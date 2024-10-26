@@ -1,11 +1,9 @@
-import React from 'react'
+import { Outlet, Navigate } from "react-router-dom";
+import { useTokenExpired } from "../utils/expired-token";
 
 const PrivateRoutes = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  const tokenExpired = useTokenExpired();
+  return tokenExpired ? <Navigate to="/login" /> : <Outlet />;
+};
 
-export default PrivateRoutes
+export default PrivateRoutes;
