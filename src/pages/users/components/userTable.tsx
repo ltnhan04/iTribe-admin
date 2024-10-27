@@ -1,35 +1,196 @@
+// // import React from "react";
+// // import { Table, Button, Space } from "antd";
+// // import { CopyOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+// // import { User } from "./types";
+
+// // interface UsersTableProps {
+// //   users: User[];
+// //   onUserClick: (user: User) => void; // Expecting the onUserClick prop
+// // }
+
+// // const UsersTable: React.FC<UsersTableProps> = ({ users, onUserClick }) => {
+// //   const columns = [
+// //     {
+// //       title: "Member Name",
+// //       dataIndex: "name",
+// //       render: (text: string, user: User) => (
+// //         <a onClick={() => onUserClick(user)}>{text}</a>
+// //       ),
+// //     },
+// //     {
+// //       title: "Mobile",
+// //       dataIndex: "mobile",
+// //     },
+// //     {
+// //       title: "Email",
+// //       dataIndex: "email",
+// //     },
+// //     {
+// //       title: "Status",
+// //       dataIndex: "status",
+// //       render: (status: string) => (
+// //         <span style={{ color: status === "Active" ? "green" : "gray" }}>{status}</span>
+// //       ),
+// //     },
+// //     {
+// //       title: "Operation",
+// //       render: () => (
+// //         <Space>
+// //           <CopyOutlined style={{ cursor: "pointer" }} />
+// //           <EditOutlined style={{ cursor: "pointer" }} />
+// //           <DeleteOutlined style={{ cursor: "pointer" }} />
+// //         </Space>
+// //       ),
+// //     },
+// //     {
+// //       title: "Action",
+// //       render: () => (
+// //         <Button type="primary">Detail</Button>
+// //       ),
+// //     },
+// //   ];
+
+// //   return (
+// //     <Table
+// //       dataSource={users}
+// //       columns={columns}
+// //       rowKey="id"
+// //       pagination={false}
+// //       bordered
+// //     />
+// //   );
+// // };
+
+// // export default UsersTable;
+
+// import React from "react";
+// import { Table, Button, Space } from "antd";
+// import { CopyOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+// import { User } from "./types";
+// import { Link } from "react-router-dom"; // Import Link from react-router-dom
+
+// interface UsersTableProps {
+//   users: User[];
+// }
+
+// const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
+//   const columns = [
+//     {
+//       title: "Member Name",
+//       dataIndex: "name",
+//       render: (text: string, user: User) => (
+//         <Link to={`/users/${user.id}`}>{text}</Link> // Link to user detail page
+//       ),
+//     },
+//     {
+//       title: "Mobile",
+//       dataIndex: "mobile",
+//     },
+//     {
+//       title: "Email",
+//       dataIndex: "email",
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "status",
+//       render: (status: string) => (
+//         <span style={{ color: status === "Active" ? "green" : "gray" }}>{status}</span>
+//       ),
+//     },
+//     {
+//       title: "Operation",
+//       render: () => (
+//         <Space>
+//           <CopyOutlined style={{ cursor: "pointer" }} />
+//           <EditOutlined style={{ cursor: "pointer" }} />
+//           <DeleteOutlined style={{ cursor: "pointer" }} />
+//         </Space>
+//       ),
+//     },
+//     {
+//       title: "Action",
+//       render: (text: string, user: User) => (
+//         <Link to={`/users/${user.id}`}>
+//           <Button type="primary">Detail</Button>
+//         </Link>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <Table
+//       dataSource={users}
+//       columns={columns}
+//       rowKey="id"
+//       pagination={false}
+//       bordered
+//     />
+//   );
+// };
+
+// export default UsersTable;
 import React from "react";
-import UserRow from "./userRow"; // Ensure you have the correct import
-import { User } from "./types"; // Adjust as necessary
+import { Table, Button, Space } from "antd";
+import { CopyOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { User } from "./types";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 interface UsersTableProps {
   users: User[];
-  onUserClick: (user: User) => void; // Define this prop
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, onUserClick }) => {
+const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
+  const columns = [
+    {
+      title: "Member Name",
+      dataIndex: "name",
+      render: (text: string, user: User) => (
+        <Link to={`/users/${user.id}`}>{text}</Link> // Link to user detail page
+      ),
+    },
+    {
+      title: "Mobile",
+      dataIndex: "mobile",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status: string) => (
+        <span style={{ color: status === "Active" ? "green" : "gray" }}>{status}</span>
+      ),
+    },
+    {
+      title: "Operation",
+      render: () => (
+        <Space>
+          <CopyOutlined style={{ cursor: "pointer" }} />
+          <EditOutlined style={{ cursor: "pointer" }} />
+          <DeleteOutlined style={{ cursor: "pointer" }} />
+        </Space>
+      ),
+    },
+    {
+      title: "Action",
+      render: (text: string, user: User) => (
+        <Link to={`/users/${user.id}`}>
+          <Button type="primary">Detail</Button>
+        </Link>
+      ),
+    },
+  ];
+
   return (
-    <table className="min-w-full bg-white shadow rounded-lg overflow-hidden">
-      <thead>
-        <tr className="text-left bg-gray-50">
-          <th className="px-4 py-2">Member Name</th>
-          <th className="px-4 py-2">Mobile</th>
-          <th className="px-4 py-2">Email</th>
-          <th className="px-4 py-2">Status</th>
-          <th className="px-4 py-2">Operation</th>
-          <th className="px-4 py-2">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map((user) => (
-          <UserRow 
-            key={user.id} 
-            user={user} 
-            onClick={() => onUserClick(user)} // Pass the onClick handler
-          />
-        ))}
-      </tbody>
-    </table>
+    <Table
+      dataSource={users}
+      columns={columns}
+      rowKey="id"
+      pagination={false}
+      bordered
+    />
   );
 };
 
