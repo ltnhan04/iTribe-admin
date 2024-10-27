@@ -14,3 +14,9 @@ export const refreshToken = async () => {
     `${import.meta.env.VITE_API_URL}/api/auth/refresh-token`
   );
 };
+
+export const logout = async () => {
+  return await axiosInstance.post(
+    `${import.meta.env.VITE_API_URL}/api/auth/logout`
+  );
+};
