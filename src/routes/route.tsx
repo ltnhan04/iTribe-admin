@@ -6,7 +6,7 @@ const Dashboard = lazy(() => import("../pages/dashboard"));
 const Inbox = lazy(() => import("../pages/inbox"));
 const Orders = lazy(() => import("../pages/orders"));
 const Products = lazy(() => import("../pages/products"));
-const Users = lazy(() => import("../pages/users/userList")); // Update this import
+const Users = lazy(() => import("../pages/users/userList"));
 const Promotions = lazy(() => import("../pages/promotions"));
 const Stock = lazy(() => import("../pages/stock"));
 import NotFound from "../pages/not-found";
@@ -29,8 +29,8 @@ const routes = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> },
       { path: "inbox", element: <Inbox /> },
       { path: "orders", element: <Orders /> },
-      { path: "products", element: <Products /> },
-      { path: "users", element: <Users /> }, // Use Users component here
+      { path: "products", element: <Products />, children: [] },
+      { path: "users", element: <Users /> },
       { path: "promotions", element: <Promotions /> },
       { path: "stock", element: <Stock /> },
     ],
