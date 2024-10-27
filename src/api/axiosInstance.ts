@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import { store } from "../redux/store";
 import { useAppDispatch } from "../redux/hooks";
-import { updateAccessToken } from "../redux/authentication/authSlice";
+import { updateAccessToken } from "../redux/features/authentication/authSlice";
 import { refreshToken } from "./services/auth/authApi";
 
 let isRefreshing = false;

@@ -6,7 +6,7 @@ export default {
     colors: {
       blue: "#4880FF",
       blackLight: "#202224",
-      grayLight: "#D5D5D5",
+      grayLight: "#F0F0F0",
     },
   },
   plugins: [],
