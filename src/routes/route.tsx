@@ -105,6 +105,7 @@ const Orders = lazy(() => import("../pages/orders"));
 const Products = lazy(() => import("../pages/products"));
 const Promotions = lazy(() => import("../pages/promotions"));
 const Stock = lazy(() => import("../pages/stock"));
+const UserDetailPage = lazy(() => import("../pages/users/components/UserDetailPage"));
 const UsersList = lazy(() => import("../pages/users/components/userList"));
 import Notification from "../layouts/navbar/components/notification";
 import Profile from "../layouts/navbar/components/profile";
