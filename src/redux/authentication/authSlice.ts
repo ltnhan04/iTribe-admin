@@ -1,6 +1,34 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LoginState } from "./authTypes";
-import { loginThunk } from "./authThunk";
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { LoginState, ErrorResponse } from "./authTypes";
+import { login } from "../../api/services/auth/authApi";
+import { LoginType } from "../../api/services/auth/authType";
+
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async (
+    {
+      user,
+      navigate,
+    }: {
+      user: LoginType;
+      navigate: (path: string) => void;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await login(user);
+      if (response.status === 200) {
+        navigate("/dashboard");
+        return response.data;
+      }
+    } catch (error: unknown) {
+      const typedError = error as ErrorResponse;
+      const errorMsg =
+        typedError.response.data.message || "Đã xảy ra lỗi! Vui lòng thử lại.";
+      return rejectWithValue(errorMsg);
+    }
+  }
+);
 
 export interface AuthState {
   login: {

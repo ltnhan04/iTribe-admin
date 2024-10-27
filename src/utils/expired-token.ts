@@ -1,4 +1,4 @@
-import { useAppSelector } from "../store/hooks";
+import { useAppSelector } from "../redux/hooks";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../type";
 
