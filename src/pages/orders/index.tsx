@@ -111,8 +111,7 @@ const OrderList: React.FC = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axiosInstance.get('/api/orders'); // URL API lấy danh sách đơn hàng
-        setOrders(response.data.orders);
+        const response = await axiosInstance.get('/api/orders'); 
       } catch (error) {
         message.error('Error fetching orders');
         console.error('Error fetching orders:', error);
@@ -126,10 +125,10 @@ const OrderList: React.FC = () => {
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
     try {
-      // Gửi yêu cầu cập nhật trạng thái cho API
+      
       await axiosInstance.put(`/api/admin/orders/${orderId}`, { status });
       message.success('Order status updated successfully!');
-      // Cập nhật lại danh sách đơn hàng sau khi cập nhật trạng thái
+      
       const updatedOrders = orders.map(order => 
         order.orderId === orderId ? { ...order, status } : order
       );
@@ -176,11 +175,11 @@ const OrderList: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        // Xác định màu sắc dựa trên trạng thái
+      
         const color = status === 'delivered' ? 'green' 
                      : status === 'processing' ? 'blue' 
                      : status === 'pending' ? 'orange' 
-                     : 'volcano'; // Mặc định cho các trạng thái khác
+                     : 'volcano'; 
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
     },
@@ -192,7 +191,7 @@ const OrderList: React.FC = () => {
           defaultValue={record.status}
           style={{ width: 120 }}
           onChange={(value) => handleUpdateStatus(record.orderId, value)}
-          dropdownStyle={{ zIndex: 1000 }} // Đảm bảo dropdown không bị che khuất
+          dropdownStyle={{ zIndex: 1000 }}
         >
           <Select.Option value="pending">Pending</Select.Option>
           <Select.Option value="processing">Processing</Select.Option>
