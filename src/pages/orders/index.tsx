@@ -112,6 +112,7 @@ const OrderList: React.FC = () => {
     const fetchOrders = async () => {
       try {
         const response = await axiosInstance.get('/api/orders'); 
+        setOrders(response.data.orders);
       } catch (error) {
         message.error('Error fetching orders');
         console.error('Error fetching orders:', error);
@@ -125,10 +126,10 @@ const OrderList: React.FC = () => {
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
     try {
-      
+    
       await axiosInstance.put(`/api/admin/orders/${orderId}`, { status });
       message.success('Order status updated successfully!');
-      
+   
       const updatedOrders = orders.map(order => 
         order.orderId === orderId ? { ...order, status } : order
       );
@@ -175,7 +176,7 @@ const OrderList: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-      
+        
         const color = status === 'delivered' ? 'green' 
                      : status === 'processing' ? 'blue' 
                      : status === 'pending' ? 'orange' 
@@ -191,7 +192,7 @@ const OrderList: React.FC = () => {
           defaultValue={record.status}
           style={{ width: 120 }}
           onChange={(value) => handleUpdateStatus(record.orderId, value)}
-          dropdownStyle={{ zIndex: 1000 }}
+          dropdownStyle={{ zIndex: 1000 }} 
         >
           <Select.Option value="pending">Pending</Select.Option>
           <Select.Option value="processing">Processing</Select.Option>
