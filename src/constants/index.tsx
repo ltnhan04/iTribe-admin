@@ -6,7 +6,6 @@ import {
   StockOutlined,
   GiftOutlined,
   ShoppingCartOutlined,
-  LogoutOutlined,
 } from "@ant-design/icons";
 
 export const menu = [
@@ -52,11 +51,5 @@ export const menu = [
     name: "Inbox",
     icon: <InboxOutlined />,
     path: "/inbox",
-  },
-  {
-    key: 8,
-    name: "Logout",
-    icon: <LogoutOutlined />,
-    path: "/logout",
   },
 ];

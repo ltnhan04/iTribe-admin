@@ -2,14 +2,17 @@ import { useEffect } from "react";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Form, Input, notification } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { loginThunk } from "../../redux/features/authentication/authThunk";
+import { useAppSelector, useAppDispatch } from "../../../redux/hooks";
+import { loginThunk } from "../../../redux/features/authentication/authThunk";
 import {
   clearError,
   clearMessage,
-} from "../../redux/features/authentication/authSlice";
+} from "../../../redux/features/authentication/authSlice";
 import { LoginType } from "./type";
-import { emailRules, passwordRules } from "../../schemaValidation/auth.schema";
+import {
+  emailRules,
+  passwordRules,
+} from "../../../schemaValidation/auth.schema";
 
 const Login = () => {
   const navigate = useNavigate();
