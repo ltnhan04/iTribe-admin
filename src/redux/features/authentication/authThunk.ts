@@ -1,18 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { login } from "../../api/services/auth/authApi";
+import { login } from "../../../api/services/auth/authApi";
+import { LoginType } from "../../../api/services/auth/authType";
 import { ErrorResponse } from "./authTypes";
-import { LoginType } from "../../api/services/auth/authType";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async (
-    {
-      user,
-      navigate,
-    }: {
-      user: LoginType;
-      navigate: (path: string) => void;
-    },
+    { user, navigate }: { user: LoginType; navigate: (path: string) => void },
     { rejectWithValue }
   ) => {
     try {
@@ -24,7 +18,8 @@ export const loginThunk = createAsyncThunk(
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
       const errorMsg =
-        typedError.response.data.message || "Đã xảy ra lỗi! Vui lòng thử lại.";
+        typedError.response?.data?.message ||
+        "Đã xảy ra lỗi! Vui lòng thử lại.";
       return rejectWithValue(errorMsg);
     }
   }

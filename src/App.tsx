@@ -3,7 +3,7 @@ import routes from "./routes/route";
 
 export default function App() {
   return (
-    <div className="h-screen w-screen bg-grayLight">
+    <div className="h-screen w-screen bg-grayLight px-5 sm:px-0">
       <RouterProvider router={routes} />
     </div>
   );
