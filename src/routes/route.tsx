@@ -105,12 +105,12 @@ const Orders = lazy(() => import("../pages/orders"));
 const Products = lazy(() => import("../pages/products"));
 const Promotions = lazy(() => import("../pages/promotions"));
 const Stock = lazy(() => import("../pages/stock"));
+const UsersList = lazy(() => import("../pages/users/components/userList"));
+import Notification from "../layouts/navbar/components/notification";
+import Profile from "../layouts/navbar/components/profile";
 import NotFound from "../pages/not-found";
 import Login from "../pages/login";
 import Loading from "../loading";
-import UsersList from "../pages/users/components/userList";
-import UserDetail from "../pages/users/components/userDetail"; // Import UserDetail
-import UserDetailPage from "../pages/users/components/UserDetailPage";
 
 // routes.tsx or similar file
 const routes = createBrowserRouter([
@@ -134,6 +134,8 @@ const routes = createBrowserRouter([
       { path: "users/:userId", element: <UserDetailPage /> }, // Add this line
       { path: "promotions", element: <Promotions /> },
       { path: "stock", element: <Stock /> },
+      { path: "notification", element: <Notification /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
   {

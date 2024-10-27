@@ -6,6 +6,7 @@ import {
   StockOutlined,
   GiftOutlined,
   ShoppingCartOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 
 export const menu = [
@@ -23,32 +24,39 @@ export const menu = [
   },
   {
     key: 3,
-    name: "Orders",
-    icon: <ShoppingCartOutlined />,
-    path: "/orders",
-  },
-  {
-    key: 4,
-    name: "Promotions",
-    icon: <GiftOutlined />,
-    path: "/promotions",
-  },
-  {
-    key: 5,
-    name: "Users",
-    icon: <UserOutlined />,
-    path: "users",
-  },
-  {
-    key: 6,
     name: "Product Stock",
     icon: <StockOutlined />,
     path: "/stock",
   },
   {
+    key: 4,
+    name: "Users",
+    icon: <UserOutlined />,
+    path: "users",
+  },
+  {
+    key: 5,
+    name: "Orders",
+    icon: <ShoppingCartOutlined />,
+    path: "/orders",
+  },
+  {
+    key: 6,
+    name: "Promotions",
+    icon: <GiftOutlined />,
+    path: "/promotions",
+  },
+
+  {
     key: 7,
     name: "Inbox",
     icon: <InboxOutlined />,
     path: "/inbox",
+  },
+  {
+    key: 8,
+    name: "Logout",
+    icon: <LogoutOutlined />,
+    path: "/logout",
   },
 ];
