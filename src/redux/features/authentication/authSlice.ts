@@ -32,7 +32,8 @@ export const logoutThunk = createAsyncThunk(
     try {
       const response = await logout();
       if (response.status === 200) {
-        return response.data;
+        const { message } = response.data;
+        return message;
       }
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
@@ -83,6 +84,12 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.login.error = "";
     },
+    clearMessageLogout: (state) => {
+      state.logout.logoutState.message = "";
+    },
+    clearErrorLogout: (state) => {
+      state.logout.error = "";
+    },
     updateAccessToken: (state, action: PayloadAction<string>) => {
       state.accessToken = action.payload;
     },
@@ -117,6 +124,7 @@ const authSlice = createSlice({
       })
       .addCase(logoutThunk.fulfilled, (state, action) => {
         const message = action.payload as string;
+        console.log(message);
         state.logout.isLoading = false;
         state.logout.logoutState.message = message;
         state.accessToken = "";
@@ -132,6 +140,11 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearMessage, clearError, updateAccessToken } =
-  authSlice.actions;
+export const {
+  clearMessage,
+  clearError,
+  updateAccessToken,
+  clearMessageLogout,
+  clearErrorLogout,
+} = authSlice.actions;
 export default authSlice.reducer;
