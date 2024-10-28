@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Popover, notification } from "antd";
+import { Button, Popover, notification, Popconfirm } from "antd";
 import {
   ExpandOutlined,
   NotificationOutlined,
@@ -11,25 +11,26 @@ import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { logoutThunk } from "../../redux/features/authentication/authThunk";
 import {
-  clearMessage,
-  clearError,
+  clearMessageLogout,
+  clearErrorLogout,
 } from "../../redux/features/authentication/authSlice";
-import Confirm from "./components/pop-confirm";
 import { NavbarProps } from "./types";
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
 
   const showPopconfirm = () => setOpen(true);
+
   const handleOk = async () => {
-    await dispatch(logoutThunk());
     setOpen(false);
+    await dispatch(logoutThunk());
   };
 
   const handleCancel = () => {
     setOpen(false);
   };
-  const dispatch = useAppDispatch();
+
   const { name, logout } = useAppSelector((state) => state.auth);
   const {
     error,
@@ -45,7 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         message: "Logout Success",
         description: displayMessage,
       });
-      dispatch(clearMessage());
+      dispatch(clearMessageLogout());
     }
     if (error) {
       const displayError =
@@ -54,23 +55,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         message: "Logout Failed",
         description: displayError,
       });
-      dispatch(clearError());
+      dispatch(clearErrorLogout());
     }
   }, [dispatch, error, message]);
-
-  const handleLogout = () => {
-    return (
-      <Confirm
-        title="Logout"
-        description="Are you sure you want to log out?"
-        confirmLoading={isLoading}
-        open={open}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        showPopconfirm={showPopconfirm}
-      />
-    );
-  };
 
   const popoverContent = (
     <div className="flex flex-col">
@@ -81,15 +68,24 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         <UserOutlined style={{ fontSize: "18px", color: "#1890ff" }} />
         <span className="text-sm font-medium text-gray-800">Profile</span>
       </Link>
-      <div
-        className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
-        onClick={handleLogout}
+      <Popconfirm
+        title="Logout"
+        description="Are you sure you want to logout?"
+        open={open}
+        onConfirm={handleOk}
+        okButtonProps={{ loading: isLoading }}
+        onCancel={handleCancel}
       >
-        <LogoutOutlined style={{ fontSize: "18px", color: "#ff4d4f" }} />
-        <span className="text-sm font-medium text-gray-800 transition-colors duration-300 ease-in-out hover:text-[#1890ff]">
-          Logout
-        </span>
-      </div>
+        <div
+          className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
+          onClick={showPopconfirm}
+        >
+          <LogoutOutlined style={{ fontSize: "18px", color: "#ff4d4f" }} />
+          <span className="text-sm font-medium text-gray-800 transition-colors duration-300 ease-in-out hover:text-[#1890ff]">
+            Logout
+          </span>
+        </div>
+      </Popconfirm>
     </div>
   );
 

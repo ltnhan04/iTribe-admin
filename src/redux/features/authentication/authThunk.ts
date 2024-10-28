@@ -31,7 +31,8 @@ export const logoutThunk = createAsyncThunk(
     try {
       const response = await logout();
       if (response.status === 200) {
-        return response.data;
+        const { message } = response.data;
+        return message;
       }
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
