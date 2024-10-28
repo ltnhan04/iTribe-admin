@@ -86,12 +86,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   );
 
   return (
-    <nav className="bg-[#fff] px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 shadow-md">
+    <nav className="bg-[#fff] px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 shadow-md z-50">
       <div className="flex items-center gap-6">
         <Button
           className="hidden lg:block"
           icon={<ExpandOutlined />}
-          onClick={onToggleSidebar}
+          // onClick={onToggleSidebar}
         />
         <Link to="/dashboard">
           <img

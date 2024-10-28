@@ -8,6 +8,7 @@ export const login = async ({ email, password }: LoginType) => {
     email,
     password,
     role,
+    role,
   });
 };
 

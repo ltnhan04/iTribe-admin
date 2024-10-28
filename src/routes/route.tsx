@@ -17,7 +17,7 @@ import Loading from "../loading";
 import Login from "../pages/auth/login";
 import Notification from "../layouts/navbar/components/notification";
 import Profile from "../layouts/navbar/components/profile";
-import UserDetail from "../pages/users/components/userDetail";
+import UserDetailPage from "../pages/users/components/UserDetailPage";
 
 const routes = createBrowserRouter([
   {
@@ -36,11 +36,8 @@ const routes = createBrowserRouter([
       { path: "inbox", element: <Inbox /> },
       { path: "orders", element: <Orders /> },
       { path: "products", element: <Products /> },
-      {
-        path: "users",
-        element: <UsersList />,
-        children: [{ path: ":id", element: <UserDetail /> }],
-      },
+      { path: "users", element: <UsersList />, },
+      { path: "users/:userId",element: <UserDetailPage />, },
       { path: "promotions", element: <Promotions /> },
       { path: "stock", element: <Stock /> },
       { path: "notification", element: <Notification /> },
