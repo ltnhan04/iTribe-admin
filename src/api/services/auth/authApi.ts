@@ -7,6 +7,10 @@ export const login = async ({ email, password }: LoginType) => {
   return await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
     email,
     password, 
+  const role = "admin";
+  return await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+    email,
+    password,
     role,
   });
 };
