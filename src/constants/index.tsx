@@ -53,3 +53,12 @@ export const menu = [
     path: "/inbox",
   },
 ];
+
+export const iphones = [
+  { label: "iPhone 11", value: "iphone-11" },
+  { label: "iPhone 12", value: "iphone-12" },
+  { label: "iPhone 13", value: "iphone-13" },
+  { label: "iPhone 14", value: "iphone-14" },
+  { label: "iPhone 15", value: "iphone-15" },
+  { label: "iPhone 16", value: "iphone-16" },
+];

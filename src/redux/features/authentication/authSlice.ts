@@ -2,7 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { login, logout } from "../../../api/services/auth/authApi";
 import { LoginType } from "../../../api/services/auth/authType";
-import { ErrorResponse, LoginState } from "./authTypes";
+import { LoginState } from "./authTypes";
+import axios from "axios";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
@@ -12,16 +13,27 @@ export const loginThunk = createAsyncThunk(
   ) => {
     try {
       const response = await login(user);
+
       if (response.status === 200) {
         navigate("/dashboard");
         return response.data;
       }
-    } catch (error: unknown) {
-      const typedError = error as ErrorResponse;
-      const errorMsg =
-        typedError.response?.data?.message ||
-        "Đã xảy ra lỗi! Vui lòng thử lại.";
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data.message) {
+          if (error.response.status === 403) {
+            return rejectWithValue("Access denied");
+          } else if (error.response.status === 401) {
+            return rejectWithValue("Invalid email or password");
+          } else {
+            return rejectWithValue("Server Error!");
+          }
+        }
+        return rejectWithValue(
+          "No response from server. Please check your network connection."
+        );
+      }
+      return rejectWithValue("Something went wrong!");
     }
   }
 );
@@ -32,14 +44,15 @@ export const logoutThunk = createAsyncThunk(
     try {
       const response = await logout();
       if (response.status === 200) {
-        const { message } = response.data;
-        return message;
+        return response.data.message;
       }
-    } catch (error: unknown) {
-      const typedError = error as ErrorResponse;
-      const errorMsg =
-        typedError.response.data.message || "Đã xảy ra lỗi! Vui lòng thử lại.";
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message || "Server Error!"
+        );
+      }
+      return rejectWithValue("An unexpected error occurred!");
     }
   }
 );
@@ -113,9 +126,10 @@ const authSlice = createSlice({
       )
       .addCase(loginThunk.rejected, (state, action) => {
         state.login.isLoading = false;
+        console.error("Login error:", action.payload);
         state.login.error = action.payload
           ? (action.payload as string)
-          : action.error.message || "Có lỗi xảy ra!";
+          : action.error.message || "An error occurred!";
       });
     builder
       .addCase(logoutThunk.pending, (state) => {
@@ -123,19 +137,14 @@ const authSlice = createSlice({
         state.logout.error = "";
       })
       .addCase(logoutThunk.fulfilled, (state, action) => {
-        const message = action.payload as string;
-        console.log(message);
         state.logout.isLoading = false;
-        state.logout.logoutState.message = message;
+        state.logout.logoutState.message = action.payload as string;
         state.accessToken = "";
         state.name = "";
-        state.logout.error = "";
       })
       .addCase(logoutThunk.rejected, (state, action) => {
         state.logout.isLoading = false;
-        state.logout.error = action.payload
-          ? (action.payload as string)
-          : action.error.message || "Có lỗi xảy ra!";
+        state.logout.error = (action.payload as string) || "An error occurred!";
       });
   },
 });
