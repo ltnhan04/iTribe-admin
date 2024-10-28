@@ -15,13 +15,6 @@ export const fetchWeeklyRevenue = async () => {
     
 };
 
-// Lấy doanh thu theo tháng
-export const fetchMonthlyRevenue = async () => {
-    return await axiosInstance.get(
-      `${import.meta.env.VITE_API_URL}/api/admin/revenue/month`);
-    
-
-};
 
 // Lấy doanh thu theo năm
 export const fetchYearlyRevenue = async () => {

@@ -37,7 +37,7 @@ const Revenue: React.FC = () => {
                     const formattedDailyData = [
                         {
                             date: new Date(revenue.date),
-                            totalSales: revenue.totalSales,
+                            totalSales: revenue.totalSales.toLocaleString(),
                             id: revenue._id,
                         }
                     ];
@@ -53,7 +53,7 @@ const Revenue: React.FC = () => {
                 if (weeklyData.data && Array.isArray(weeklyData.data.result)) {
                     const formattedWeeklyData = weeklyData.data.result.map((rev: any) => ({
                         week: `${rev._id.month}-${rev._id.year}`, 
-                        totalSales: rev.totalSales,
+                        totalSales: rev.totalSales.toLocaleString(),
                     }));
                     setWeeklyRevenue(formattedWeeklyData);
                 } else {
@@ -67,7 +67,7 @@ const Revenue: React.FC = () => {
                 if (yearlyData.data && Array.isArray(yearlyData.data.result)) {
                     const formattedYearlyData = yearlyData.data.result.map((rev: any) => ({
                         year: rev._id.year,
-                        totalSales: rev.totalSales,
+                        totalSales: rev.totalSales.toLocaleString(),
                     }));
                     setYearlyRevenue(formattedYearlyData);
                 } else {
@@ -79,7 +79,7 @@ const Revenue: React.FC = () => {
                 const totalData = await fetchTotalRevenue();
                 console.log('Total Revenue Data:', totalData);
                 if (totalData.data && Array.isArray(totalData.data.result) && totalData.data.result.length > 0) {
-                    setTotalRevenue(totalData.data.result[0]); // Chỉ lấy kết quả đầu tiên
+                    setTotalRevenue(totalData.data.result[0]); 
                 } else {
                     console.error('No total revenue data available:', totalData.data);
                     alert('No total revenue data available.');
@@ -128,7 +128,7 @@ const Revenue: React.FC = () => {
     };
 
     const totalRevenueConfig = {
-        data: totalRevenue ? [{ name: 'Total Sales', value: totalRevenue.totalSales }] : [],
+        data: totalRevenue ? [{ name: 'Total Sales', value: totalRevenue.totalSales.toLocaleString() }] : [],
         xField: 'name',
         yField: 'value',
         label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
@@ -142,7 +142,7 @@ const Revenue: React.FC = () => {
 
     return (
       <div>
-        <h1 className='text-center font-bold text-xl'>Revenue Dashboard</h1>
+        <h1 className='text-center font-bold text-xl'>Revenue Dashboard</h1>  
         
         {/* Nút điều hướng để chọn biểu đồ */}
         <div style={{ textAlign: 'center', margin: '20px' }}>
