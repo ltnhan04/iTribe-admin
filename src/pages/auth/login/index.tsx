@@ -27,20 +27,19 @@ const Login = () => {
   };
 
   useEffect(() => {
+    if (message) {
+      notification.success({
+        message: "Login Success",
+        description: message,
+      });
+      dispatch(clearMessage());
+    }
     if (error) {
       notification.error({
         message: "Login Failed",
         description: error,
       });
       dispatch(clearError());
-    }
-
-    if (message) {
-      notification.success({
-        message: "Success",
-        description: message,
-      });
-      dispatch(clearMessage());
     }
   }, [dispatch, error, message]);
 

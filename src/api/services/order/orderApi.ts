@@ -4,7 +4,7 @@ export const getOrders = async () => {
   return await axiosInstance.get(
     `${import.meta.env.VITE_API_URL}/api/admin/orders`
   );
-};
+};  
 
 export const updateOrderStatus = async (orderId: string, status: string) => {
   return await axiosInstance.put(

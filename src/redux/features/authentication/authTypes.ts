@@ -4,10 +4,3 @@ export interface LoginState {
   message: string;
 }
 
-export interface ErrorResponse {
-  response: {
-    data: {
-      message: string;
-    };
-  };
-}

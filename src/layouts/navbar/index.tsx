@@ -40,20 +40,16 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
 
   useEffect(() => {
     if (message) {
-      const displayMessage =
-        typeof message === "string" ? message : JSON.stringify(message);
       notification.success({
         message: "Logout Success",
-        description: displayMessage,
+        description: message,
       });
       dispatch(clearMessageLogout());
     }
     if (error) {
-      const displayError =
-        typeof error === "string" ? error : JSON.stringify(error);
       notification.error({
         message: "Logout Failed",
-        description: displayError,
+        description: error,
       });
       dispatch(clearErrorLogout());
     }
