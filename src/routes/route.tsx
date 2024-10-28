@@ -9,7 +9,6 @@ const Orders = lazy(() => import("../pages/orders"));
 const Products = lazy(() => import("../pages/products"));
 const Promotions = lazy(() => import("../pages/promotions"));
 const Stock = lazy(() => import("../pages/stock"));
-const UserDetailPage = lazy(() => import("../pages/users/components/UserDetailPage"));
 const UsersList = lazy(() => import("../pages/users/components/userList"));
 
 import NotFound from "../pages/not-found";
