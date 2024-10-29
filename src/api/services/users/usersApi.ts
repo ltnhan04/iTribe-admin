@@ -13,17 +13,17 @@ export const getUserDetails = async (userId: string) => {
 
 // Ban a user
 export const banUser = async (userId: string) => {
-  return await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/admin/ban/${userId}`);
+  return await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/admin/users/ban/${userId}`);
 };
 
 // Unban a user
 export const unBanUser = async (userId: string) => {
-  return await axiosInstance.patch(`${import.meta.env.VITE_API_URL}/api/admin/unban/${userId}`);
+  return await axiosInstance.patch(`${import.meta.env.VITE_API_URL}/api/admin/users/unban/${userId}`);
 };
 
 // Get user orders
 export const getUserOrders = async (userId: string) => {
-  return await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/admin/userOrder/${userId}`);
+  return await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/admin/users/userOrder/${userId}`);
 };
 
 // Get user order details
