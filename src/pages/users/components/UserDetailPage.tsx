@@ -1,161 +1,331 @@
+// import React, { useEffect, useState } from "react";
+// import { useParams } from "react-router-dom";
+// import { User, Order } from "./types"; // Import Order type
+// import { Layout, Spin, Pagination, Button, message } from "antd";
+// import { UserOutlined } from "@ant-design/icons";
+// import { getUserDetails, getUserOrders } from "../../../api/services/users/usersApi"; // Adjust the import based on your API structure
+
+// const UserDetailPage: React.FC = () => {
+//   const { userId } = useParams<{ userId: string }>();
+//   const [user, setUser] = useState<User | null>(null);
+//   const [orders, setOrders] = useState<Order[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 2;
+
+//   useEffect(() => {
+//     if (!userId) return;
+
+//     const fetchUserDetails = async () => {
+//       try {
+//         const userResponse = await getUserDetails(userId);
+//         setUser(userResponse.data);
+//       } catch (error) {
+//         message.error("Failed to fetch user details.");
+//       }
+//     };
+
+//     const fetchUserOrders = async () => {
+//       try {
+//         const ordersResponse = await getUserOrders(userId);
+//         setOrders(ordersResponse.data);
+//       } catch (error) {
+//         message.error("Failed to fetch user orders.");
+//       }
+//     };
+
+//     fetchUserDetails();
+//     fetchUserOrders();
+//     setLoading(false);
+//   }, [userId]);
+
+//   const handleBanUser = () => {
+//     message.success(`User ${user?.name} has been banned successfully.`);
+//   };
+
+//   if (loading) {
+//     return <Spin size="large" className="flex justify-center my-8" />;
+//   }
+
+//   if (!user) {
+//     return <p className="text-center">User not found</p>;
+//   }
+
+//   // Calculate pagination for orders
+//   const indexOfLastOrder = currentPage * itemsPerPage;
+//   const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
+//   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+//   return (
+//     <div className="max-h-screen bg-gray-100 py-8 flex justify-center">
+//       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+//         <div className="text-center mb-6">
+//           <div className="flex justify-center">
+//             <div className="bg-gray-200 rounded-full w-16 h-16 flex items-center justify-center">
+//               <UserOutlined className="text-2xl text-gray-600" />
+//             </div>
+//           </div>
+//           <h3 className="text-xl font-semibold mt-3">{user.name}</h3>
+//           <p className="text-gray-500 text-sm mt-1 break-all sm:whitespace-normal">{user.email}</p>
+//         </div>
+
+//         <div className="flex flex-col sm:flex-row sm:space-x-6">
+//           <div className="sm:w-1/2">
+//             <h4 className="text-lg font-semibold mb-2">User Information</h4>
+//             <ul className="border rounded-lg p-4 bg-gray-50 space-y-2">
+//               <li>
+//                 <strong>Name:</strong> {user.name}
+//               </li>
+//               <li>
+//                 <strong>Mobile:</strong> {user.mobile || "Not available"}
+//               </li>
+//               <li>
+//                 <strong>Role:</strong> {user.role}
+//               </li>
+//               <li>
+//                 <strong>Status:</strong> 
+//                 <span className={`ml-1 font-semibold ${user.status === "Active" ? "text-green-600" : "text-red-600"}`}>
+//                   {user.status}
+//                 </span>
+//               </li>
+//               <li>
+//                 <strong>Email:</strong> {user.email}
+//               </li>
+//               <li>
+//                 <strong>Address:</strong> 
+//                 {user.address ? (
+//                   <div className="mt-1">
+//                     <p>{user.address.street}</p>
+//                     <p>{user.address.city}, {user.address.state} {user.address.zip}</p>
+//                   </div>
+//                 ) : (
+//                   "No address available"
+//                 )}
+//               </li>
+//             </ul>
+//           </div>
+
+//           <div className="sm:w-1/2 mt-6 sm:mt-0">
+//             <h4 className="text-lg font-semibold mb-2">Order History</h4>
+//             {currentOrders.length > 0 ? (
+//               <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
+//                 {currentOrders.map((order, index) => (
+//                   <div key={index} className="border-b pb-2 last:border-b-0">
+//                     <p><strong>Total Amount:</strong> ${order.totalAmount}</p>
+//                     <p><strong>Status:</strong> {order.status}</p>
+//                     <p><strong>Products:</strong></p>
+//                     <ul className="list-disc pl-6">
+//                       {order.products.map((product: string, productIndex: number) => (
+//                         <li key={productIndex}>{product}</li>
+//                       ))}
+//                     </ul>
+//                   </div>
+//                 ))}
+//               </div>
+//             ) : (
+//               <p>No orders available</p>
+//             )}
+//             <Pagination
+//               current={currentPage}
+//               pageSize={itemsPerPage}
+//               total={orders.length}
+//               onChange={(page) => setCurrentPage(page)}
+//               className="mt-4 text-right"
+//             />
+//             <div className="flex justify-end mt-4">
+//               <Button
+//                 danger
+//                 onClick={handleBanUser}
+//                 className="bg-red-500 text-white hover:bg-red-600"
+//               >
+//                 Ban User
+//               </Button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UserDetailPage;
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { User } from "./types";
-import { Layout, List, Typography, Tag, Avatar, Card, Spin, Row, Col, Descriptions } from "antd";
+import { User, Order } from "./types"; // Import Order type
+import { Layout, Spin, Pagination, Button, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-
-// Define the Order type
-interface Order {
-  totalAmount: number;
-  status: string;
-  products: string[];
-}
-
-const { Content } = Layout;
-const { Title } = Typography;
+import { getUserDetails, getUserOrders, banUser, unBanUser } from "../../../api/services/users/usersApi"; // Adjust the import based on your API structure
 
 const UserDetailPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<User | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Dummy order history data
-  const dummyOrderHistory: Order[] = [
-    {
-      totalAmount: 150,
-      status: "Completed",
-      products: ["Product A", "Product B"],
-    },
-    {
-      totalAmount: 200,
-      status: "Pending",
-      products: ["Product C"],
-    },
-  ];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2;
 
   useEffect(() => {
-    // Simulate fetching user data
-    const fetchUserDetails = () => {
-      // Here we use dummy user data instead of fetching from an API
-      const dummyUser: User = {
-        id: parseInt(userId, 10),
-        name: "George Lindelof",
-        mobile: "+4 315 23 62",
-        role: "user",
-        email: "carlsen@armand.no",
-        status: "Active",
-        address: {
-          street: "123 Elm St",
-          city: "Somewhere",
-          state: "CA",
-          zip: "90210",
-        },
-      };
+    if (!userId) return;
 
-      setUser(dummyUser);
-      setLoading(false);
+    const fetchUserDetails = async () => {
+      try {
+        const userResponse = await getUserDetails(userId);
+        
+        setUser(userResponse.data);
+      } catch (error) {
+        message.error("Failed to fetch user details.");
+      }
+    };
+
+    const fetchUserOrders = async () => {
+      try {
+        const ordersResponse = await getUserOrders(userId);
+        setOrders(ordersResponse.data);
+      } catch (error) {
+        message.error("Failed to fetch user orders.");
+      }
     };
 
     fetchUserDetails();
+    fetchUserOrders();
+    setLoading(false);
   }, [userId]);
 
+  const handleBanUser = async () => {
+    if (!userId) return; // Ensure userId is defined
+    try {
+      await banUser(userId); // Call the ban API
+      setUser((prevUser) => ({ ...prevUser!, status: "Banned" })); // Update user status
+      message.success(`User ${user?.name} has been banned successfully.`);
+    } catch (error) {
+      message.error("Failed to ban user.");
+    }
+  };
+
+  const handleUnbanUser = async () => {
+    if (!userId) return; // Ensure userId is defined
+    console.log(userId)
+    try {
+      await unBanUser(userId); // Call the unban API
+      setUser((prevUser) => ({ ...prevUser!, status: "Active" })); // Update user status
+      message.success(`User ${user?.name} has been unbanned successfully.`);
+    } catch (error) {
+      message.error("Failed to unban user.");
+    }
+  };
+  
+
   if (loading) {
-    return <Spin size="large" style={{ display: "block", margin: "20px auto" }} />;
+    return <Spin size="large" className="flex justify-center my-8" />;
   }
 
   if (!user) {
-    return <p>User not found</p>;
+    return <p className="text-center">User not found</p>;
   }
 
+  // Calculate pagination for orders
+  const indexOfLastOrder = currentPage * itemsPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+  console.log(user.active)
   return (
-    <Layout style={{ minHeight: "100vh", padding: "2rem", backgroundColor: "#f0f2f5" }}>
-      <Content style={{ maxWidth: "800px", margin: "0 auto" }}>
-        <Card
-          bordered
-          style={{
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            borderRadius: "8px",
-            padding: "1.5rem",
-          }}
-        >
-          <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-            <Avatar size={64} icon={<UserOutlined />} />
-            <Title level={3} style={{ marginTop: "1rem", marginBottom: 0 }}>
-              {user.name}
-            </Title>
-            <p style={{ color: "#8c8c8c", fontSize: "0.9rem", marginTop: "0.5rem" }}>
-              {user.email}
-            </p>
+    <div className="max-h-screen bg-gray-100 py-8 flex justify-center">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+        <div className="text-center mb-6">
+          <div className="flex justify-center">
+            <div className="bg-gray-200 rounded-full w-16 h-16 flex items-center justify-center">
+              <UserOutlined className="text-2xl text-gray-600" />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold mt-3">{user.name}</h3>
+          <p className="text-gray-500 text-sm mt-1 break-all sm:whitespace-normal">{user.email}</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:space-x-6">
+          <div className="sm:w-1/2">
+            <h4 className="text-lg font-semibold mb-2">User Information</h4>
+            <ul className="border rounded-lg p-4 bg-gray-50 space-y-2">
+              <li>
+                <strong>Name:</strong> {user.name}
+              </li>
+              <li>
+                <strong>Mobile:</strong> {user.mobile || "Not available"}
+              </li>
+              <li>
+                <strong>Role:</strong> {user.role}
+              </li>
+              <li>
+                <strong>Status:</strong> 
+                <span className={`ml-1 font-semibold ${user.active === true ? "text-green-600" : "text-red-600"}`}>
+                {user.active ? "Active" : "Banned"}
+                </span>
+              </li>
+              <li>
+                <strong>Email:</strong> {user.email}
+              </li>
+              <li>
+                <strong>Address:</strong> 
+                {user.address ? (
+                  <div className="mt-1">
+                    <p>{user.address.street}</p>
+                    <p>{user.address.city}, {user.address.state} {user.address.zip}</p>
+                  </div>
+                ) : (
+                  "No address available"
+                )}
+              </li>
+            </ul>
           </div>
 
-          <Row gutter={16}>
-            <Col span={12}>
-              <List
-                header={<Title level={4}>User Information</Title>}
-                bordered
-                dataSource={[
-                  { label: "Name", value: user.name },
-                  { label: "Mobile", value: user.mobile },
-                  { label: "Role", value: user.role },
-                  { 
-                    label: "Status", 
-                    value: <Tag color={user.status === "Active" ? "green" : "red"}>{user.status}</Tag> 
-                  },
-                  { 
-                    label: "Email", 
-                    value: user.email 
-                  },
-                  { 
-                    label: "Address", 
-                    value: user.address ? (
-                      <div>
-                        <p style={{ margin: 0 }}>{user.address.street}</p>
-                        <p style={{ margin: 0 }}>
-                          {user.address.city}, {user.address.state} {user.address.zip}
-                        </p>
-                      </div>
-                    ) : (
-                      "No address available"
-                    ),
-                  },
-                ]}
-                renderItem={(item) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      title={<strong>{item.label}</strong>}
-                      description={item.value}
-                    />
-                  </List.Item>
-                )}
-              />
-            </Col>
-            <Col span={12}>
-              <Title level={4}>Order History</Title>
-              {dummyOrderHistory.length > 0 ? (
-                <Descriptions bordered column={1}>
-                  {dummyOrderHistory.map((order, index) => (
-                    <Descriptions.Item label={`Order ${index + 1}`} key={index}>
-                      <div>
-                        <p><strong>Total Amount:</strong> ${order.totalAmount}</p>
-                        <p><strong>Status:</strong> {order.status}</p>
-                        <p><strong>Products:</strong></p>
-                        <ul>
-                          {order.products.map((product, productIndex) => (
-                            <li key={productIndex}>{product}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </Descriptions.Item>
-                  ))}
-                </Descriptions>
+          <div className="sm:w-1/2 mt-6 sm:mt-0">
+            <h4 className="text-lg font-semibold mb-2">Order History</h4>
+            {currentOrders.length > 0 ? (
+              <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
+                {currentOrders.map((order, index) => (
+                  <div key={index} className="border-b pb-2 last:border-b-0">
+                    <p><strong>Total Amount:</strong> ${order.totalAmount}</p>
+                    <p><strong>Status:</strong> {order.status}</p>
+                    <p><strong>Products:</strong></p>
+                    <ul className="list-disc pl-6">
+                      {order.products.map((product: string, productIndex: number) => (
+                        <li key={productIndex}>{product}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No orders available</p>
+            )}
+            <Pagination
+              current={currentPage}
+              pageSize={itemsPerPage}
+              total={orders.length}
+              onChange={(page) => setCurrentPage(page)}
+              className="mt-4 text-right"
+            />
+            <div className="flex justify-end mt-4">
+              {user.active === true ? (
+                <Button
+                  danger
+                  onClick={handleBanUser}
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  Ban User
+                </Button>
               ) : (
-                <p>No orders available</p>
+                <Button
+                  onClick={handleUnbanUser}
+                  className="bg-green-500 text-white hover:bg-green-600"
+                >
+                  Unban User
+                </Button>
               )}
-            </Col>
-          </Row>
-        </Card>
-      </Content>
-    </Layout>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
