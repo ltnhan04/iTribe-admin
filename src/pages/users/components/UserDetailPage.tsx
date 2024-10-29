@@ -152,7 +152,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { User, Order } from "./types"; // Import Order type
-import { Layout, Spin, Pagination, Button, message } from "antd";
+import {  Spin, Pagination, Button, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { getUserDetails, getUserOrders, banUser, unBanUser } from "../../../api/services/users/usersApi"; // Adjust the import based on your API structure
 
@@ -180,11 +180,13 @@ const UserDetailPage: React.FC = () => {
     const fetchUserOrders = async () => {
       try {
         const ordersResponse = await getUserOrders(userId);
-        setOrders(ordersResponse.data);
+        console.log(ordersResponse.data); // Debugging: Confirm the response structure
+        setOrders(ordersResponse.data.orderHistory || []); // Ensure `orderHistory` is set as an array
       } catch (error) {
         message.error("Failed to fetch user orders.");
       }
     };
+    
 
     fetchUserDetails();
     fetchUserOrders();
@@ -286,11 +288,30 @@ const UserDetailPage: React.FC = () => {
                     <p><strong>Total Amount:</strong> ${order.totalAmount}</p>
                     <p><strong>Status:</strong> {order.status}</p>
                     <p><strong>Products:</strong></p>
+                    {/* <ul className="list-disc pl-6">
+                      {order.products.map((productItem) => (
+                        <div key={productItem._id}>
+                          <p>Product: {productItem.product.name}</p>
+                          <p>Quantity: {productItem.quantity}</p>
+                        </div>
+                      ))}
+                    </ul> */}
                     <ul className="list-disc pl-6">
-                      {order.products.map((product: string, productIndex: number) => (
-                        <li key={productIndex}>{product}</li>
+                    {order.products && order.products.length > 0 ? (
+                      <ul className="list-disc pl-6">
+                      {order.products.map((productItem) => (
+                        <li key={productItem._id}>
+                          <p>Product Name: {productItem.product.name}</p>
+                          <p>Product ID: {productItem.product._id}</p> {/* Display the product ID */}
+                          <p>Quantity: {productItem.quantity}</p>
+                        </li>
                       ))}
                     </ul>
+                    ) : (
+                      <p>No products available.</p>
+                    )}
+                    </ul>
+
                   </div>
                 ))}
               </div>
