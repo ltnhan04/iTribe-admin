@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, DatePicker, InputNumber, message, List, Modal } from 'antd';
 import dayjs from 'dayjs';
+import { Rule } from 'antd/lib/form';
 import { promotionNameRules, descriptionRules, startDateRules, endDateRules, discountRules } from '../../schemaValidation/promotionValidation.schema';
 import { fetchPromotions, createPromotion, updatePromotion, deletePromotion } from '../../../api/promotion/promotionApi';
 interface Promotion {
@@ -20,7 +21,7 @@ interface FormValues {
   discount: number;
 }
 
-const PromotionForm: React.FC = () => {
+const Promotion: React.FC = () => {
   const [form] = Form.useForm();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
@@ -141,7 +142,7 @@ const PromotionForm: React.FC = () => {
         <Form.Item
           label="Phần trăm giảm giá (%)"
           name="discount"
-          rules={discountRules}
+          // rules={discountRules}
         >
           <InputNumber placeholder="Nhập phần trăm giảm giá" min={0} max={100} style={{ width: '100%' }} />
         </Form.Item>
@@ -180,4 +181,4 @@ const PromotionForm: React.FC = () => {
   );
 };
 
-export default PromotionForm;
+export default Promotion;
