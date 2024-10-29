@@ -1,4 +1,5 @@
-import { Button, Popover } from "antd";
+import { useState, useEffect } from "react";
+import { Button, Popover, notification, Popconfirm } from "antd";
 import {
   ExpandOutlined,
   NotificationOutlined,
@@ -9,18 +10,50 @@ import {
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { logoutThunk } from "../../redux/features/authentication/authThunk";
-
-interface NavbarProps {
-  onToggleSidebar: () => void;
-}
+import {
+  clearMessageLogout,
+  clearErrorLogout,
+} from "../../redux/features/authentication/authSlice";
+import { NavbarProps } from "./types";
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
+  const [open, setOpen] = useState<boolean>(false);
   const dispatch = useAppDispatch();
-  const { name } = useAppSelector((state) => state.auth);
 
-  const handleLogout = async () => {
+  const showPopconfirm = () => setOpen(true);
+
+  const handleOk = async () => {
+    setOpen(false);
     await dispatch(logoutThunk());
   };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
+  const { name, logout } = useAppSelector((state) => state.auth);
+  const {
+    error,
+    isLoading,
+    logoutState: { message },
+  } = logout;
+
+  useEffect(() => {
+    if (message) {
+      notification.success({
+        message: "Logout Success",
+        description: message,
+      });
+      dispatch(clearMessageLogout());
+    }
+    if (error) {
+      notification.error({
+        message: "Logout Failed",
+        description: error,
+      });
+      dispatch(clearErrorLogout());
+    }
+  }, [dispatch, error, message]);
 
   const popoverContent = (
     <div className="flex flex-col">
@@ -31,23 +64,34 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         <UserOutlined style={{ fontSize: "18px", color: "#1890ff" }} />
         <span className="text-sm font-medium text-gray-800">Profile</span>
       </Link>
-      <div
-        className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
-        onClick={handleLogout}
+      <Popconfirm
+        title="Logout"
+        description="Are you sure you want to logout?"
+        open={open}
+        onConfirm={handleOk}
+        okButtonProps={{ loading: isLoading }}
+        onCancel={handleCancel}
       >
-        <LogoutOutlined style={{ fontSize: "18px", color: "#ff4d4f" }} />
-        <span className="text-sm font-medium text-gray-800">Logout</span>
-      </div>
+        <div
+          className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
+          onClick={showPopconfirm}
+        >
+          <LogoutOutlined style={{ fontSize: "18px", color: "#ff4d4f" }} />
+          <span className="text-sm font-medium text-gray-800 transition-colors duration-300 ease-in-out hover:text-[#1890ff]">
+            Logout
+          </span>
+        </div>
+      </Popconfirm>
     </div>
   );
 
   return (
-    <nav className="bg-[#fff] px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 shadow-md">
+    <nav className="bg-[#fff] px-6 py-4 flex items-center justify-between fixed top-0 left-0 right-0 shadow-md z-50">
       <div className="flex items-center gap-6">
         <Button
           className="hidden lg:block"
           icon={<ExpandOutlined />}
-          onClick={onToggleSidebar}
+          // onClick={onToggleSidebar}
         />
         <Link to="/dashboard">
           <img

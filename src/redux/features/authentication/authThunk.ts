@@ -1,7 +1,7 @@
+import axios from "axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { login, logout } from "../../../api/services/auth/authApi";
 import { LoginType } from "../../../api/services/auth/authType";
-import { ErrorResponse } from "./authTypes";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
@@ -11,16 +11,32 @@ export const loginThunk = createAsyncThunk(
   ) => {
     try {
       const response = await login(user);
-      if (response.status === 200) {
+
+      if (response?.status === 200) {
         navigate("/dashboard");
         return response.data;
+      } else if (response?.status === 403) {
+        return rejectWithValue("Access denied");
+      } else if (response?.status === 401) {
+        return rejectWithValue("Invalid email or password");
+      } else {
+        return rejectWithValue("Unexpected server response.");
       }
-    } catch (error: unknown) {
-      const typedError = error as ErrorResponse;
-      const errorMsg =
-        typedError.response?.data?.message ||
-        "Đã xảy ra lỗi! Vui lòng thử lại.";
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          const { status, data } = error.response;
+          if (status === 403) {
+            return rejectWithValue("Access denied");
+          } else if (status === 401) {
+            return rejectWithValue("Invalid email or password");
+          } else {
+            return rejectWithValue(data.message || "Server Error!");
+          }
+        }
+        return rejectWithValue("No response from server. Check network.");
+      }
+      return rejectWithValue("Something went wrong!");
     }
   }
 );
@@ -31,13 +47,15 @@ export const logoutThunk = createAsyncThunk(
     try {
       const response = await logout();
       if (response.status === 200) {
-        return response.data;
+        return response.data.message;
       }
-    } catch (error: unknown) {
-      const typedError = error as ErrorResponse;
-      const errorMsg =
-        typedError.response.data.message || "Đã xảy ra lỗi! Vui lòng thử lại.";
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message || "Server Error!"
+        );
+      }
+      return rejectWithValue("An unexpected error occurred!");
     }
   }
 );
