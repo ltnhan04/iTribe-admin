@@ -13,12 +13,12 @@ export const descriptionRules = [
 
 export const startDateRules = [{ required: true, message: 'Please select the start date' }];
 
-export const endDateRules = (getFieldValue: (field: string) => any): RuleObject => ({
+export const endDateRules = (getFieldValue: (field: string) => string | undefined): RuleObject => ({
   required: true,
   message: 'Please select the end date',
-  validator(_, value) {
+  validator(_: RuleObject, value: string) {
     const startDate = getFieldValue('startDate');
-    if (!value || !startDate || dayjs(value).isAfter(startDate)) {
+    if (!value || !startDate || dayjs(value).isAfter(dayjs(startDate))) {
       return Promise.resolve();
     }
     return Promise.reject(new Error('End date must be after start date'));

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, DatePicker, InputNumber, message, List, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { Rule } from 'antd/lib/form';
-import { promotionNameRules, descriptionRules, startDateRules, endDateRules, discountRules } from '../../schemaValidation/promotionValidation.schema';
-import { fetchPromotions, createPromotion, updatePromotion, deletePromotion } from '../../../api/promotion/promotionApi';
+import { promotionNameRules, descriptionRules, startDateRules, endDateRules,  } from '../../schemaValidation/promotionValidation.schema';
+import { fetchPromotions, createPromotion, updatePromotion, deletePromotion } from '../../api/promotion/promotionApi';
 interface Promotion {
   id: number;
   promotionName: string;
