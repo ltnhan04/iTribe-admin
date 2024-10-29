@@ -3,12 +3,16 @@ import { axiosInstance } from "../../axiosInstance"; // Adjust the path if neces
 
 // Fetch all users
 export const getAllUsers = async () => {
-  return await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/admin/users`);
+  return await axiosInstance.get(
+    `${import.meta.env.VITE_API_URL}/api/admin/users`
+  );
 };
 
 // Fetch a specific user by ID
 export const getUserDetails = async (userId: string) => {
-  return await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`);
+  return await axiosInstance.get(
+    `${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`
+  );
 };
 
 // Ban a user
@@ -28,12 +32,16 @@ export const getUserOrders = async (userId: string) => {
 
 // Get user order details
 export const getUserOrderDetail = async (userId: string) => {
-  return await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/admin/userOrderDetail/${userId}`);
+  return await axiosInstance.get(
+    `${import.meta.env.VITE_API_URL}/api/admin/userOrderDetail/${userId}`
+  );
 };
 
 // Fetch paginated users
 export const paginatedUsers = async (page: number, limit: number) => {
   return await axiosInstance.get(
-    `${import.meta.env.VITE_API_URL}/api/admin/paginate?page=${page}&limit=${limit}`
+    `${
+      import.meta.env.VITE_API_URL
+    }/api/admin/paginate?page=${page}&limit=${limit}`
   );
 };

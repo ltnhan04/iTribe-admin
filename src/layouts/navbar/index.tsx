@@ -91,7 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         <Button
           className="hidden lg:block"
           icon={<ExpandOutlined />}
-          // onClick={onToggleSidebar}
+          onClick={onToggleSidebar}
         />
         <Link to="/dashboard">
           <img
