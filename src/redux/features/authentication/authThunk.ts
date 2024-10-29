@@ -15,12 +15,8 @@ export const loginThunk = createAsyncThunk(
       if (response?.status === 200) {
         navigate("/dashboard");
         return response.data;
-      } else if (response?.status === 403) {
-        return rejectWithValue("Access denied");
-      } else if (response?.status === 401) {
-        return rejectWithValue("Invalid email or password");
       } else {
-        return rejectWithValue("Unexpected server response.");
+        return rejectWithValue(response.data.message);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
