@@ -15,13 +15,11 @@ const OrderList: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await getOrders();
+        console.log(response);
         setOrders(response.data.orders);
-      } catch (error: unknown) {
-        const typedError = error as ErrorResponse;
-        const errorMsg =
-          typedError.response.data.message ||
-          "Đã xảy ra lỗi! Vui lòng thử lại.";
-        message.error(errorMsg);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        message.error(error);
       } finally {
         setIsLoading(false);
       }
