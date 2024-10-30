@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { Button, Form, Input, notification } from "antd";
+import { Button, Form, Input, message as Message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { loginThunk } from "../../../redux/features/authentication/authActions";
 import { useAppSelector, useAppDispatch } from "../../../redux/hooks";
-import { loginThunk } from "../../../redux/features/authentication/authThunk";
 import {
   clearError,
   clearMessage,
 } from "../../../redux/features/authentication/authSlice";
-import { LoginType } from "./type";
+import type { LoginType } from "./type";
 import {
   emailRules,
   passwordRules,
@@ -22,26 +22,20 @@ const Login = () => {
   );
   const { message } = loginState;
 
-  const onFinish = async (values: LoginType) => {
-    await dispatch(loginThunk({ user: values, navigate }));
-  };
-
   useEffect(() => {
     if (message) {
-      notification.success({
-        message: "Login Success",
-        description: message,
-      });
+      Message.success(message);
       dispatch(clearMessage());
     }
     if (error) {
-      notification.error({
-        message: "Login Failed",
-        description: error,
-      });
+      Message.error(error);
       dispatch(clearError());
     }
   }, [dispatch, error, message]);
+
+  const onFinish = async (values: LoginType) => {
+    await dispatch(loginThunk({ user: values, navigate }));
+  };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-200">

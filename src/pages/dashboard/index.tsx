@@ -4,7 +4,7 @@ import {
     fetchWeeklyRevenue,
     fetchYearlyRevenue,
     fetchTotalRevenue,
-} from '../../api/services/revenua/revenuaApi';
+} from '../../api/services/revenue/revenueApi';
 import {
     DailyRevenue,
     WeeklyRevenue,

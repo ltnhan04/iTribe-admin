@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Button, Popover, notification, Popconfirm } from "antd";
+import axios from "axios";
+import { Button, Popover, message as Message, Popconfirm } from "antd";
 import {
   ExpandOutlined,
   NotificationOutlined,
@@ -8,52 +9,54 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { logout } from "../../api/services/auth/authApi";
+import { clearAccessToken } from "../../redux/features/authentication/authSlice";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { logoutThunk } from "../../redux/features/authentication/authThunk";
-import {
-  clearMessageLogout,
-  clearErrorLogout,
-} from "../../redux/features/authentication/authSlice";
 import { NavbarProps } from "./types";
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    if (message) {
+      Message.success(message);
+    }
+    if (error) {
+      Message.error(error);
+    }
+  }, [error, message]);
+
   const dispatch = useAppDispatch();
+  const { name } = useAppSelector((state) => state.auth);
 
   const showPopconfirm = () => setOpen(true);
 
   const handleOk = async () => {
     setOpen(false);
-    await dispatch(logoutThunk());
+    try {
+      setIsLoading(true);
+      const response = await logout();
+      if (response.status === 200) {
+        setMessage(response.data.message);
+        setTimeout(() => {
+          dispatch(clearAccessToken());
+        }, 2000);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(error.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setOpen(false);
   };
-
-  const { name, logout } = useAppSelector((state) => state.auth);
-  const {
-    error,
-    isLoading,
-    logoutState: { message },
-  } = logout;
-
-  useEffect(() => {
-    if (message) {
-      notification.success({
-        message: "Logout Success",
-        description: message,
-      });
-      dispatch(clearMessageLogout());
-    }
-    if (error) {
-      notification.error({
-        message: "Logout Failed",
-        description: error,
-      });
-      dispatch(clearErrorLogout());
-    }
-  }, [dispatch, error, message]);
 
   const popoverContent = (
     <div className="flex flex-col">
