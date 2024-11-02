@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
 import CurrencyInput from "react-currency-input-field";
 import type { UploadFile, UploadProps } from "antd";
 import { Divider, Image, Upload, Input, Select, Button, Form } from "antd";
 import { FileType } from "./types";
 import { iphones } from "../../constants";
+import UploadButton from "./components/UploadButton";
 import {
   descriptionRules,
   imageRules,
@@ -15,8 +15,13 @@ import {
 
 const Products = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+
+  const handlePriceChange = (value: string | undefined) => {
+    setPrice(value || "");
+  };
 
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
@@ -37,18 +42,8 @@ const Products = () => {
       reader.onerror = (error) => reject(error);
     });
 
-  const uploadButton = (
-    <button
-      className="flex flex-col items-center justify-center w-full h-full"
-      type="button"
-    >
-      <PlusOutlined />
-      <div className="mt-2 text-sm">Upload</div>
-    </button>
-  );
-
   return (
-    <div className="bg-white h-screen rounded-lg shadow-md px-8 py-6">
+    <div className=" h-screen rounded-lg shadow-md px-8 py-6">
       <Divider
         orientation="left"
         style={{ borderColor: "#f0f0f0" }}
@@ -58,21 +53,26 @@ const Products = () => {
       </Divider>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="border border-[#b9b6b6] p-6 rounded-lg">
+        <div className="border shadow-lg transition-shadow duration-500 ease-in-out hover:shadow-xl border-grayLight p-6 rounded-lg">
           <Form.Item
             rules={imageRules}
             validateFirst
-            label="Images"
+            label="Upload Images"
+            name={"image"}
             className="text-base font-medium mb-4"
           >
             <Upload
+              name="image"
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               listType="picture-card"
               fileList={fileList}
+              maxCount={5}
+              multiple={true}
+              accept="image/*"
               onPreview={handlePreview}
               onChange={handleChange}
             >
-              {fileList.length >= 5 ? null : uploadButton}
+              {fileList.length >= 5 ? null : <UploadButton />}
             </Upload>
 
             {previewImage && (
@@ -102,12 +102,12 @@ const Products = () => {
                 <CurrencyInput
                   name="price"
                   placeholder="VND"
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-grayBorder rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ease-out hover:border-blue cursor-pointer"
                   prefix="₫"
-                  groupSeparator="."
-                  decimalSeparator=","
-                  allowDecimals={false}
-                  onValueChange={(value) => console.log(value)}
+                  value={price}
+                  decimalsLimit={2}
+                  intlConfig={{ locale: "vi-VN", currency: "VND" }}
+                  onValueChange={handlePriceChange}
                 />
               </Form.Item>
             </div>
@@ -146,6 +146,7 @@ const Products = () => {
               className="text-base font-medium"
             >
               <Input.TextArea
+                maxLength={1000}
                 rows={4}
                 placeholder="Enter product description"
                 className="w-full border-gray-300 rounded-md"

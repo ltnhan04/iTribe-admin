@@ -3,7 +3,7 @@ export const imageRules = [
 ];
 
 export const priceRules = [
-  { required: true, message: "Please enter a price" },
+  { required: true, message: "Please enter product price" },
   {
     min: 0,
     message: "Price cannot be negative",
@@ -11,7 +11,7 @@ export const priceRules = [
 ];
 
 export const descriptionRules = [
-  { required: true, message: "Please enter a description" },
+  { required: true, message: "Please enter product description" },
   {
     min: 10,
     message: "Description must be at least 10 characters long",
