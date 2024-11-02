@@ -7,6 +7,7 @@ export default {
       blue: "#4880FF",
       blackLight: "#202224",
       grayLight: "#F8F8FF",
+      grayBorder: "#d9d9d9",
     },
   },
   plugins: [],

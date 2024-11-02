@@ -3,11 +3,11 @@ import axios from "axios";
 import { Button, Popover, message as Message, Popconfirm } from "antd";
 import {
   ExpandOutlined,
-  NotificationOutlined,
   DownCircleOutlined,
   UserOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import { IoMdNotificationsOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { logout } from "../../api/services/auth/authApi";
 import { clearAccessToken } from "../../redux/features/authentication/authSlice";
@@ -20,6 +20,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>();
 
+  const dispatch = useAppDispatch();
+  const { name } = useAppSelector((state) => state.auth);
+
   useEffect(() => {
     if (message) {
       Message.success(message);
@@ -28,11 +31,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
       Message.error(error);
     }
   }, [error, message]);
-
-  const dispatch = useAppDispatch();
-  const { name } = useAppSelector((state) => state.auth);
-
-  const showPopconfirm = () => setOpen(true);
 
   const handleOk = async () => {
     setOpen(false);
@@ -54,10 +52,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     }
   };
 
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
   const popoverContent = (
     <div className="flex flex-col">
       <Link
@@ -73,11 +67,11 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         open={open}
         onConfirm={handleOk}
         okButtonProps={{ loading: isLoading }}
-        onCancel={handleCancel}
+        onCancel={() => setOpen(false)}
       >
         <div
           className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
-          onClick={showPopconfirm}
+          onClick={() => setOpen(true)}
         >
           <LogoutOutlined style={{ fontSize: "18px", color: "#ff4d4f" }} />
           <span className="text-sm font-medium text-gray-800 transition-colors duration-300 ease-in-out hover:text-[#1890ff]">
@@ -104,9 +98,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           />
         </Link>
       </div>
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4">
         <Link to={"/notification"}>
-          <NotificationOutlined
+          <IoMdNotificationsOutline
             style={{ fontSize: "24px", color: "#1890ff" }}
           />
         </Link>

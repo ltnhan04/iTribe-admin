@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import { store } from "../redux/store";
-import { useAppDispatch } from "../redux/hooks";
-import { updateAccessToken } from "../redux/features/authentication/authSlice";
+import {
+  updateAccessToken,
+  clearAccessToken,
+} from "../redux/features/authentication/authSlice";
 import { refreshToken } from "./services/auth/authApi";
 
 let isRefreshing = false;
@@ -38,13 +40,18 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    console.log(error);
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      !originalRequest._retry
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -64,10 +71,9 @@ axios.interceptors.response.use(
       try {
         const response = await refreshToken();
         const newAccessToken = response.data.accessToken;
-        const dispatch = useAppDispatch();
-        await dispatch(updateAccessToken(newAccessToken));
+        store.dispatch(updateAccessToken(newAccessToken));
         processQueue(null, newAccessToken);
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (error) {
         processQueue(error, null);
@@ -75,6 +81,13 @@ axios.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    } else if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 500)
+    ) {
+      store.dispatch(clearAccessToken());
+    } else {
+      return Promise.reject(error);
     }
   }
 );
