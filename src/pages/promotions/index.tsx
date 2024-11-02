@@ -1,216 +1,100 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   Form,
-//   Input,
-//   Button,
-//   DatePicker,
-//   InputNumber,
-//   message,
-//   List,
-//   Modal,
-// } from "antd";
-// import dayjs from "dayjs";
-// import {
-//   promotionNameRules,
-//   descriptionRules,
-//   startDateRules,
-//   endDateRules,
-// } from "../../schemaValidation/promotionValidation.schema";
-// import {
-//   fetchPromotions,
-//   createPromotion,
-//   updatePromotion,
-//   deletePromotion,
-// } from "../../api/services/promotion/promotionApi";
+import React, { useState } from 'react';
+import { PlusOutlined } from '@ant-design/icons';
+import type { TableColumnsType } from 'antd';
+import {
+   Badge, Space, Table, Modal, FloatButton
+  } from 'antd';
+import { ExpandedDataType, DataType } from "./types";
+import AddPromotion from "./components/addPromotion";
 
-// interface Promotion {
-//   id: number;
-//   promotionName: string;
-//   description: string;
-//   startDate: string;
-//   endDate: string;
-//   discount: number;
-// }
+const expandDataSource = Array.from({ length: 1 }).map<ExpandedDataType>((_, i) => ({
+  key: i.toString(),
+  date: '2014-12-24 23:12:00',
+  name: 'Khuyến mãi thử nghiệm'
+}));
 
-// interface FormValues {
-//   promotionName: string;
-//   description: string;
-//   startDate: dayjs.Dayjs;
-//   endDate: dayjs.Dayjs;
-//   discount: number;
-// }
+const dataSource = Array.from({ length: 3 }).map<DataType>((_, i) => ({
+  key: i.toString(),
+  id: `1000${i + 1}`,
+  name: `Giảm giá tháng ${i + 1}`,
+  status: 'Trạng thái',
+  date: new Date().toLocaleString(),
+  quantity: 0,
+}));
 
-// const Promotions: React.FC = () => {
-//   const [form] = Form.useForm();
-//   const [promotions, setPromotions] = useState<Promotion[]>([]);
-//   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(
-//     null
-//   );
+const expandColumns: TableColumnsType<ExpandedDataType> = [
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Date', dataIndex: 'date', key: 'date' },
+  {
+    title: 'Status',
+    key: 'state',
+    render: () => <Badge status="success" text="Active" />,
+  },
+  {
+    title: 'Action',
+    key: 'operation',
+    render: () => (
+      <Space size="middle">
+        <a>Continue</a>
+        <a>Pause</a>
+        <a>Stop</a>
+      </Space>
+    ),
+  },
+];
 
-//   useEffect(() => {
-//     const loadPromotions = async () => {
-//       try {
-//         const data = await fetchPromotions();
-//         setPromotions(data);
-//       } catch (error: unknown) {
-//         if (error instanceof Error) {
-//           message.error("Không thể tải danh sách khuyến mãi: " + error.message);
-//         }
-//       }
-//     };
-//     loadPromotions();
-//   }, []);
+const columns: TableColumnsType<DataType> = [
+  { title: 'ID', dataIndex: 'id', key: 'id' },
+  { title: 'Name', dataIndex: 'name' },
+  { title: 'Date', dataIndex: 'date', key: 'date' },
+];
 
-//   const handleSubmit = async (values: FormValues) => {
-//     const formattedValues: Omit<Promotion, "id"> = {
-//       ...values,
-//       startDate: dayjs(values.startDate).format("YYYY-MM-DD"),
-//       endDate: dayjs(values.endDate).format("YYYY-MM-DD"),
-//     };
+const expandedRowRender = () => (
+  <Table<ExpandedDataType>
+    columns={expandColumns}
+    dataSource={expandDataSource}
+    pagination={false}
+  />
+);
 
-//     try {
-//       if (editingPromotion) {
-//         const updatedPromotion = await updatePromotion(
-//           editingPromotion.id,
-//           formattedValues
-//         );
-//         setPromotions((prev) =>
-//           prev.map((promotion) =>
-//             promotion.id === editingPromotion.id ? updatedPromotion : promotion
-//           )
-//         );
-//         setEditingPromotion(null);
-//         message.success("Cập nhật khuyến mãi thành công!");
-//       } else {
-//         const newPromotion = await createPromotion(formattedValues);
-//         setPromotions((prev) => [...prev, newPromotion]);
-//         message.success("Thêm khuyến mãi thành công!");
-//       }
-//     } catch (error: unknown) {
-//       if (error instanceof Error) {
-//         message.error("Không thể thực hiện thao tác: " + error.message);
-//       }
-//     }
+const Promotions: React.FC = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false); 
 
-//     form.resetFields();
-//   };
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
 
-//   const handleEdit = (promotion: Promotion) => {
-//     setEditingPromotion(promotion);
-//     form.setFieldsValue({
-//       ...promotion,
-//       startDate: dayjs(promotion.startDate),
-//       endDate: dayjs(promotion.endDate),
-//     });
-//   };
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
 
-//   const handleDelete = (promotionId: number) => {
-//     Modal.confirm({
-//       title: "Bạn có chắc chắn muốn xóa khuyến mãi này?",
-//       onOk: async () => {
-//         try {
-//           await deletePromotion(promotionId);
-//           setPromotions((prev) =>
-//             prev.filter((promotion) => promotion.id !== promotionId)
-//           );
-//           message.success("Xóa khuyến mãi thành công!");
-//         } catch (error: unknown) {
-//           if (error instanceof Error) {
-//             message.error("Không thể xóa khuyến mãi: " + error.message);
-//           }
-//         }
-//       },
-//     });
-//   };
+  const handleCancel = () => {
+    setIsModalVisible(false); //
+  };
 
-//   return (
-//     <div style={{ maxWidth: "600px", margin: "auto" }}>
-//       <Form
-//         layout="vertical"
-//         form={form}
-//         onFinish={handleSubmit}
-//         style={{ marginBottom: "20px" }}
-//       >
-//         <Form.Item
-//           label="Tên khuyến mãi"
-//           name="promotionName"
-//           rules={promotionNameRules}
-//         >
-//           <Input placeholder="Nhập tên khuyến mãi" />
-//         </Form.Item>
-
-//         <Form.Item label="Mô tả" name="description" rules={descriptionRules}>
-//           <Input.TextArea placeholder="Nhập mô tả khuyến mãi" rows={4} />
-//         </Form.Item>
-
-//         <Form.Item label="Ngày bắt đầu" name="startDate" rules={startDateRules}>
-//           <DatePicker style={{ width: "100%" }} />
-//         </Form.Item>
-
-//         <Form.Item
-//           label="Ngày kết thúc"
-//           name="endDate"
-//           rules={[endDateRules(form.getFieldValue)]}
-//         >
-//           <DatePicker style={{ width: "100%" }} />
-//         </Form.Item>
-
-//         <Form.Item
-//           label="Phần trăm giảm giá (%)"
-//           name="discount"
-//           // rules={discountRules}
-//         >
-//           <InputNumber
-//             placeholder="Nhập phần trăm giảm giá"
-//             min={0}
-//             max={100}
-//             style={{ width: "100%" }}
-//           />
-//         </Form.Item>
-
-//         <Form.Item>
-//           <Button type="primary" htmlType="submit">
-//             {editingPromotion ? "Cập nhật khuyến mãi" : "Thêm khuyến mãi"}
-//           </Button>
-//         </Form.Item>
-//       </Form>
-
-//       <List
-//         header={<h3>Danh sách khuyến mãi</h3>}
-//         bordered
-//         dataSource={promotions}
-//         renderItem={(promotion) => (
-//           <List.Item
-//             actions={[
-//               <Button type="link" onClick={() => handleEdit(promotion)}>
-//                 Sửa
-//               </Button>,
-//               <Button
-//                 type="link"
-//                 danger
-//                 onClick={() => handleDelete(promotion.id)}
-//               >
-//                 Xóa
-//               </Button>,
-//             ]}
-//           >
-//             <List.Item.Meta
-//               title={`${promotion.promotionName} (${promotion.discount}% giảm giá)`}
-//               description={`Từ: ${promotion.startDate} Đến: ${promotion.endDate}`}
-//             />
-//             <div>{promotion.description}</div>
-//           </List.Item>
-//         )}
-//       />
-//     </div>
-//   );
-// };
-
-// export default Promotions;
-import React from "react";
-
-const Promotions = () => {
-  return <div>Promotions</div>;
+  return (
+    <>
+      <FloatButton
+        icon={<PlusOutlined />}
+        type="default"
+        style={{ insetInlineEnd: 94 }}
+        onClick={showModal}
+      />
+      <Table<DataType>
+        columns={columns}
+        expandable={{ expandedRowRender, defaultExpandedRowKeys: ['0'] }}
+        dataSource={dataSource}
+      />
+      <Modal
+        title="Thêm Khuyến Mãi"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <AddPromotion /> 
+      </Modal>
+    </>
+  );
 };
 
 export default Promotions;
