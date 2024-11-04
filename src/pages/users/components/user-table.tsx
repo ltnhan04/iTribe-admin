@@ -1,9 +1,7 @@
-
-
 // export default UsersTable;
 import React from "react";
 import { Table, Button } from "antd";
-import { User } from "./types";
+import { User } from "../types";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 interface UsersTableProps {
@@ -27,11 +25,10 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
       title: "Email",
       dataIndex: "email",
     },
-    
-    
+
     {
       title: "Action",
-      render: (text: string, user: User) => (
+      render: (user: User) => (
         <Link to={`/users/${user._id}`}>
           <Button type="primary">Detail</Button>
         </Link>

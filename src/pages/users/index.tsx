@@ -85,11 +85,10 @@
 // export default UsersList;
 // UsersList.tsx
 import React, { useEffect, useState } from "react";
-import UsersTable from "./userTable";
+import UsersTable from "./components/user-table";
 import { User } from "./types";
 import { Layout } from "antd";
-import { getAllUsers } from "../../../api/services/users/usersApi"; // Adjust the import path as needed
-
+import { getAllUsers } from "../../api/services/users/usersApi";
 const { Content } = Layout;
 
 const UsersList: React.FC = () => {
@@ -103,6 +102,7 @@ const UsersList: React.FC = () => {
         const response = await getAllUsers();
         setUsers(response.data); // Adjust if response structure is different
       } catch (error) {
+        console.log(error);
         setError("Failed to fetch users."); // Handle error if fetching fails
       } finally {
         setLoading(false);
