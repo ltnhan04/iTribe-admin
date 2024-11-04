@@ -83,7 +83,7 @@
 //                 <strong>Role:</strong> {user.role}
 //               </li>
 //               <li>
-//                 <strong>Status:</strong> 
+//                 <strong>Status:</strong>
 //                 <span className={`ml-1 font-semibold ${user.status === "Active" ? "text-green-600" : "text-red-600"}`}>
 //                   {user.status}
 //                 </span>
@@ -92,7 +92,7 @@
 //                 <strong>Email:</strong> {user.email}
 //               </li>
 //               <li>
-//                 <strong>Address:</strong> 
+//                 <strong>Address:</strong>
 //                 {user.address ? (
 //                   <div className="mt-1">
 //                     <p>{user.address.street}</p>
@@ -151,10 +151,15 @@
 // export default UserDetailPage;
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { User, Order } from "./types"; // Import Order type
-import {  Spin, Pagination, Button, message } from "antd";
+import { User, Order } from "../types"; // Import Order type
+import { Spin, Pagination, Button, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { getUserDetails, getUserOrders, banUser, unBanUser } from "../../../api/services/users/usersApi"; // Adjust the import based on your API structure
+import {
+  getUserDetails,
+  getUserOrders,
+  banUser,
+  unBanUser,
+} from "../../../api/services/users/usersApi"; // Adjust the import based on your API structure
 
 const UserDetailPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -170,9 +175,10 @@ const UserDetailPage: React.FC = () => {
     const fetchUserDetails = async () => {
       try {
         const userResponse = await getUserDetails(userId);
-        
+
         setUser(userResponse.data);
       } catch (error) {
+        console.log(error);
         message.error("Failed to fetch user details.");
       }
     };
@@ -183,10 +189,10 @@ const UserDetailPage: React.FC = () => {
         console.log(ordersResponse.data); // Debugging: Confirm the response structure
         setOrders(ordersResponse.data.orderHistory || []); // Ensure `orderHistory` is set as an array
       } catch (error) {
+        console.log(error);
         message.error("Failed to fetch user orders.");
       }
     };
-    
 
     fetchUserDetails();
     fetchUserOrders();
@@ -200,22 +206,23 @@ const UserDetailPage: React.FC = () => {
       setUser((prevUser) => ({ ...prevUser!, status: "Banned" })); // Update user status
       message.success(`User ${user?.name} has been banned successfully.`);
     } catch (error) {
+      console.log(error);
       message.error("Failed to ban user.");
     }
   };
 
   const handleUnbanUser = async () => {
     if (!userId) return; // Ensure userId is defined
-    console.log(userId)
+    console.log(userId);
     try {
       await unBanUser(userId); // Call the unban API
       setUser((prevUser) => ({ ...prevUser!, status: "Active" })); // Update user status
       message.success(`User ${user?.name} has been unbanned successfully.`);
     } catch (error) {
+      console.log(error);
       message.error("Failed to unban user.");
     }
   };
-  
 
   if (loading) {
     return <Spin size="large" className="flex justify-center my-8" />;
@@ -229,7 +236,7 @@ const UserDetailPage: React.FC = () => {
   const indexOfLastOrder = currentPage * itemsPerPage;
   const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-  console.log(user.active)
+  console.log(user.active);
   return (
     <div className="max-h-screen bg-gray-100 py-8 flex justify-center">
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
@@ -240,7 +247,9 @@ const UserDetailPage: React.FC = () => {
             </div>
           </div>
           <h3 className="text-xl font-semibold mt-3">{user.name}</h3>
-          <p className="text-gray-500 text-sm mt-1 break-all sm:whitespace-normal">{user.email}</p>
+          <p className="text-gray-500 text-sm mt-1 break-all sm:whitespace-normal">
+            {user.email}
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:space-x-6">
@@ -257,20 +266,27 @@ const UserDetailPage: React.FC = () => {
                 <strong>Role:</strong> {user.role}
               </li>
               <li>
-                <strong>Status:</strong> 
-                <span className={`ml-1 font-semibold ${user.active === true ? "text-green-600" : "text-red-600"}`}>
-                {user.active ? "Active" : "Banned"}
+                <strong>Status:</strong>
+                <span
+                  className={`ml-1 font-semibold ${
+                    user.active === true ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {user.active ? "Active" : "Banned"}
                 </span>
               </li>
               <li>
                 <strong>Email:</strong> {user.email}
               </li>
               <li>
-                <strong>Address:</strong> 
+                <strong>Address:</strong>
                 {user.address ? (
                   <div className="mt-1">
                     <p>{user.address.street}</p>
-                    <p>{user.address.city}, {user.address.state} {user.address.zip}</p>
+                    <p>
+                      {user.address.city}, {user.address.state}{" "}
+                      {user.address.zip}
+                    </p>
                   </div>
                 ) : (
                   "No address available"
@@ -285,9 +301,15 @@ const UserDetailPage: React.FC = () => {
               <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
                 {currentOrders.map((order, index) => (
                   <div key={index} className="border-b pb-2 last:border-b-0">
-                    <p><strong>Total Amount:</strong> ${order.totalAmount}</p>
-                    <p><strong>Status:</strong> {order.status}</p>
-                    <p><strong>Products:</strong></p>
+                    <p>
+                      <strong>Total Amount:</strong> ${order.totalAmount}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {order.status}
+                    </p>
+                    <p>
+                      <strong>Products:</strong>
+                    </p>
                     {/* <ul className="list-disc pl-6">
                       {order.products.map((productItem) => (
                         <div key={productItem._id}>
@@ -297,21 +319,20 @@ const UserDetailPage: React.FC = () => {
                       ))}
                     </ul> */}
                     <ul className="list-disc pl-6">
-                    {order.products && order.products.length > 0 ? (
-                      <ul className="list-disc pl-6">
-                      {order.products.map((productItem) => (
-                        <li key={productItem._id}>
-                          <p>Product Name: {productItem.product.name}</p>
-                          <p>Product ID: {productItem.product._id}</p> {/* Display the product ID */}
-                          <p>Quantity: {productItem.quantity}</p>
-                        </li>
-                      ))}
+                      {/* {order.products && order.products.length > 0 ? (
+                        <ul className="list-disc pl-6">
+                          {order.products.map((productItem) => (
+                            <li key={productItem._id}>
+                              <p>Product Name: {productItem.product.name}</p>
+                              <p>Product ID: {productItem.product._id}</p>
+                              <p>Quantity: {productItem.quantity}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No products available.</p>
+                      )} */}
                     </ul>
-                    ) : (
-                      <p>No products available.</p>
-                    )}
-                    </ul>
-
                   </div>
                 ))}
               </div>
