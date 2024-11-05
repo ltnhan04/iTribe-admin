@@ -4,21 +4,27 @@ import { createBrowserRouter } from "react-router-dom";
 import PrivateRoutes from "./PrivateRoutes";
 
 const Dashboard = lazy(() => import("../pages/dashboard"));
-const Inbox = lazy(() => import("../pages/inbox"));
-const Orders = lazy(() => import("../pages/orders"));
-const Products = lazy(() => import("../pages/products"));
-const Promotions = lazy(() => import("../pages/promotions"));
-const Stock = lazy(() => import("../pages/stock"));
-const Users = lazy(() => import("../pages/users"));
 
-import AddProduct from "../pages/products/components/add-product";
+const Inbox = lazy(() => import("../pages/inbox"));
+
+const Orders = lazy(() => import("../pages/orders"));
+//Product Page
+const Products = lazy(() => import("../pages/products"));
+import AddProduct from "../pages/products/pages/create-product";
+import EditProduct from "../pages/products/pages/edit-product";
+
+const Promotions = lazy(() => import("../pages/promotions"));
+
+const Stock = lazy(() => import("../pages/stock"));
+
+const Users = lazy(() => import("../pages/users"));
 
 import NotFound from "../pages/not-found";
 import Loading from "../loading";
 
 import Login from "../pages/auth/login";
-import Notification from "../layouts/navbar/components/notification";
-import Profile from "../layouts/navbar/components/profile";
+import Notification from "../layouts/navbar/pages/notification";
+import Profile from "../layouts/navbar/pages/profile";
 import UserDetailPage from "../pages/users/components/UserDetailPage";
 
 const routes = createBrowserRouter([
@@ -40,7 +46,14 @@ const routes = createBrowserRouter([
       {
         path: "products",
         element: <Products />,
-        children: [{ path: "create", element: <AddProduct /> }],
+      },
+      {
+        path: "products/create",
+        element: <AddProduct />,
+      },
+      {
+        path: "products/:productId/edit",
+        element: <EditProduct />,
       },
       { path: "users", element: <Users /> },
       { path: "users/:userId", element: <UserDetailPage /> },
