@@ -1,13 +1,9 @@
-import { axiosInstance } from "../../axiosInstance";
+import { axiosInstance } from "../../../config/axiosInstance";
 
 export const refreshToken = async () => {
-  return await axiosInstance.post(
-    `${import.meta.env.VITE_API_URL}/api/auth/refresh-token`
-  );
+  return await axiosInstance.post(`/api/auth/refresh-token`);
 };
 
 export const logout = async () => {
-  return await axiosInstance.post(
-    `${import.meta.env.VITE_API_URL}/api/auth/logout`
-  );
+  return await axiosInstance.post(`/api/auth/logout`);
 };

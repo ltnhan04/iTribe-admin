@@ -67,7 +67,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         open={open}
         onConfirm={handleOk}
         okButtonProps={{ loading: isLoading }}
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          setOpen(false);
+        }}
       >
         <div
           className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"

@@ -1,5 +1,7 @@
+import { Table } from "antd";
+import { columns, dataSource } from "./constants";
 const Products = () => {
-  return <div>Products</div>;
+  return <Table columns={columns} dataSource={dataSource} />;
 };
 
 export default Products;

@@ -5,7 +5,7 @@ import {
   updateAccessToken,
   clearAccessToken,
 } from "../redux/features/authentication/authSlice";
-import { refreshToken } from "./services/auth/authApi";
+import { refreshToken } from "../api/services/auth/authApi";
 
 let isRefreshing = false;
 let failedQueue: any[] = [];

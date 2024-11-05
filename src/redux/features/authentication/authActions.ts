@@ -16,7 +16,8 @@ export const loginThunk = createAsyncThunk(
           email: user.email,
           password: user.password,
           role,
-        }
+        },
+        { withCredentials: true }
       );
       if (response.status === 200) {
         navigate("/dashboard");
