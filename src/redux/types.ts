@@ -1,7 +1,6 @@
-import type { GetProp, UploadProps } from "antd";
-
-export type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
+export interface Data {
+    data: Product[];
+}
 export interface Product {
   id: number;
   name: string;

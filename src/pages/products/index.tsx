@@ -1,17 +1,19 @@
-import { Rate, Badge, Image, Input, Button, Table } from "antd";
-import { Link } from "react-router-dom";
+import { Rate, Badge, Image, Input, Button, Table, message } from "antd";
+import { PlusCircleOutlined } from "@ant-design/icons";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
-import type { DataType } from "./types";
+import type { Product } from "./types";
 import { desc } from "./constants";
 import { formatCurrency } from "../../utils/format-currency";
-// import { useGetProductsQuery } from "../../redux/api";
+import { useGetProductsQuery } from "../../redux/api";
 
-const columns: TableColumnsType<DataType> = [
+const columns: TableColumnsType<Product> = [
   {
     title: "Product Name",
     dataIndex: "name",
@@ -116,24 +118,24 @@ const columns: TableColumnsType<DataType> = [
     className: "font-medium",
     render: (status: string) => (
       <Badge
-        color={status === "Active" ? "green" : "red"}
+        color={status === "active" ? "green" : "red"}
         text={status}
         className="font-medium"
       />
     ),
     filters: [
-      { text: "Active", value: "Active" },
-      { text: "Inactive", value: "Inactive" },
+      { text: "active", value: "active" },
+      { text: "inactive", value: "inactive" },
     ],
     onFilter: (value, record) => record.status === value,
   },
   {
     title: "Action",
     key: "action",
-    render: () => (
+    render: (record) => (
       <div className="flex justify-center items-center space-x-4">
         <Link
-          to="/products/1/edit"
+          to={`/products/${record._id}/edit`}
           className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"
         >
           <EditOutlined />
@@ -148,25 +150,32 @@ const columns: TableColumnsType<DataType> = [
   },
 ];
 
-const dataSource: DataType[] = Array.from({ length: 100 }).map((_, i) => ({
-  key: i,
-  name: `Product ${i + 1}`,
-  image:
-    "https://i.pinimg.com/564x/98/66/86/98668673a6787ee39af4e6320d980b1d.jpg",
-  price: 30000000,
-  rating: 4.8,
-  status: "Active",
-}));
-
 const Products = () => {
-  // const { data, error, isLoading } = useGetProductsQuery();
+  const navigate = useNavigate();
+  const { data, error, isLoading } = useGetProductsQuery();
+  useEffect(() => {
+    if (error) {
+      const errorMessage =
+        "status" in error
+          ? `Error: ${error.status}, ${JSON.stringify(error.data)}`
+          : error.message;
+      message.error(errorMessage || "An unknown error occurred.");
+    }
+  }, [error]);
+
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg">
+      <Button className="mb-4" onClick={() => navigate("/products/create")}>
+        <PlusCircleOutlined />
+        Add New Product
+      </Button>
       <Table
         columns={columns}
-        dataSource={dataSource}
+        dataSource={data?.data || []}
+        loading={isLoading}
         pagination={{ pageSize: 10 }}
         className="ant-table-tbody text-sm"
+        rowKey="id"
       />
     </div>
   );
