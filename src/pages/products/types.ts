@@ -10,3 +10,9 @@ export interface Product {
   rating: number;
   status: string;
 }
+
+export interface newProduct {
+  name: string;
+  description: string;
+  slug: string;
+}

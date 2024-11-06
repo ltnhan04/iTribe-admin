@@ -22,8 +22,8 @@ export const descriptionRules = [
   },
 ];
 
-export const categoryRules = [
-  { required: true, message: "Please select a category" },
+export const nameRules = [
+  { required: true, message: "Please select a name of product" },
 ];
 
 export const slugRules = [

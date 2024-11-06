@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "./store";
-import type { Data } from "./types";
+import type { Data, Root, newProduct } from "./types";
 
 export const api = createApi({
   reducerPath: "api",
@@ -21,7 +21,35 @@ export const api = createApi({
     getProducts: builder.query<Data, void>({
       query: () => `/api/admin/products`,
     }),
+    getProduct: builder.query<Root, string>({
+      query: (id) => `/api/admin/products/${id}`,
+    }),
+    createProduct: builder.mutation<Root, newProduct>({
+      query: (product) => ({
+        url: `/api/admin/products`,
+        method: "POST",
+        body: product,
+      }),
+    }),
+    updateProduct: builder.mutation<Root, string>({
+      query: (id) => ({
+        url: `/api/admin/products/${id}`,
+        method: "PUT",
+      }),
+    }),
+    deleteProduct: builder.mutation<string, string>({
+      query: (id) => ({
+        url: `/api/admin/products/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetProductsQuery } = api;
+export const {
+  useGetProductsQuery,
+  useGetProductQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+} = api;
