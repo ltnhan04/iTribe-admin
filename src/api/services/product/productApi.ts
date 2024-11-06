@@ -14,7 +14,7 @@ export const updateProduct = async (id: string) => {
 };
 
 export const getProducts = async () => {
-  return await axiosInstance.get(`$/api/admin/products`);
+  return await axiosInstance.get(`/api/admin/products`);
 };
 
 export const getProduct = async (id: string) => {
