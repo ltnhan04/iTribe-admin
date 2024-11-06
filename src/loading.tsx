@@ -1,9 +1,12 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import { Loading3QuartersOutlined } from "@ant-design/icons";
 
 const Loading = () => {
   return (
-    <div className="w-full h-full absolute z-20 flex items-center justify-center top-0 left-0 right-0 bottom-0 bg-grayLight">
-      <LoadingOutlined className="text-blue w-10 h-10 animate-spin" />
+    <div className="w-full h-full fixed z-20 flex items-center justify-center top-0 left-0 bg-gray-100 opacity-80">
+      <Loading3QuartersOutlined
+        spin
+        className="text-blue text-2xl animate-spin"
+      />
     </div>
   );
 };
