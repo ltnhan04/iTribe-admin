@@ -12,6 +12,8 @@ const Orders = lazy(() => import("../pages/orders"));
 const Products = lazy(() => import("../pages/products"));
 import AddProduct from "../pages/products/pages/create-product";
 import EditProduct from "../pages/products/pages/edit-product";
+import ViewProduct from "../pages/products/pages/view-product";
+import CreateProductVariant from "../pages/products/pages/create-product-variant";
 
 const Promotions = lazy(() => import("../pages/promotions"));
 
@@ -50,10 +52,15 @@ const routes = createBrowserRouter([
       {
         path: "products/create",
         element: <AddProduct />,
+        children: [{ path: "variant", element: <CreateProductVariant /> }],
       },
       {
         path: "products/:productId/edit",
         element: <EditProduct />,
+      },
+      {
+        path: "products/:productId",
+        element: <ViewProduct />,
       },
       { path: "users", element: <Users /> },
       { path: "users/:userId", element: <UserDetailPage /> },

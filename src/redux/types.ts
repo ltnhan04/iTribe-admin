@@ -1,3 +1,4 @@
+//Product types
 export interface Data {
   data: ProductList[];
 }
@@ -51,4 +52,32 @@ export interface Variant {
 export interface Color {
   colorName: string;
   colorCode: string;
+}
+
+//Product Variant types
+
+//Get All Variants
+export interface VariantRoot {
+  variants: Variant[];
+}
+
+//Create Variant
+
+export interface ProductVariantRoot {
+  message: string;
+  productVariant: ProductVariant;
+}
+export interface ProductVariant {
+  productId: string;
+  name: string;
+  color: Color;
+  storage: string;
+  price: number;
+  stock: number;
+  slug: string;
+  images: string[];
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }

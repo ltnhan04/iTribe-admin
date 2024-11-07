@@ -7,21 +7,26 @@ import {
   Table,
   message,
   Popconfirm,
+  Tag,
 } from "antd";
-import { PlusCircleOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
+  PlusCircleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { Product } from "./types";
 import { desc } from "./constants";
 import { formatCurrency } from "../../utils/format-currency";
-import { useGetProductsQuery, useDeleteProductMutation } from "../../redux/api";
+import {
+  useGetProductsQuery,
+  useDeleteProductMutation,
+} from "../../redux/api/productApi";
 
 interface ErrorResponse {
   message: string;
@@ -103,6 +108,11 @@ const Products = () => {
           record.name.toLowerCase().includes((value as string).toLowerCase())
         );
       },
+      render: (name: string) => (
+        <Tag className="text-xs font-semibold px-3 py-1 rounded-lg ">
+          {name}
+        </Tag>
+      ),
     },
     {
       title: "Image",
@@ -127,7 +137,14 @@ const Products = () => {
       title: "Price",
       dataIndex: "price",
       key: "price",
-      render: (price: number) => formatCurrency(price),
+      render: (price: number) => (
+        <Tag
+          color="gold"
+          className="text-xs font-semibold px-3 py-1 rounded-lg "
+        >
+          {formatCurrency(price)}
+        </Tag>
+      ),
       filters: [
         { text: "Below 10M", value: 10000000 },
         { text: "10M - 20M", value: 20000000 },
@@ -164,13 +181,13 @@ const Products = () => {
       render: (status: string) => (
         <Badge
           color={status === "active" ? "green" : "red"}
-          text={status}
+          text={status === "active" ? "Active" : "Inactive"}
           className="font-medium"
         />
       ),
       filters: [
-        { text: "active", value: "active" },
-        { text: "inactive", value: "inactive" },
+        { text: "Active", value: "active" },
+        { text: "Inactive", value: "inactive" },
       ],
       onFilter: (value, record) => record.status === value,
     },
@@ -179,6 +196,13 @@ const Products = () => {
       key: "action",
       render: (record) => (
         <div className="flex justify-center items-center space-x-4">
+          <Link
+            to={`/products/${record._id}`}
+            className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"
+          >
+            <EyeOutlined />
+            <span>View</span>
+          </Link>
           <Link
             to={`/products/${record._id}/edit`}
             className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"

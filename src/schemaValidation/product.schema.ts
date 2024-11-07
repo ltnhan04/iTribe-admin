@@ -25,11 +25,3 @@ export const descriptionRules = [
 export const nameRules = [
   { required: true, message: "Please select a name of product" },
 ];
-
-export const slugRules = [
-  { required: true, message: "Please enter a slug" },
-  {
-    pattern: /^(?!-)[A-Za-z0-9]+(-[A-Za-z0-9]+)*(?<!-)$/,
-    message: "Slug must be in the format: iphone-16",
-  },
-];

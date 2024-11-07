@@ -1,17 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Divider, Input, Select, Button, Form, message } from "antd";
-import { useCreateProductMutation } from "../../../redux/api";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { useCreateProductMutation } from "../../../redux/api/productApi";
 import { iphones } from "../../../constants";
 import {
   descriptionRules,
-  slugRules,
   nameRules,
 } from "../../../schemaValidation/product.schema";
 import type { newProduct, ErrorResponse } from "../types";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 const AddProduct = () => {
+  const [form] = Form.useForm();
   const [createProduct, { isLoading, error }] = useCreateProductMutation();
+  const [selectedName, setSelectedName] = useState<string>("");
+  const [selectedSlug, setSelectedSlug] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   useEffect(() => {
     if (error && "data" in error) {
@@ -22,17 +27,42 @@ const AddProduct = () => {
   }, [error]);
 
   const handleSubmit = async (values: newProduct) => {
-    const response = await createProduct(values).unwrap();
-    message.success(response.message);
+    const productData = {
+      ...values,
+      name: selectedName,
+      slug: selectedSlug,
+      description,
+    };
+
+    const response = await createProduct(productData).unwrap();
+    if (response) {
+      message.success(response.message);
+      form.resetFields();
+      setDescription("");
+    }
+  };
+
+  const handleSelectChange = (value: string) => {
+    const selectedProduct = iphones.find((item) => item.value === value);
+    if (selectedProduct) {
+      setSelectedName(selectedProduct.label);
+      setSelectedSlug(value);
+      form.setFieldsValue({ slug: value });
+    }
   };
 
   return (
-    <div className=" h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white">
+    <div className="h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white">
       <Divider orientation="left" className="text-2xl border font-bold">
         Add Product
       </Divider>
 
-      <Form layout="vertical" onFinish={handleSubmit} className="space-y-6">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        className="space-y-6"
+      >
         <Form.Item
           rules={nameRules}
           label="Name"
@@ -40,29 +70,34 @@ const AddProduct = () => {
           className="text-base font-medium"
         >
           <Select
+            value={selectedName}
             options={iphones}
-            placeholder="Select a name of product"
+            disabled={isLoading}
+            placeholder="Select a product name"
             className="w-full"
+            onChange={handleSelectChange}
           />
         </Form.Item>
 
-        <Form.Item
-          rules={slugRules}
-          label="Slug"
-          name="slug"
-          className="text-base font-medium"
-        >
-          <Input placeholder="Enter product slug" className="w-full" />
+        <Form.Item label="Slug" name="slug" className="text-base font-medium">
+          <Input
+            value={selectedSlug}
+            disabled
+            placeholder="Auto-generated slug"
+            className="w-full"
+          />
         </Form.Item>
 
         <Form.Item
           rules={descriptionRules}
           label="Description"
           name="description"
-          className="text-base font-medium"
+          className="text-base font-medium max-h-40"
         >
-          <Input.TextArea
-            rows={4}
+          <ReactQuill
+            value={description}
+            onChange={setDescription}
+            theme="snow"
             placeholder="Enter product description"
             className="w-full"
           />

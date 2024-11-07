@@ -38,7 +38,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-200">
+    <div className="flex items-center justify-center h-screen bg-grayLight">
       <div className="max-w-[400px] w-full px-8 py-6 bg-[#fff] rounded-2xl shadow-xl cursor-pointer transition-all duration-300 ease-in-out hover:shadow-2xl border border-grayLight">
         <div className="w-full flex justify-center">
           <img
