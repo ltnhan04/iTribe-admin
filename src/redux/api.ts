@@ -14,13 +14,21 @@ export const api = createApi({
       }
       return headers;
     },
-    timeout: 10000,
   }),
+  tagTypes: ["Products"],
 
   endpoints: (builder) => ({
     getProducts: builder.query<Data, void>({
-      query: () => `/api/admin/products`,
+      async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
+        const result = await fetchWithBQ(`/api/admin/products`);
+        if (result.error && result.error.status === 404) {
+          return { data: { data: [] } };
+        }
+        return result as { data: Data };
+      },
+      providesTags: ["Products"],
     }),
+
     getProduct: builder.query<Root, string>({
       query: (id) => `/api/admin/products/${id}`,
     }),
@@ -37,11 +45,12 @@ export const api = createApi({
         method: "PUT",
       }),
     }),
-    deleteProduct: builder.mutation<string, string>({
+    deleteProduct: builder.mutation<{ message: string }, string>({
       query: (id) => ({
         url: `/api/admin/products/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Products"],
     }),
   }),
 });

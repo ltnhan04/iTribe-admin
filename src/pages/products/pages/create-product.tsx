@@ -7,14 +7,16 @@ import {
   slugRules,
   nameRules,
 } from "../../../schemaValidation/product.schema";
-import { newProduct } from "../types";
+import type { newProduct, ErrorResponse } from "../types";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 const AddProduct = () => {
   const [createProduct, { isLoading, error }] = useCreateProductMutation();
 
   useEffect(() => {
-    if (error) {
-      const errorMsg = JSON.stringify(error);
+    if (error && "data" in error) {
+      const errorData = (error as FetchBaseQueryError).data as ErrorResponse;
+      const errorMsg = errorData.error;
       message.error(errorMsg);
     }
   }, [error]);
@@ -26,7 +28,7 @@ const AddProduct = () => {
 
   return (
     <div className=" h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white">
-      <Divider orientation="left" className="text-2xl font-bold">
+      <Divider orientation="left" className="text-2xl border font-bold">
         Add Product
       </Divider>
 
