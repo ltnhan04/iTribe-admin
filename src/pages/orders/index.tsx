@@ -5,6 +5,7 @@ import {
   getOrders,
   updateOrderStatus,
 } from "../../api/services/order/orderApi";
+import { formatCurrency } from "../../utils/format-currency";
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -17,7 +18,7 @@ const OrderList: React.FC = () => {
         const response = await getOrders();
         console.log(response);
         setOrders(response.data.orders);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         message.error(error);
       } finally {
@@ -76,7 +77,7 @@ const OrderList: React.FC = () => {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (amount: number) => `$${amount.toFixed(2)}`,
+      render: (amount: number) => formatCurrency(amount),
     },
     {
       title: "Status",

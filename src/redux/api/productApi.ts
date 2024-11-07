@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { RootState } from "./store";
-import type { Data, Root, newProduct } from "./types";
+import type { RootState } from "../store";
+import type { Data, Root, newProduct } from "../types";
 
-export const api = createApi({
-  reducerPath: "api",
+export const productApi = createApi({
+  reducerPath: "productApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_API_URL}`,
     prepareHeaders: (headers, { getState }) => {
@@ -61,4 +61,4 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
-} = api;
+} = productApi;
