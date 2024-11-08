@@ -67,11 +67,11 @@ const Promotions = () => {
     { title: "Giảm Giá (%)", dataIndex: "discountPercentage", key: "discountPercentage" },
     { title: "Ngày Bắt Đầu", dataIndex: "validFrom", key: "validFrom", render: (text: string) => new Date(text).toLocaleDateString('en-GB') }, 
     { title: "Ngày Kết Thúc", dataIndex: "validTo", key: "validTo", render: (text: string) => new Date(text).toLocaleDateString('en-GB') },
-    { title: "Trạng Thái", key: "status", render: (text: string, record: DataType) => (
+    { title: "Trạng Thái", key: "status", render: (record: DataType) => (
       <Badge status={record.isActive ? "success" : "default"} text={record.isActive ? "Active" : "Inactive"} />
     )},
     {
-      title: "...", key: "action", render: (text: string, record: DataType) => (
+      title: "...", key: "action", render: (record: DataType) => (
         <Space size="middle">
           <a onClick={() => handleUpdate(record)}>Sửa</a>
           <a onClick={() => handleDelete(record._id)}>Xóa</a>
