@@ -52,8 +52,8 @@ const routes = createBrowserRouter([
       {
         path: "products/create",
         element: <AddProduct />,
-        children: [{ path: "variant", element: <CreateProductVariant /> }],
       },
+      { path: "products/create/variant", element: <CreateProductVariant /> },
       {
         path: "products/:productId/edit",
         element: <EditProduct />,
