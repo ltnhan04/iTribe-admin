@@ -1,8 +1,8 @@
 export interface Promotions {
-  id: number;
-  promotionName: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  discount: number;
+  code: string;
+  discountPercentage: number;
+  validFrom: Date;
+  validTo: Date;
+  isActive?: boolean;
+  maxUsage?: number;
 }
