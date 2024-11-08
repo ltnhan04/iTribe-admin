@@ -5,6 +5,10 @@ export const fetchPromotions = async () => {
   return response.data; 
 };
 
+export const getPromotion = async (id: string) => {
+  return await axiosInstance.get(`$/api/admin/promotions/${id}`);
+};
+
 export const createPromotion = async (promotionData: {
   code: string;
   discountPercentage: number;

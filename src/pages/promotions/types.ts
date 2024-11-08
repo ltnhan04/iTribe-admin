@@ -1,8 +1,8 @@
 export interface FormValues {
   code: string;
   discount: number;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
 }
 
 export interface DataType {
@@ -10,8 +10,8 @@ export interface DataType {
   _id: string; 
   code: string;
   discountPercentage: number; 
-  validFrom: string; 
-  validTo: string; 
+  validFrom: Date; 
+  validTo: Date; 
   isActive: boolean; 
   status: string; 
 }

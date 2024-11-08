@@ -51,7 +51,7 @@ export const endDateRules: Rule[] = [
       
 
       if (endDate.isBefore(startDate, 'day')) {
-        return Promise.reject(new Error("Ngày kết thúc không thể trước ngày bắt đầu"));
+        return Promise.reject(new Error("Ngày kết thúc không thể trước ngày bắt đầu và không thể là ngày quá khứ"));
       }
       
       return Promise.resolve();

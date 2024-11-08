@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { fetchPromotions, createPromotion, deletePromotion } from "../../api/services/promotion/promotionApi";
 import { Table, Modal, Input, Button, Form, DatePicker, message, Badge, Space, FloatButton } from "antd";
 import { DataType, FormValues } from "./types";
+import {
+  promotionNameRules,
+  startDateRules,
+  endDateRules,
+  discountRules
+} from "../../schemaValidation/promotion.schema";
 
 const Promotions = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Lấy danh sách khuyến mãi
+
   const fetchData = async () => {
     try {
       const response = await fetchPromotions();
@@ -56,6 +62,7 @@ const Promotions = () => {
   };
 
   const columns = [
+    { title: "STT"},
     { title: "Mã Khuyến Mãi", dataIndex: "code", key: "code" },
     { title: "Giảm Giá (%)", dataIndex: "discountPercentage", key: "discountPercentage" },
     { title: "Ngày Bắt Đầu", dataIndex: "validFrom", key: "validFrom", render: (text: string) => new Date(text).toLocaleDateString('en-GB') }, 
@@ -110,18 +117,18 @@ const Promotions = () => {
       >
         <Form layout="vertical" onFinish={onFinish}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Mã Khuyến Mãi" name="code">
+            <Form.Item label="Mã Khuyến Mãi" name="code" rules={promotionNameRules}>
               <Input placeholder="Nhập mã khuyến mãi" />
             </Form.Item>
-            <Form.Item label="Giảm giá (%)" name="discount">
+            <Form.Item label="Giảm giá (%)" name="discount" rules={discountRules}>
               <Input placeholder="Nhập % giảm giá" />
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Ngày Bắt Đầu" name="startDate">
+            <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
-            <Form.Item label="Ngày Kết Thúc" name="endDate">
+            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
           </div>
