@@ -9,7 +9,7 @@ import {
   endDateRules,
   discountRules
 } from "../../schemaValidation/promotion.schema";
-//aa
+
 const Promotions = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
