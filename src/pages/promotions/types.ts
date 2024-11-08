@@ -1,15 +1,17 @@
-export interface ExpandedDataType {
-    key: React.Key;
-    date: string;
-    name: string;
-    // discount: number;
-    // upgradeNum: string;
-  }
-  
-  export interface DataType {
-    key: React.Key;
-    id: string;
-    name: string;
-    status: string;
-    quantity: number;
-  }
+export interface FormValues {
+  code: string;
+  discount: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface DataType {
+  key: React.Key;
+  _id: string; 
+  code: string;
+  discountPercentage: number; 
+  validFrom: string; 
+  validTo: string; 
+  isActive: boolean; 
+  status: string; 
+}

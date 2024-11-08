@@ -1,42 +1,82 @@
 import { Rule } from "antd/lib/form";
 import dayjs from "dayjs";
 
+const getStartDate = () => {
+  const startDate = localStorage.getItem("startDate");
+  return startDate ? dayjs(startDate) : dayjs(); 
+}
+
 export const promotionNameRules: Rule[] = [
-  { required: true, message: "Please enter the promotion name" },
-  { min: 3, message: "Promotion name must be at least 3 characters" },
+  { required: true, message: "Vui lòng nhập tên !" },
+  { min: 3, message: "Tên không ít hơn 3 kí tự" },
+  { max: 50, message: "Tên tối đa 50 kí tự" }, 
 ];
 
-export const descriptionRules: Rule[] = [
-  { required: true, message: "Please enter the description" },
-  { max: 200, message: "Description cannot exceed 200 characters" },
-];
+// export const descriptionRules: Rule[] = [
+//   { required: true, message: "Please enter the description" },
+//   { max: 200, message: "Description cannot exceed 200 characters" },
+//   { min: 10, message: "Description must be at least 10 characters" }, 
+// ];
 
 export const startDateRules: Rule[] = [
-  { required: true, message: "Please select the start date" },
+  { required: true, message: "Nhập ngày bắt đầu!" },
+  {
+    validator: (_, value) => {
+      const currentDate = dayjs(); 
+      if (!value || dayjs(value).isBefore(currentDate, 'day')) {
+        return Promise.reject(new Error("Ngày bắt đầu phải lớn hơn ngày hôm nay !"));
+      }
+      return Promise.resolve();
+    },
+  },
 ];
 
 export const endDateRules: Rule[] = [
   {
     required: true,
-    message: "Please select the end date",
+    message: "Nhập ngày kết thúc !",
   },
   {
     validator: (_, value) => {
-      const startDate = dayjs(localStorage.getItem("startDate")); // Lưu trữ startDate trong localStorage hoặc state
-      if (!value || !startDate || dayjs(value).isAfter(startDate)) {
-        return Promise.resolve();
+      const startDate = getStartDate();
+      if (!value) {
+        return Promise.reject(new Error("Vui lòng chọn ngày kết thúc"));
       }
-      return Promise.reject(new Error("End date must be after start date"));
+      const endDate = dayjs(value);
+      
+   
+      if (!startDate.isValid()) {
+        return Promise.reject(new Error("Ngày bắt đầu không hợp lệ"));
+      }
+      
+
+      if (endDate.isBefore(startDate, 'day')) {
+        return Promise.reject(new Error("Ngày kết thúc không thể trước ngày bắt đầu"));
+      }
+      
+      return Promise.resolve();
     },
   },
 ];
 
+
+
 export const discountRules: Rule[] = [
-  { required: true, message: "Please enter the discount percentage" },
+  { required: true, message: "Vui lòng nhập % giảm giá" },
   {
     type: "number",
-    min: 0,
-    max: 100,
-    message: "Discount must be between 0 and 100",
+    min: 5,
+    max: 50,
+    message: "Giảm giá từ 5-50%",
+    transform: (value) => Number(value), 
   },
+  {
+    validator: (_, value) => {
+      if (value && (value < 5 || value > 50)) {
+        return Promise.reject(new Error("Giảm giá phải nằm trong khoảng từ 5% đến 50%"));
+      }
+      return Promise.resolve();
+    }
+  }
 ];
+
