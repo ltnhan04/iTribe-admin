@@ -9,7 +9,7 @@ import {
   endDateRules,
   discountRules
 } from "../../schemaValidation/promotion.schema";
-
+//aa
 const Promotions = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
@@ -128,7 +128,7 @@ const Promotions = () => {
             <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
-            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
+            <Form.Item label="Ngày Kết Thúc" name="endDate" >
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
           </div>
