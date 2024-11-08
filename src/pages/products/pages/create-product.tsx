@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Divider, Input, Select, Button, Form, message } from "antd";
+import { useNavigate } from "react-router-dom";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -12,6 +13,7 @@ import {
 import type { newProduct, ErrorResponse } from "../types";
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [createProduct, { isLoading, error }] = useCreateProductMutation();
   const [selectedName, setSelectedName] = useState<string>("");
@@ -37,6 +39,9 @@ const AddProduct = () => {
     const response = await createProduct(productData).unwrap();
     if (response) {
       message.success(response.message);
+      setTimeout(() => {
+        navigate("/products/create/variant");
+      }, 1000);
       form.resetFields();
       setDescription("");
     }
@@ -52,16 +57,16 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white">
+    <div className="h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white ">
       <Divider orientation="left" className="text-2xl border font-bold">
-        Add Product
+        Create New Product
       </Divider>
 
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        className="space-y-6"
+        className="space-y-6 mx-auto max-w-3xl"
       >
         <Form.Item
           rules={nameRules}
@@ -92,14 +97,13 @@ const AddProduct = () => {
           rules={descriptionRules}
           label="Description"
           name="description"
-          className="text-base font-medium max-h-40"
+          className="text-base font-medium"
         >
           <ReactQuill
             value={description}
             onChange={setDescription}
             theme="snow"
             placeholder="Enter product description"
-            className="w-full"
           />
         </Form.Item>
 
