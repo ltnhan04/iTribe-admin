@@ -1,4 +1,3 @@
-// types.ts
 export interface User {
   _id: number;
   name: string;
@@ -13,29 +12,17 @@ export interface User {
     zip: string;
   };
 }
-// types.ts
-// export interface Product {
-//   product: {
-//     _id: string;
-//     name: string;
-//   };
-//   quantity: number;
-// }
-
-// export interface Order {
-//   _id: string;
-//   totalAmount: number;
-//   status: string;
-//   products: Product[];
-// }
 
 export interface Order {
   _id: string;
   totalAmount: number;
   status: string;
   products: {
-    product: string; // or a specific type if it's an object
+    product: {
+      _id: string;  // Product ID
+      name: string; // Product name
+    };
     quantity: number;
-    _id: string;
+    _id: string;  // Unique identifier for this order item
   }[];
 }
