@@ -128,7 +128,7 @@ const Promotions = () => {
             <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
-            <Form.Item label="Ngày Kết Thúc" name="endDate" >
+            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
           </div>
