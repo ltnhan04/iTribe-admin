@@ -18,13 +18,26 @@ const Promotions = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetchPromotions();
-      setPromotions(response.data);
+      const response = await fetchPromotions();  // Gọi API để lấy dữ liệu
+      console.log("API response:", response); // Kiểm tra cấu trúc dữ liệu
+  
+      // Kiểm tra cấu trúc dữ liệu trả về (giả sử có `promotions` là mảng)
+      if (response && response.promotions && Array.isArray(response.promotions)) {
+        const data: DataType[] = response.promotions.map((item: DataType) => ({
+          ...item,
+          key: item._id,  // Thêm `key` vào mỗi đối tượng để sử dụng trong bảng
+          status: item.isActive ? "Active" : "Inactive",
+        }));
+        setPromotions(data);  // Cập nhật trạng thái `promotions` trong component
+      } else {
+        throw new Error("Dữ liệu trả về không đúng định dạng");
+      }
     } catch (error) {
       console.error("Error fetching promotions:", error);
       message.error("Không thể tải danh sách khuyến mãi");
     }
   };
+  
 
   useEffect(() => {
     fetchData();
@@ -62,16 +75,33 @@ const Promotions = () => {
   };
 
   const columns = [
-    { title: "STT"},
+    { title: "STT", render: (index: number) => index + 1 },
     { title: "Mã Khuyến Mãi", dataIndex: "code", key: "code" },
     { title: "Giảm Giá (%)", dataIndex: "discountPercentage", key: "discountPercentage" },
-    { title: "Ngày Bắt Đầu", dataIndex: "validFrom", key: "validFrom", render: (text: string) => new Date(text).toLocaleDateString('en-GB') }, 
-    { title: "Ngày Kết Thúc", dataIndex: "validTo", key: "validTo", render: (text: string) => new Date(text).toLocaleDateString('en-GB') },
-    { title: "Trạng Thái", key: "status", render: (record: DataType) => (
-      <Badge status={record.isActive ? "success" : "default"} text={record.isActive ? "Active" : "Inactive"} />
-    )},
+    { 
+      title: "Ngày Bắt Đầu", 
+      dataIndex: "validFrom", 
+      key: "validFrom", 
+      render: (text: string) => new Date(text).toLocaleDateString('en-GB')
+    },
+    { 
+      title: "Ngày Kết Thúc", 
+      dataIndex: "validTo", 
+      key: "validTo", 
+      render: (text: string) => new Date(text).toLocaleDateString('en-GB')
+    },
+    { 
+      title: "Trạng Thái", 
+      dataIndex: "status", 
+      key: "status", 
+      render: (text: string, record: DataType) => (
+        <Badge status={record.isActive ? "success" : "default"} text={text} />
+      ),
+    },
     {
-      title: "...", key: "action", render: (record: DataType) => (
+      title: "...", 
+      key: "action", 
+      render: (record: DataType) => (
         <Space size="middle">
           <a onClick={() => handleUpdate(record)}>Sửa</a>
           <a onClick={() => handleDelete(record._id)}>Xóa</a>
@@ -79,6 +109,9 @@ const Promotions = () => {
       ),
     },
   ];
+  
+  
+  
 
   const handleUpdate = (record: DataType) => {
     console.log("Sửa khuyến mãi", record);

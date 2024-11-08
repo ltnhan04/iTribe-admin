@@ -6,7 +6,7 @@ export const fetchPromotions = async () => {
 };
 
 export const getPromotion = async (id: string) => {
-  return await axiosInstance.get(`$/api/admin/promotions/${id}`);
+  return await axiosInstance.get(`/api/admin/promotions/${id}`);
 };
 
 export const createPromotion = async (promotionData: {
