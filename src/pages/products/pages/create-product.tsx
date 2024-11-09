@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Divider, Input, Select, Button, Form, message } from "antd";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -13,7 +13,7 @@ import {
 import type { newProduct, ErrorResponse } from "../types";
 
 const AddProduct = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [form] = Form.useForm();
   const [createProduct, { isLoading, error }] = useCreateProductMutation();
   const [selectedName, setSelectedName] = useState<string>("");
@@ -39,9 +39,9 @@ const AddProduct = () => {
     const response = await createProduct(productData).unwrap();
     if (response) {
       message.success(response.message);
-      setTimeout(() => {
-        navigate("/products/create/variant");
-      }, 1000);
+      // setTimeout(() => {
+      //   navigate("/products/create/variant");
+      // }, 1000);
       form.resetFields();
       setDescription("");
     }
@@ -99,12 +99,15 @@ const AddProduct = () => {
           name="description"
           className="text-base font-medium"
         >
-          <ReactQuill
-            value={description}
-            onChange={setDescription}
-            theme="snow"
-            placeholder="Enter product description"
-          />
+          <div className="h-[250px]">
+            <ReactQuill
+              value={description}
+              onChange={setDescription}
+              theme="snow"
+              placeholder="Enter product description"
+              className="h-[200px]"
+            />
+          </div>
         </Form.Item>
 
         <Button

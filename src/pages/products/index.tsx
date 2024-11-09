@@ -9,7 +9,7 @@ import {
   Popconfirm,
   Tag,
 } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   EditOutlined,
@@ -21,7 +21,7 @@ import {
 import type { TableColumnsType } from "antd";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { Product } from "./types";
-import { desc } from "./constants";
+import { desc, pageSize } from "./constants";
 import { formatCurrency } from "../../utils/format-currency";
 import {
   useGetProductsQuery,
@@ -33,6 +33,8 @@ interface ErrorResponse {
 }
 
 const Products = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+
   const navigate = useNavigate();
   const {
     data,
@@ -64,6 +66,12 @@ const Products = () => {
   };
 
   const columns: TableColumnsType<Product> = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      render: (_, _record, index) => (currentPage - 1) * pageSize + index + 1,
+    },
     {
       title: "Product Name",
       dataIndex: "name",
@@ -236,7 +244,10 @@ const Products = () => {
         columns={columns}
         dataSource={data?.data || []}
         loading={isProductLoading || isDeleteLoading}
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          pageSize,
+          onChange: (page) => setCurrentPage(page),
+        }}
         className="ant-table-tbody text-sm"
         rowKey={(record) => `${record.id}-${record.name}`}
       />
