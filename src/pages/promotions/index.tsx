@@ -1,13 +1,28 @@
 import { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import { fetchPromotions, createPromotion, deletePromotion } from "../../api/services/promotion/promotionApi";
-import { Table, Modal, Input, Button, Form, DatePicker, message, Badge, Space, FloatButton } from "antd";
+import {
+  fetchPromotions,
+  createPromotion,
+  deletePromotion,
+} from "../../api/services/promotion/promotionApi";
+import {
+  Table,
+  Modal,
+  Input,
+  Button,
+  Form,
+  DatePicker,
+  message,
+  Badge,
+  Space,
+  FloatButton,
+} from "antd";
 import { DataType, FormValues } from "./types";
 import {
   promotionNameRules,
   startDateRules,
   endDateRules,
-  discountRules
+  discountRules,
 } from "../../schemaValidation/promotion.schema";
 
 const Promotions = () => {
@@ -15,20 +30,23 @@ const Promotions = () => {
   const [promotions, setPromotions] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
 
-
   const fetchData = async () => {
     try {
-      const response = await fetchPromotions();  // Gọi API để lấy dữ liệu
+      const response = await fetchPromotions(); // Gọi API để lấy dữ liệu
       console.log("API response:", response); // Kiểm tra cấu trúc dữ liệu
-  
+
       // Kiểm tra cấu trúc dữ liệu trả về (giả sử có `promotions` là mảng)
-      if (response && response.promotions && Array.isArray(response.promotions)) {
+      if (
+        response &&
+        response.promotions &&
+        Array.isArray(response.promotions)
+      ) {
         const data: DataType[] = response.promotions.map((item: DataType) => ({
           ...item,
-          key: item._id,  // Thêm `key` vào mỗi đối tượng để sử dụng trong bảng
+          key: item._id, // Thêm `key` vào mỗi đối tượng để sử dụng trong bảng
           status: item.isActive ? "Active" : "Inactive",
         }));
-        setPromotions(data);  // Cập nhật trạng thái `promotions` trong component
+        setPromotions(data); // Cập nhật trạng thái `promotions` trong component
       } else {
         throw new Error("Dữ liệu trả về không đúng định dạng");
       }
@@ -37,7 +55,6 @@ const Promotions = () => {
       message.error("Không thể tải danh sách khuyến mãi");
     }
   };
-  
 
   useEffect(() => {
     fetchData();
@@ -77,30 +94,34 @@ const Promotions = () => {
   const columns = [
     { title: "STT", render: (index: number) => index + 1 },
     { title: "Mã Khuyến Mãi", dataIndex: "code", key: "code" },
-    { title: "Giảm Giá (%)", dataIndex: "discountPercentage", key: "discountPercentage" },
-    { 
-      title: "Ngày Bắt Đầu", 
-      dataIndex: "validFrom", 
-      key: "validFrom", 
-      render: (text: string) => new Date(text).toLocaleDateString('en-GB')
+    {
+      title: "Giảm Giá (%)",
+      dataIndex: "discountPercentage",
+      key: "discountPercentage",
     },
-    { 
-      title: "Ngày Kết Thúc", 
-      dataIndex: "validTo", 
-      key: "validTo", 
-      render: (text: string) => new Date(text).toLocaleDateString('en-GB')
+    {
+      title: "Ngày Bắt Đầu",
+      dataIndex: "validFrom",
+      key: "validFrom",
+      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
     },
-    { 
-      title: "Trạng Thái", 
-      dataIndex: "status", 
-      key: "status", 
+    {
+      title: "Ngày Kết Thúc",
+      dataIndex: "validTo",
+      key: "validTo",
+      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
+    },
+    {
+      title: "Trạng Thái",
+      dataIndex: "status",
+      key: "status",
       render: (text: string, record: DataType) => (
         <Badge status={record.isActive ? "success" : "default"} text={text} />
       ),
     },
     {
-      title: "...", 
-      key: "action", 
+      title: "Action",
+      key: "action",
       render: (record: DataType) => (
         <Space size="middle">
           <a onClick={() => handleUpdate(record)}>Sửa</a>
@@ -109,9 +130,6 @@ const Promotions = () => {
       ),
     },
   ];
-  
-  
-  
 
   const handleUpdate = (record: DataType) => {
     console.log("Sửa khuyến mãi", record);
@@ -150,18 +168,34 @@ const Promotions = () => {
       >
         <Form layout="vertical" onFinish={onFinish}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Mã Khuyến Mãi" name="code" rules={promotionNameRules}>
+            <Form.Item
+              label="Mã Khuyến Mãi"
+              name="code"
+              rules={promotionNameRules}
+            >
               <Input placeholder="Nhập mã khuyến mãi" />
             </Form.Item>
-            <Form.Item label="Giảm giá (%)" name="discount" rules={discountRules}>
+            <Form.Item
+              label="Giảm giá (%)"
+              name="discount"
+              rules={discountRules}
+            >
               <Input placeholder="Nhập % giảm giá" />
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
+            <Form.Item
+              label="Ngày Bắt Đầu"
+              name="startDate"
+              rules={startDateRules}
+            >
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
-            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
+            <Form.Item
+              label="Ngày Kết Thúc"
+              name="endDate"
+              rules={endDateRules}
+            >
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
           </div>
