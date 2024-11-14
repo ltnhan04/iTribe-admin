@@ -1,5 +1,6 @@
+// User Interface
 export interface User {
-  _id: number;
+  _id: string;  // Changed to string to match typical MongoDB ObjectId type
   name: string;
   mobile: string;
   role: string;
@@ -13,15 +14,21 @@ export interface User {
   };
 }
 
+// ProductVariant Interface
+export interface ProductVariant {
+  _id: string;    // Product variant ID
+  name: string;   // Name of the product variant
+  price: number;  // Price of the product variant
+  stock: number;  // Quantity of the product variant in stock
+}
+
+// Order Interface
 export interface Order {
   _id: string;
   totalAmount: number;
   status: string;
-  products: {
-    product: {
-      _id: string;  // Product ID
-      name: string; // Product name
-    };
+  productVariants: {
+    productVariant: string;  // This is the ID of the product variant
     quantity: number;
     _id: string;  // Unique identifier for this order item
   }[];

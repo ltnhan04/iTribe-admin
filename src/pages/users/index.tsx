@@ -122,7 +122,7 @@ const UsersList: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Content style={{ padding: "1rem" }}>
+      <Content >
         <UsersTable users={users} />
       </Content>
     </Layout>

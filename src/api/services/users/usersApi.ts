@@ -20,8 +20,10 @@ export const getUserOrders = async (userId: string) => {
   return await axiosInstance.get(`/api/admin/users/userOrder/${userId}`);
 };
 
-export const getUserOrderDetail = async (userId: string) => {
-  return await axiosInstance.get(`/api/admin/userOrderDetail/${userId}`);
+export const getProductVariantDetail = async (productVariantId: string) => {
+    console.log("gg")
+    return await axiosInstance.get(`/api/admin/users/productVariantDetail/${productVariantId}`);
+   
 };
 
 export const paginatedUsers = async (page: number, limit: number) => {
