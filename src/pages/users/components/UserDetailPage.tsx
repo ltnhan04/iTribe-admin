@@ -1,5 +1,6 @@
 
 // export default UserDetailPage;
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { User, Order, ProductVariant } from "../types";
@@ -8,7 +9,7 @@ import { UserOutlined } from "@ant-design/icons";
 import {
   getUserDetails,
   getUserOrders,
-  getProductVariantDetail,  // Ensure this is imported
+  getProductVariantDetail,
   banUser,
   unBanUser,
 } from "../../../api/services/users/usersApi";
@@ -21,11 +22,11 @@ const UserDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
-  const [orderDetails, setOrderDetails] = useState<{ [key: string]: ProductVariant[] }>({}); // Store product variants by order ID
+  const [orderDetails, setOrderDetails] = useState<{ [key: string]: ProductVariant[] }>({});
 
   useEffect(() => {
     if (!userId) return;
-  
+
     const fetchUserDetails = async () => {
       try {
         const userResponse = await getUserDetails(userId);
@@ -35,39 +36,38 @@ const UserDetailPage: React.FC = () => {
         message.error("Failed to fetch user details.");
       }
     };
-  
+
     const fetchUserOrders = async () => {
       try {
         const ordersResponse = await getUserOrders(userId);
-        
-        // Log the entire order history response to inspect its structure
-        console.log("Order history response:", ordersResponse.data.orderHistory);
-    
         setOrders(ordersResponse.data.orderHistory || []);
-    
-        // Initialize orderVariants as an object where each key has ProductVariant[] as value
         const orderVariants: { [key: string]: ProductVariant[] } = {};
-    
+
+        // for (const order of ordersResponse.data.orderHistory) {
+        //   await Promise.all(
+        //     order.productVariants.map(async (productItem: any) => {
+        //       try {
+        //         const variantId = productItem.productVariant;
+        //         if (variantId) {
+        //           const response = await getProductVariantDetail(variantId);
+        //           orderVariants[order._id] = orderVariants[order._id] || [];
+        //           orderVariants[order._id].push(response.data.productVariant);
+        //         }
+        //       } catch (error) {
+        //         console.error("Error fetching product variant details:", error);
+        //       }
+        //     })
+        //   );
+        // }
         for (const order of ordersResponse.data.orderHistory) {
           await Promise.all(
             order.productVariants.map(async (productItem: any) => {
               try {
-                // Log the structure of productItem to confirm it has the expected fields
-                console.log("Product item structure:", productItem);
-    
-                // Check if productItem.product and productItem.product._id exist before logging
-                const variantId = productItem.productVariant;
+                const variantId = productItem.productVariant._id; // Extracting _id from the productVariant object
                 if (variantId) {
-                  console.log("Fetching variant detail for variantId:", variantId);
-    
                   const response = await getProductVariantDetail(variantId);
-                  console.log("Fetched product variant details:", response.data);
-    
-                  // Add each fetched variant into an array for its corresponding key
                   orderVariants[order._id] = orderVariants[order._id] || [];
                   orderVariants[order._id].push(response.data.productVariant);
-                } else {
-                  console.warn("Missing product or product._id for product item:", productItem);
                 }
               } catch (error) {
                 console.error("Error fetching product variant details:", error);
@@ -75,27 +75,24 @@ const UserDetailPage: React.FC = () => {
             })
           );
         }
-    
-        console.log("Final orderVariants object:", orderVariants); // Log the final object
-        setOrderDetails(orderVariants); // Set the state with orderVariants
+        setOrderDetails(orderVariants);
       } catch (error) {
         console.error(error);
         message.error("Failed to fetch user orders.");
+      } finally {
+        setLoading(false);
       }
     };
-    
-    
+
     fetchUserDetails();
     fetchUserOrders();
-    setLoading(false);
   }, [userId]);
-  
 
   const handleBanUser = async () => {
     if (!userId) return;
     try {
       await banUser(userId);
-      setUser((prevUser) => ({ ...prevUser!, status: "Banned" }));
+      setUser((prevUser) => ({ ...prevUser!, active: false }));
       message.success(`User ${user?.name} has been banned successfully.`);
     } catch (error) {
       console.error(error);
@@ -107,7 +104,7 @@ const UserDetailPage: React.FC = () => {
     if (!userId) return;
     try {
       await unBanUser(userId);
-      setUser((prevUser) => ({ ...prevUser!, status: "Active" }));
+      setUser((prevUser) => ({ ...prevUser!, active: true }));
       message.success(`User ${user?.name} has been unbanned successfully.`);
     } catch (error) {
       console.error(error);
@@ -123,7 +120,6 @@ const UserDetailPage: React.FC = () => {
     return <p className="text-center">User not found</p>;
   }
 
-  // Calculate pagination for orders
   const currentOrders = orders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -188,8 +184,8 @@ const UserDetailPage: React.FC = () => {
                           <p><strong>Variant Details:</strong></p>
                           {orderDetails[order._id]?.map((variant, idx) => (
                             <div key={idx}>
-                              <p>Variant Name: {variant.name}</p> {/* Variant Name */}
-                              <p>Price: {formatCurrency(variant.price)}</p> {/* Variant Price */}
+                              <p>Variant Name: {variant.name}</p>
+                              <p>Price: {formatCurrency(variant.price)}</p>
                             </div>
                           ))}
                         </li>
@@ -210,14 +206,11 @@ const UserDetailPage: React.FC = () => {
             />
             <div className="flex justify-end mt-4">
               {user.active ? (
-              <Button
-              onClick={handleBanUser}
-              className="bg-red-500 text-black w-auto py-2 px-4 rounded border-2 border-red-500 hover:bg-red-600 focus:border-red-500 focus:ring-0"
-            >
-              Ban User
-            </Button>
+                <Button onClick={handleBanUser} className="bg-red-500 text-black w-auto py-2 px-4 rounded border-2 border-red-500 hover:bg-red-600 focus:border-red-500 focus:ring-0">
+                  Ban User
+                </Button>
               ) : (
-                <Button onClick={handleUnbanUser} className="bg-green-500 text-black hover:bg-green-600">
+                <Button onClick={handleUnbanUser} className="bg-green-500 text-white w-auto py-2 px-4 rounded">
                   Unban User
                 </Button>
               )}
