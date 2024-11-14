@@ -16,7 +16,7 @@ const OrderList: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await getOrders();
-        console.log(response);
+        console.log(response.data);
         setOrders(response.data.orders);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -61,12 +61,12 @@ const OrderList: React.FC = () => {
     },
     {
       title: "Products",
-      dataIndex: "products",
+      dataIndex: "productVariants",
       key: "products",
-      render: (products: Product[]) => (
+      render: (productVariants: Product[]) => (
         <>
-          {products.map((product) => (
-            <Tag key={product.productId}>
+          {productVariants.map((product) => (
+            <Tag key={product.productVariantId}>
               {product.productName} (x{product.quantity})
             </Tag>
           ))}
@@ -107,7 +107,6 @@ const OrderList: React.FC = () => {
         >
           <Select.Option value="pending">Pending</Select.Option>
           <Select.Option value="processing">Processing</Select.Option>
-          <Select.Option value="shipped">Shipped</Select.Option>
           <Select.Option value="delivered">Delivered</Select.Option>
           <Select.Option value="cancel">Cancel</Select.Option>
         </Select>

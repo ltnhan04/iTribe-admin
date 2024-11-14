@@ -1,7 +1,7 @@
 export interface Product {
-  productId: string;
+  productVariantId: string;
   productName: string;
-  productColor: string;
+  productColorName: string;
   productStorage: string;
   quantity: number;
 }
@@ -14,7 +14,7 @@ export interface User {
 export interface Order {
   orderId: string;
   user: User;
-  products: Product[];
+  productVariants: Product[];
   totalAmount: number;
   status: string;
   shippingAddress: string;
