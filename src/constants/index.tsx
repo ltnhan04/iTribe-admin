@@ -85,3 +85,5 @@ export const iphones = [
     value: "iphone-16-pro-max",
   },
 ];
+
+export const storages = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB"];

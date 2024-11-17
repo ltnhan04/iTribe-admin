@@ -1,5 +1,4 @@
 import {
-  Rate,
   Badge,
   Image,
   Input,
@@ -20,13 +19,13 @@ import {
 } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import type { Product } from "./types";
-import { desc, pageSize } from "./constants";
+import { pageSize } from "./constants";
 import { formatCurrency } from "../../utils/format-currency";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
 } from "../../redux/api/productApi";
+import { ProductList } from "../../redux/types";
 
 interface ErrorResponse {
   message: string;
@@ -65,11 +64,11 @@ const Products = () => {
     }
   };
 
-  const columns: TableColumnsType<Product> = [
+  const columns: TableColumnsType<ProductList> = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "_id",
+      key: "_id",
       render: (_, _record, index) => (currentPage - 1) * pageSize + index + 1,
     },
     {
@@ -166,22 +165,6 @@ const Products = () => {
       },
     },
     {
-      title: "Rating",
-      dataIndex: "rating",
-      key: "rating",
-      render: (rating: number) => (
-        <Rate allowHalf defaultValue={0} value={rating} tooltips={desc} />
-      ),
-      filters: [
-        { text: "1 Star", value: 1 },
-        { text: "2 Stars", value: 2 },
-        { text: "3 Stars", value: 3 },
-        { text: "4 Stars", value: 4 },
-        { text: "5 Stars", value: 5 },
-      ],
-      onFilter: (value, record) => Math.floor(record.rating) === value,
-    },
-    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -203,7 +186,7 @@ const Products = () => {
       title: "Action",
       key: "action",
       render: (record) => (
-        <div className="flex justify-center items-center space-x-4">
+        <div className="flex items-center space-x-4">
           <Link
             to={`/products/${record._id}`}
             className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"
@@ -236,10 +219,19 @@ const Products = () => {
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg">
-      <Button className="mb-4" onClick={() => navigate("/products/create")}>
-        <PlusCircleOutlined />
-        Add New Product
-      </Button>
+      <div className="flex items-center space-x-3">
+        <Button className="mb-4" onClick={() => navigate("/products/create")}>
+          <PlusCircleOutlined />
+          Add New Product
+        </Button>
+        <Button
+          className="mb-4"
+          onClick={() => navigate("/products/create/variant")}
+        >
+          <PlusCircleOutlined />
+          Add New Product Variant
+        </Button>
+      </div>
       <Table
         columns={columns}
         dataSource={data?.data || []}
@@ -248,8 +240,8 @@ const Products = () => {
           pageSize,
           onChange: (page) => setCurrentPage(page),
         }}
-        className="ant-table-tbody text-sm"
-        rowKey={(record) => `${record.id}-${record.name}`}
+        className="text-sm"
+        rowKey={(record) => `${record._id}-${record.name}`}
       />
     </div>
   );

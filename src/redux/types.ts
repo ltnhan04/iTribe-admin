@@ -10,7 +10,7 @@ export interface Root {
 export type newProduct = Pick<Product, "name" | "description" | "slug">;
 
 export interface ProductList {
-  id: number;
+  _id: string;
   name: string;
   image: string;
   price: number;

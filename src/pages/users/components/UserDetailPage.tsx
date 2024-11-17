@@ -61,6 +61,7 @@ const UserDetailPage: React.FC = () => {
         // }
         for (const order of ordersResponse.data.orderHistory) {
           await Promise.all(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             order.productVariants.map(async (productItem: any) => {
               try {
                 const variantId = productItem.productVariant._id; // Extracting _id from the productVariant object
