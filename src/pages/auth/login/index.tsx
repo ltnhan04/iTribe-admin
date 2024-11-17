@@ -20,18 +20,17 @@ const Login = () => {
   const { error, isLoading, loginState } = useAppSelector(
     (state) => state.auth.login
   );
-  const { message } = loginState;
 
   useEffect(() => {
-    if (message) {
-      Message.success(message);
+    if (loginState?.message) {
+      Message.success(loginState?.message);
       dispatch(clearMessage());
     }
     if (error) {
       Message.error(error);
       dispatch(clearError());
     }
-  }, [dispatch, error, message]);
+  }, [dispatch, error, loginState?.message]);
 
   const onFinish = async (values: LoginType) => {
     await dispatch(loginThunk({ user: values, navigate }));

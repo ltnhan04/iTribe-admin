@@ -1,19 +1,15 @@
 import { useEffect, useState } from "react";
 import { Divider, Input, Select, Button, Form, message } from "antd";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useCreateProductMutation } from "../../../redux/api/productApi";
 import { iphones } from "../../../constants";
-import {
-  descriptionRules,
-  nameRules,
-} from "../../../schemaValidation/product.schema";
 import type { newProduct, ErrorResponse } from "../types";
 
 const AddProduct = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [createProduct, { isLoading, error }] = useCreateProductMutation();
   const [selectedName, setSelectedName] = useState<string>("");
@@ -39,9 +35,9 @@ const AddProduct = () => {
     const response = await createProduct(productData).unwrap();
     if (response) {
       message.success(response.message);
-      // setTimeout(() => {
-      //   navigate("/products/create/variant");
-      // }, 1000);
+      setTimeout(() => {
+        navigate("/products");
+      }, 1000);
       form.resetFields();
       setDescription("");
     }
@@ -58,7 +54,11 @@ const AddProduct = () => {
 
   return (
     <div className="h-screen px-4 py-8 md:px-8 md:py-10 rounded-lg shadow-md bg-white ">
-      <Divider orientation="left" className="text-2xl border font-bold">
+      <Divider
+        orientation="left"
+        className="text-2xl font-bold"
+        style={{ borderColor: "#f0f0f0" }}
+      >
         Create New Product
       </Divider>
 
@@ -66,10 +66,11 @@ const AddProduct = () => {
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        className="space-y-6 mx-auto max-w-3xl"
+        className="space-y-6 mx-auto max-w-2xl"
       >
         <Form.Item
-          rules={nameRules}
+          rules={[{ required: true, message: "Please select a product name" }]}
+          validateFirst
           label="Name"
           name="name"
           className="text-base font-medium"
@@ -94,20 +95,25 @@ const AddProduct = () => {
         </Form.Item>
 
         <Form.Item
-          rules={descriptionRules}
+          rules={[
+            { required: true, message: "Please enter product description" },
+          ]}
           label="Description"
           name="description"
           className="text-base font-medium"
         >
-          <div className="h-[250px]">
-            <ReactQuill
-              value={description}
-              onChange={setDescription}
-              theme="snow"
-              placeholder="Enter product description"
-              className="h-[200px]"
-            />
-          </div>
+          <CKEditor
+            editor={ClassicEditor}
+            data={description}
+            disabled={isLoading}
+            onChange={(_, editor) => {
+              const data = editor.getData();
+              setDescription(data);
+            }}
+            config={{
+              placeholder: "Enter product description",
+            }}
+          />
         </Form.Item>
 
         <Button
