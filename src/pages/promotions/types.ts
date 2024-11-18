@@ -16,6 +16,6 @@ export interface DataType {
   validTo: Date; 
   isActive: boolean; 
   status: string; 
-  usedCount: number;
+  usedCount?: number;
   maxUsage: number;
 }

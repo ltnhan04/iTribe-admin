@@ -12,12 +12,6 @@ export const promotionNameRules: Rule[] = [
   { max: 50, message: "Tên tối đa 50 kí tự" }, 
 ];
 
-// export const descriptionRules: Rule[] = [
-//   { required: true, message: "Please enter the description" },
-//   { max: 200, message: "Description cannot exceed 200 characters" },
-//   { min: 10, message: "Description must be at least 10 characters" }, 
-// ];
-
 export const startDateRules: Rule[] = [
   { required: true, message: "Nhập ngày bắt đầu!" },
   {
@@ -59,7 +53,7 @@ export const endDateRules: Rule[] = [
   },
 ];
 
-export const quantityRules: Rule[] = [
+export const maxUsageRules: Rule[] = [
   { required: true, message: "Vui lòng nhập số lượng" },
   {
     type: "number",

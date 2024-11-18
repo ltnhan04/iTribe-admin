@@ -19,7 +19,7 @@ import {
   FloatButton,
 } from "antd";
 import { DataType, FormValues } from "./types";
-import { promotionNameRules, startDateRules, endDateRules, discountRules, quantityRules } from "../../schemaValidation/promotion.schema";
+import { promotionNameRules, startDateRules, endDateRules, discountRules, maxUsageRules } from "../../schemaValidation/promotion.schema";
 import dayjs from "dayjs";
 
 const Promotions = () => {
@@ -37,7 +37,7 @@ const Promotions = () => {
           ...item,
           key: item._id,
           status: item.isActive ? "Active" : "Inactive",
-          usedCount: item.usedCount || 0,
+          maxUsage: item.maxUsage,
         }));
         setPromotions(data);
       } else {
@@ -71,9 +71,9 @@ const Promotions = () => {
           discountPercentage: values.discount,
           validFrom: startDate,
           validTo: endDate,
-          maxUsage: values.maxUsage || 1, 
+          maxUsage: values.maxUsage, 
           isActive: true,
-          usedCount: values.usedCount || 0,
+
         });
         message.success("Khuyến mãi đã được cập nhật thành công!");
       } else {
@@ -84,7 +84,6 @@ const Promotions = () => {
           validTo: endDate,
           maxUsage: values.maxUsage,
           isActive: true,
-          usedCount: values.usedCount || 0,
         });
         message.success("Khuyến mãi đã được tạo thành công!");
       }
@@ -98,7 +97,9 @@ const Promotions = () => {
   };
 
   const columns = [
-    { title: "STT", render: (index: number) => index + 1 },
+    { title: "STT",
+      render: (text: string, record: DataType, index: number) => index + 1,
+    },
     { title: "Mã Khuyến Mãi", 
       dataIndex: "code", 
       key: "code" },
@@ -150,7 +151,7 @@ const Promotions = () => {
       discount: record.discountPercentage,
       startDate: dayjs(record.validFrom),
       endDate: dayjs(record.validTo),
-      quantity: record.maxUsage,
+      maxUsage: record.maxUsage,
     });
     setCurrentPromotionId(record._id);
     setIsModalVisible(true);
@@ -205,7 +206,7 @@ const Promotions = () => {
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Số lượng tối đa" name="quantity" rules={quantityRules}>
+            <Form.Item label="Số lượng tối đa" name="maxUsage" rules={maxUsageRules}>
               <Input placeholder="Nhập vào số lượng" />
             </Form.Item>
           </div>

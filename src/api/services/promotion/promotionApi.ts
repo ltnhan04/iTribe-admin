@@ -15,8 +15,7 @@ export const createPromotion = async (promotionData: {
   validFrom: Date;
   validTo: Date;
   isActive?: boolean;
-  maxUsage?: number;
-  usedCount: number;
+  maxUsage: number;
 }) => {
   const response = await axiosInstance.post(`/api/admin/promotions`, promotionData);
   return response.data;
@@ -35,7 +34,6 @@ export const updatePromotion = async (id: string, promotionData: {
   validTo: Date;
   isActive?: boolean;
   maxUsage?: number;
-  usedCount?: number;
 }) => {
   const response = await axiosInstance.put(`/api/admin/promotions/${id}`, promotionData);
   return response.data; 
