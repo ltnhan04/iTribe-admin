@@ -97,9 +97,9 @@ const Promotions = () => {
   };
 
   const columns = [
-    { title: "STT",
-      render: (text: string, record: DataType, index: number) => index + 1,
-    },
+    // { title: "STT",
+    //   render: (text: string, record: DataType, index: number) => index + 1,
+    // },
     { title: "Mã Khuyến Mãi", 
       dataIndex: "code", 
       key: "code" },
