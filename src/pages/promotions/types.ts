@@ -3,6 +3,8 @@ export interface FormValues {
   discount: number;
   startDate: Date;
   endDate: Date;
+  usedCount?: number;
+  maxUsage: number;
 }
 
 export interface DataType {
@@ -14,4 +16,6 @@ export interface DataType {
   validTo: Date; 
   isActive: boolean; 
   status: string; 
+  usedCount: number;
+  maxUsage: number;
 }

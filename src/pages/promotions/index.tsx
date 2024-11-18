@@ -3,6 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import {
   fetchPromotions,
   createPromotion,
+  updatePromotion,
   deletePromotion,
 } from "../../api/services/promotion/promotionApi";
 import {
@@ -18,35 +19,27 @@ import {
   FloatButton,
 } from "antd";
 import { DataType, FormValues } from "./types";
-import {
-  promotionNameRules,
-  startDateRules,
-  endDateRules,
-  discountRules,
-} from "../../schemaValidation/promotion.schema";
+import { promotionNameRules, startDateRules, endDateRules, discountRules, quantityRules } from "../../schemaValidation/promotion.schema";
+import dayjs from "dayjs";
 
 const Promotions = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPromotionId, setCurrentPromotionId] = useState<string | null>(null);
+  const [form] = Form.useForm(); // Khởi tạo form từ Form.useForm()
 
   const fetchData = async () => {
     try {
-      const response = await fetchPromotions(); // Gọi API để lấy dữ liệu
-      console.log("API response:", response); // Kiểm tra cấu trúc dữ liệu
-
-      // Kiểm tra cấu trúc dữ liệu trả về (giả sử có `promotions` là mảng)
-      if (
-        response &&
-        response.promotions &&
-        Array.isArray(response.promotions)
-      ) {
+      const response = await fetchPromotions();
+      if (response && response.promotions && Array.isArray(response.promotions)) {
         const data: DataType[] = response.promotions.map((item: DataType) => ({
           ...item,
-          key: item._id, // Thêm `key` vào mỗi đối tượng để sử dụng trong bảng
+          key: item._id,
           status: item.isActive ? "Active" : "Inactive",
+          usedCount: item.usedCount || 0,
         }));
-        setPromotions(data); // Cập nhật trạng thái `promotions` trong component
+        setPromotions(data);
       } else {
         throw new Error("Dữ liệu trả về không đúng định dạng");
       }
@@ -71,20 +64,33 @@ const Promotions = () => {
     setLoading(true);
     try {
       const startDate = values.startDate;
-      const endDate = values.endDate;
-
-      await createPromotion({
-        code: values.code,
-        discountPercentage: values.discount,
-        validFrom: startDate,
-        validTo: endDate,
-        isActive: true,
-        maxUsage: 1,
-      });
-      message.success("Khuyến mãi đã được tạo thành công!");
+      const endDate = values.endDate;  
+      if (currentPromotionId) {
+        await updatePromotion(currentPromotionId, {
+          code: values.code,
+          discountPercentage: values.discount,
+          validFrom: startDate,
+          validTo: endDate,
+          maxUsage: values.maxUsage || 1, 
+          isActive: true,
+          usedCount: values.usedCount || 0,
+        });
+        message.success("Khuyến mãi đã được cập nhật thành công!");
+      } else {
+        await createPromotion({
+          code: values.code,
+          discountPercentage: values.discount,
+          validFrom: startDate,
+          validTo: endDate,
+          maxUsage: values.maxUsage,
+          isActive: true,
+          usedCount: values.usedCount || 0,
+        });
+        message.success("Khuyến mãi đã được tạo thành công!");
+      }
       handleOk();
     } catch (error) {
-      console.error("Error creating promotion:", error);
+      console.error("Error submitting form:", error);
       message.error("Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -93,11 +99,18 @@ const Promotions = () => {
 
   const columns = [
     { title: "STT", render: (index: number) => index + 1 },
-    { title: "Mã Khuyến Mãi", dataIndex: "code", key: "code" },
+    { title: "Mã Khuyến Mãi", 
+      dataIndex: "code", 
+      key: "code" },
     {
       title: "Giảm Giá (%)",
       dataIndex: "discountPercentage",
       key: "discountPercentage",
+    },
+    {
+      title: "Số lượng sử dụng",
+      key: "maxUsage",
+      render: (record: DataType) => `${record.usedCount}/${record.maxUsage}`,
     },
     {
       title: "Ngày Bắt Đầu",
@@ -132,7 +145,15 @@ const Promotions = () => {
   ];
 
   const handleUpdate = (record: DataType) => {
-    console.log("Sửa khuyến mãi", record);
+    form.setFieldsValue({
+      code: record.code,
+      discount: record.discountPercentage,
+      startDate: dayjs(record.validFrom),
+      endDate: dayjs(record.validTo),
+      quantity: record.maxUsage,
+    });
+    setCurrentPromotionId(record._id);
+    setIsModalVisible(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -161,47 +182,36 @@ const Promotions = () => {
         pagination={false}
       />
       <Modal
-        title="Thêm Khuyến Mãi"
+        title={currentPromotionId ? "Sửa Khuyến Mãi" : "Thêm Khuyến Mãi"}
         visible={isModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form layout="vertical" onFinish={onFinish} form={form}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="Mã Khuyến Mãi"
-              name="code"
-              rules={promotionNameRules}
-            >
+            <Form.Item label="Mã Khuyến Mãi" name="code" rules={promotionNameRules}>
               <Input placeholder="Nhập mã khuyến mãi" />
             </Form.Item>
-            <Form.Item
-              label="Giảm giá (%)"
-              name="discount"
-              rules={discountRules}
-            >
+            <Form.Item label="Giảm giá (%)" name="discount" rules={discountRules}>
               <Input placeholder="Nhập % giảm giá" />
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="Ngày Bắt Đầu"
-              name="startDate"
-              rules={startDateRules}
-            >
+            <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
             </Form.Item>
-            <Form.Item
-              label="Ngày Kết Thúc"
-              name="endDate"
-              rules={endDateRules}
-            >
+            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
               <DatePicker className="w-full" format="DD-MM-YYYY" />
+            </Form.Item>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Form.Item label="Số lượng tối đa" name="quantity" rules={quantityRules}>
+              <Input placeholder="Nhập vào số lượng" />
             </Form.Item>
           </div>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>
-              Lưu
+              {currentPromotionId ? "Lưu thay đổi" : "Lưu"}
             </Button>
           </Form.Item>
         </Form>
