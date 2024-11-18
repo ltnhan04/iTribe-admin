@@ -4,5 +4,6 @@ export interface Promotions {
   validFrom: Date;
   validTo: Date;
   isActive?: boolean;
-  maxUsage?: number;
+  maxUsage: number;
+  usedCount?: number;
 }

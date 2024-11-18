@@ -12,12 +12,6 @@ export const promotionNameRules: Rule[] = [
   { max: 50, message: "Tên tối đa 50 kí tự" }, 
 ];
 
-// export const descriptionRules: Rule[] = [
-//   { required: true, message: "Please enter the description" },
-//   { max: 200, message: "Description cannot exceed 200 characters" },
-//   { min: 10, message: "Description must be at least 10 characters" }, 
-// ];
-
 export const startDateRules: Rule[] = [
   { required: true, message: "Nhập ngày bắt đầu!" },
   {
@@ -59,7 +53,24 @@ export const endDateRules: Rule[] = [
   },
 ];
 
-
+export const maxUsageRules: Rule[] = [
+  { required: true, message: "Vui lòng nhập số lượng" },
+  {
+    type: "number",
+    min: 1,
+    max: 50,
+    message: "Số lượng này sẽ không thể thay đổi",
+    transform: (value) => Number(value), 
+  },
+  {
+    validator: (_, value) => {
+      if (value && (value < 1 || value > 50)) {
+        return Promise.reject(new Error("Số lượng sử dụng phải từ 1 đến 50"));
+      }
+      return Promise.resolve();
+    }
+  }
+]
 
 export const discountRules: Rule[] = [
   { required: true, message: "Vui lòng nhập % giảm giá" },
@@ -67,7 +78,7 @@ export const discountRules: Rule[] = [
     type: "number",
     min: 5,
     max: 50,
-    message: "Giảm giá từ 5-50%",
+    message: "Vui lòng kiểm tra lại % giảm giá",
     transform: (value) => Number(value), 
   },
   {

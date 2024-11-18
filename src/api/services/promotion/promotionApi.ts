@@ -15,11 +15,17 @@ export const createPromotion = async (promotionData: {
   validFrom: Date;
   validTo: Date;
   isActive?: boolean;
-  maxUsage?: number;
+  maxUsage: number;
 }) => {
   const response = await axiosInstance.post(`/api/admin/promotions`, promotionData);
   return response.data;
 };
+
+export const incrementUsedCount = async (id: string) => {
+  const response = await axiosInstance.patch(`/api/admin/promotions/${id}/increment`);
+  return response.data;
+};
+
 
 export const updatePromotion = async (id: string, promotionData: {
   code: string;
