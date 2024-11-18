@@ -29,11 +29,11 @@ export const productVariantApi = createApi({
           : [{ type: "ProductVariants", id: productId }],
     }),
 
-    createProductVariant: builder.mutation<ProductVariantRoot, ProductVariant>({
-      query: (newVariant) => ({
-        url: `/api/admin/variant`,
+    createProductVariant: builder.mutation<ProductVariantRoot, FormData>({
+      query: (formData) => ({
+        url: `/api/admin/products/variant`,
         method: "POST",
-        body: newVariant,
+        body: formData,
       }),
       invalidatesTags: ["ProductVariants"],
     }),
