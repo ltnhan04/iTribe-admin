@@ -38,7 +38,9 @@ const ViewProduct = () => {
   const location = useLocation();
   const id = location.pathname.split("/")[2];
 
-  const { data, error, isLoading, refetch } = useGetProductQuery(id);
+  const { data, error, isLoading, refetch } = useGetProductQuery(id, {
+    refetchOnMountOrArgChange: true,
+  });
   const [deleteProductVariant, { isLoading: isDeleting }] =
     useDeleteProductVariantMutation();
 
