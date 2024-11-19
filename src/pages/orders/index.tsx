@@ -84,7 +84,7 @@ const OrderList: React.FC = () => {
       key: "status",
       render: (status: string) => {
         const color =
-          status === "delivered"
+          status === "shipped"
             ? "green"
             : status === "processing"
             ? "blue"
@@ -105,9 +105,9 @@ const OrderList: React.FC = () => {
             availableStatus = ["processing", "cancel"];
             break;
           case "processing":
-            availableStatus = ["delivered", "cancel"];
+            availableStatus = ["shipped", "cancel"];
             break;
-          case "delivered":
+          case "shipped":
           case "cancel":
             availableStatus = []; // Không thể chuyển trạng thái nữa
             break;

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Column,Pie  } from '@ant-design/charts';
+import { Column, Pie } from '@ant-design/charts';
 import { Button } from 'antd';
 import '../../index.css';
-import { fetchDailyRevenue,fetchTotalRevenue } from '../../api/services/revenue/revenueApi';
+import { fetchDailyRevenue, fetchTotalRevenue } from '../../api/services/revenue/revenueApi';
+import { formatCurrency } from '../../utils/format-currency';
 
 const Revenue: React.FC = () => {
     const [dailyRevenue, setDailyRevenue] = useState<any[]>([]);
@@ -47,104 +48,133 @@ const Revenue: React.FC = () => {
 
         loadData();
     }, []);
+
     // Xử lý dữ liệu cho 3 ngày gần nhất (cách 1 ngày)
     const getLast3DaysData = () => {
-      const today = new Date();
-      const filteredData = [];
-      for (let i = 2; i >= 0; i--) {
-          const date = new Date();
-          date.setDate(today.getDate() - i);
-          const formattedDate = date.toISOString().split('T')[0]; 
-          const dataForDate = dailyRevenue.find(
-              (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
-          );
-          filteredData.push({
-              date: formattedDate,
-              totalSales: dataForDate ? dataForDate.totalSales : 0, 
-          });
-      }
-      return filteredData;
-  };
+        const today = new Date();
+        const filteredData = [];
+        for (let i = 2; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(today.getDate() - i);
+            const formattedDate = date.toISOString().split('T')[0];
+            const dataForDate = dailyRevenue.find(
+                (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
+            );
+            filteredData.push({
+                date: formattedDate,
+                totalSales: dataForDate ? dataForDate.totalSales : 0,
+            });
+        }
+        return filteredData;
+    };
 
-  // Xử lý dữ liệu cho 7 ngày trong tuần bắt đầu từ thứ Hai
-  const getLast7DaysData = () => {
-      const today = new Date();
-      const currentDayOfWeek = today.getDay(); 
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - currentDayOfWeek + 1); 
-      const filteredData = [];
-      for (let i = 0; i < 7; i++) {
-          const date = new Date(monday);
-          date.setDate(monday.getDate() + i); 
-          const formattedDate = date.toISOString().split('T')[0]; 
-          const dataForDate = dailyRevenue.find(
-              (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
-          );
-          filteredData.push({
-              date: formattedDate,
-              totalSales: dataForDate ? dataForDate.totalSales : 0, 
-          });
-      }
-      return filteredData;
-  };
+    // Xử lý dữ liệu cho 7 ngày trong tuần bắt đầu từ thứ Hai
+    const getLast7DaysData = () => {
+        const today = new Date();
+        const currentDayOfWeek = today.getDay();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - currentDayOfWeek + 1);
+        const filteredData = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            const formattedDate = date.toISOString().split('T')[0];
+            const dataForDate = dailyRevenue.find(
+                (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
+            );
+            filteredData.push({
+                date: formattedDate,
+                totalSales: dataForDate ? dataForDate.totalSales : 0,
+            });
+        }
+        return filteredData;
+    };
+
     const getColorBySales = (totalSales: number) => {
         if (totalSales < 100000) return '#f39c12';
         if (totalSales < 500000) return '#e67e22';
-        return '#2ecc71'; 
+        return '#2ecc71';
     };
+
     const productRevenueConfig = {
-      data: productRevenue,
-      angleField: 'totalSales',  // Trường tổng doanh thu
-      colorField: 'name',  // Trường tên sản phẩm
-      radius: 0.8,  // Kích thước của vòng tròn
-      color: (datum: any) => getColorBySales(datum.totalSales),
-      label: { 
-          type: 'inner', 
-          content: '{name} {percentage}',  // Hiển thị tên và tỷ lệ phần trăm
-          style: { fill: '#fff', fontSize: 14 },
-      },
-      legend: {
-          position: 'top',
-      },
-      statistic: {
-          title: {
-              style: { fontSize: '16px' },
-          },
-          content: {
-              formatter: (value: any) => `${value} $`,  // Định dạng tổng doanh thu
-          },
-      },
-  };
+        data: productRevenue,
+        angleField: 'totalSales',  // Trường tổng doanh thu
+        colorField: 'name',  // Trường tên sản phẩm
+        radius: 0.8,  // Kích thước của vòng tròn
+        color: (datum: any) => getColorBySales(datum.totalSales),
+        label: {
+            type: 'inner',
+            content: '{name} {percentage}',  // Hiển thị tên và tỷ lệ phần trăm
+            style: { fill: '#fff', fontSize: 14 },
+        },
+        legend: {
+            position: 'top',
+        },
+        statistic: {
+            title: {
+                style: { fontSize: '16px' },
+            },
+            content: {
+                formatter: (value: any) => formatCurrency(value), // Định dạng tổng doanh thu
+            },
+        },
+    };
 
     const dailyConfig = {
         data: dailyRevenue,
         xField: 'date',
         yField: 'totalSales',
         color: (datum: any) => getColorBySales(datum.totalSales),
-        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        label: {
+            position: 'top',
+            style: { fill: '#FFFFFF', opacity: 0.6 },
+            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
+        },
         xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { title: { text: 'Sales' } },
-    };
+        yAxis: { 
+          title: { text: 'Sales' },  // Tiêu đề cho trục Y
+          label: {
+              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
+          },
+      },
+  };
 
     const last3DaysConfig = {
         data: getLast3DaysData(),
         xField: 'date',
         yField: 'totalSales',
         color: (datum: any) => getColorBySales(datum.totalSales),
-        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        label: {
+            position: 'top',
+            style: { fill: '#FFFFFF', opacity: 0.6 },
+            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
+        },
         xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { title: { text: 'Sales' } },
-    };
-
+        yAxis: { 
+          title: { text: 'Sales' },  // Tiêu đề cho trục Y
+          label: {
+              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
+          },
+      },
+  };
     const last7DaysConfig = {
         data: getLast7DaysData(),
         xField: 'date',
         yField: 'totalSales',
         color: (datum: any) => getColorBySales(datum.totalSales),
-        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        label: {
+            position: 'top',
+            style: { fill: '#FFFFFF', opacity: 0.6 },
+            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
+        },
         xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { title: { text: 'Sales' } },
-    };
+        yAxis: { 
+          title: { text: 'Sales' },  // Tiêu đề cho trục Y
+          label: {
+              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
+          },
+      },
+  };
 
     if (loading) {
         return <p>Loading revenue data...</p>;
