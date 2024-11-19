@@ -6,6 +6,9 @@ export interface Data {
 export interface ProductDetails {
   product: Product;
 }
+export interface VariantDetails {
+  variant: Variant;
+}
 export interface Root {
   message?: string;
   product: Product;
