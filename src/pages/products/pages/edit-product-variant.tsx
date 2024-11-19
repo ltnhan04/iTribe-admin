@@ -165,6 +165,7 @@ const EditProductVariant = () => {
       }
       return file;
     });
+    console.log(updatedFileList);
 
     setFileList(updatedFileList);
   };
@@ -196,11 +197,14 @@ const EditProductVariant = () => {
       formData.append("name", formState.selectedVariantName);
       formData.append("slug", formState.selectedSlug);
 
+      const existingImages = fileList
+        .filter((file) => file.url)
+        .map((file) => file.url);
+      formData.append("existingImages", JSON.stringify(existingImages));
+
       fileList.forEach((file) => {
-        if (file.url) {
-          formData.append("images", file.url);
-        } else if (file.originFileObj) {
-          formData.append("images", file.originFileObj);
+        if (file.originFileObj) {
+          formData.append("newImages", file.originFileObj);
         }
       });
 
