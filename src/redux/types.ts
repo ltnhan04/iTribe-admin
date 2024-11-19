@@ -44,6 +44,7 @@ export interface Variant {
   name: string;
   storage: string;
   price: number;
+  rating?: number;
   stock: number;
   slug: string;
   images: string[];
