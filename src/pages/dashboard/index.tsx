@@ -1,233 +1,183 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   fetchDailyRevenue,
-//   fetchWeeklyRevenue,
-//   fetchYearlyRevenue,
-//   fetchTotalRevenue,
-// } from "../../api/services/revenue/revenueApi";
-// import {
-//   DailyRevenue,
-//   WeeklyRevenue,
-//   YearlyRevenue,
-//   TotalRevenue,
-// } from "./types";
-// import { Column } from "@ant-design/charts";
-// import { Button } from "antd"; // Import Button từ Ant Design
-// import "../../index.css";
+import React, { useEffect, useState } from 'react';
+import { Column,Pie  } from '@ant-design/charts';
+import { Button } from 'antd';
+import '../../index.css';
+import { fetchDailyRevenue,fetchTotalRevenue } from '../../api/services/revenue/revenueApi';
 
-// const Revenue: React.FC = () => {
-//   const [dailyRevenue, setDailyRevenue] = useState<DailyRevenue[]>([]);
-//   const [weeklyRevenue, setWeeklyRevenue] = useState<WeeklyRevenue[]>([]);
-//   const [yearlyRevenue, setYearlyRevenue] = useState<YearlyRevenue[]>([]);
-//   const [totalRevenue, setTotalRevenue] = useState<TotalRevenue | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [chartType, setChartType] = useState<string>("daily"); // Trạng thái để theo dõi loại biểu đồ đang hiển thị
+const Revenue: React.FC = () => {
+    const [dailyRevenue, setDailyRevenue] = useState<any[]>([]);
+    const [, setTotalRevenue] = useState<any | null>(null);
+    const [productRevenue, setProductRevenue] = useState<any[]>([]); // Thêm state cho doanh thu theo sản phẩm
+    const [loading, setLoading] = useState(true);
+    const [chartType, setChartType] = useState<string>('daily'); // Trạng thái biểu đồ
 
-//   useEffect(() => {
-//     const loadData = async () => {
-//       setLoading(true);
-//       try {
-//         // Lấy doanh thu theo ngày
-//         const dailyData = await fetchDailyRevenue();
-//         console.log("Daily Revenue Data:", dailyData);
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                // Fetch doanh thu theo ngày
+                const dailyData = await fetchDailyRevenue();
+                if (dailyData.data && dailyData.data.revenue) {
+                    const revenue = dailyData.data.revenue;
+                    const formattedDailyData = [
+                        {
+                            date: new Date(revenue.date),
+                            totalSales: revenue.totalSales,
+                        },
+                    ];
+                    setDailyRevenue(formattedDailyData);
+                }
+                const totalData = await fetchTotalRevenue();
+                if (totalData.data && Array.isArray(totalData.data.result) && totalData.data.result.length > 0) {
+                    setTotalRevenue(totalData.data.result[0]);
+                }
+                // Fetch doanh thu theo sản phẩm
+                const productData = await fetch('http://localhost:8000/api/admin/revenue/product');
+                const productRevenueData = await productData.json();
+                if (productRevenueData.result && Array.isArray(productRevenueData.result)) {
+                    setProductRevenue(productRevenueData.result);
+                }
 
-//         if (dailyData.data && dailyData.data.revenue) {
-//           const revenue = dailyData.data.revenue;
-//           const formattedDailyData = [
-//             {
-//               date: new Date(revenue.date),
-//               totalSales: revenue.totalSales.toLocaleString(),
-//               id: revenue._id,
-//             },
-//           ];
-//           setDailyRevenue(formattedDailyData);
-//         } else {
-//           console.error("No revenue data available for daily:", dailyData.data);
-//           alert("No daily revenue data available.");
-//         }
+            } catch (error) {
+                console.error('Failed to fetch revenue data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-//         // Lấy doanh thu theo tuần
-//         const weeklyData = await fetchWeeklyRevenue();
-//         console.log("Weekly Revenue Data:", weeklyData);
-//         if (weeklyData.data && Array.isArray(weeklyData.data.result)) {
-//           const formattedWeeklyData = weeklyData.data.result.map(
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             (rev: any) => ({
-//               week: `${rev._id.month}-${rev._id.year}`,
-//               totalSales: rev.totalSales.toLocaleString(),
-//             })
-//           );
-//           setWeeklyRevenue(formattedWeeklyData);
-//         } else {
-//           console.error("No weekly revenue data available:", weeklyData.data);
-//           alert("No weekly revenue data available.");
-//         }
+        loadData();
+    }, []);
+    // Xử lý dữ liệu cho 3 ngày gần nhất (cách 1 ngày)
+    const getLast3DaysData = () => {
+      const today = new Date();
+      const filteredData = [];
+      for (let i = 2; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(today.getDate() - i);
+          const formattedDate = date.toISOString().split('T')[0]; 
+          const dataForDate = dailyRevenue.find(
+              (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
+          );
+          filteredData.push({
+              date: formattedDate,
+              totalSales: dataForDate ? dataForDate.totalSales : 0, 
+          });
+      }
+      return filteredData;
+  };
 
-//         // Lấy doanh thu theo năm
-//         const yearlyData = await fetchYearlyRevenue();
-//         console.log("Yearly Revenue Data:", yearlyData);
-//         if (yearlyData.data && Array.isArray(yearlyData.data.result)) {
-//           const formattedYearlyData = yearlyData.data.result.map(
-//             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//             (rev: any) => ({
-//               year: rev._id.year,
-//               totalSales: rev.totalSales.toLocaleString(),
-//             })
-//           );
-//           setYearlyRevenue(formattedYearlyData);
-//         } else {
-//           console.error("No yearly revenue data available:", yearlyData.data);
-//           alert("No yearly revenue data available.");
-//         }
+  // Xử lý dữ liệu cho 7 ngày trong tuần bắt đầu từ thứ Hai
+  const getLast7DaysData = () => {
+      const today = new Date();
+      const currentDayOfWeek = today.getDay(); 
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - currentDayOfWeek + 1); 
+      const filteredData = [];
+      for (let i = 0; i < 7; i++) {
+          const date = new Date(monday);
+          date.setDate(monday.getDate() + i); 
+          const formattedDate = date.toISOString().split('T')[0]; 
+          const dataForDate = dailyRevenue.find(
+              (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
+          );
+          filteredData.push({
+              date: formattedDate,
+              totalSales: dataForDate ? dataForDate.totalSales : 0, 
+          });
+      }
+      return filteredData;
+  };
+    const getColorBySales = (totalSales: number) => {
+        if (totalSales < 100000) return '#f39c12';
+        if (totalSales < 500000) return '#e67e22';
+        return '#2ecc71'; 
+    };
+    const productRevenueConfig = {
+      data: productRevenue,
+      angleField: 'totalSales',  // Trường tổng doanh thu
+      colorField: 'name',  // Trường tên sản phẩm
+      radius: 0.8,  // Kích thước của vòng tròn
+      color: (datum: any) => getColorBySales(datum.totalSales),
+      label: { 
+          type: 'inner', 
+          content: '{name} {percentage}',  // Hiển thị tên và tỷ lệ phần trăm
+          style: { fill: '#fff', fontSize: 14 },
+      },
+      legend: {
+          position: 'top',
+      },
+      statistic: {
+          title: {
+              style: { fontSize: '16px' },
+          },
+          content: {
+              formatter: (value: any) => `${value} $`,  // Định dạng tổng doanh thu
+          },
+      },
+  };
 
-//         // Lấy tổng doanh thu
-//         const totalData = await fetchTotalRevenue();
-//         console.log("Total Revenue Data:", totalData);
-//         if (
-//           totalData.data &&
-//           Array.isArray(totalData.data.result) &&
-//           totalData.data.result.length > 0
-//         ) {
-//           setTotalRevenue(totalData.data.result[0]);
-//         } else {
-//           console.error("No total revenue data available:", totalData.data);
-//           alert("No total revenue data available.");
-//         }
-//       } catch (error) {
-//         console.error("Failed to fetch revenue data:", error);
-//         alert("Failed to load revenue data. Please try again later.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
+    const dailyConfig = {
+        data: dailyRevenue,
+        xField: 'date',
+        yField: 'totalSales',
+        color: (datum: any) => getColorBySales(datum.totalSales),
+        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        xAxis: { title: { text: 'Date' }, type: 'time' },
+        yAxis: { title: { text: 'Sales' } },
+    };
 
-//     loadData();
-//   }, []);
+    const last3DaysConfig = {
+        data: getLast3DaysData(),
+        xField: 'date',
+        yField: 'totalSales',
+        color: (datum: any) => getColorBySales(datum.totalSales),
+        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        xAxis: { title: { text: 'Date' }, type: 'time' },
+        yAxis: { title: { text: 'Sales' } },
+    };
 
-//   // Cấu hình cho các biểu đồ
-//   const dailyConfig = {
-//     data: dailyRevenue,
-//     xField: "date",
-//     yField: "totalSales",
-//     label: { position: "top", style: { fill: "#FFFFFF", opacity: 0.6 } },
-//     xAxis: {
-//       title: { text: "Date" },
-//       type: "time",
-//       tickInterval: 24 * 60 * 60 * 1000, // Mỗi tick là 1 ngày
-//     },
-//     yAxis: { title: { text: "Sales" } },
-//   };
+    const last7DaysConfig = {
+        data: getLast7DaysData(),
+        xField: 'date',
+        yField: 'totalSales',
+        color: (datum: any) => getColorBySales(datum.totalSales),
+        label: { position: 'top', style: { fill: '#FFFFFF', opacity: 0.6 } },
+        xAxis: { title: { text: 'Date' }, type: 'time' },
+        yAxis: { title: { text: 'Sales' } },
+    };
 
-//   const weeklyConfig = {
-//     data: weeklyRevenue,
-//     xField: "week",
-//     yField: "totalSales",
-//     label: { position: "top", style: { fill: "#FFFFFF", opacity: 0.6 } },
-//     xAxis: { title: { text: "Week" } },
-//     yAxis: { title: { text: "Sales" } },
-//   };
+    if (loading) {
+        return <p>Loading revenue data...</p>;
+    }
 
-//   const yearlyConfig = {
-//     data: yearlyRevenue,
-//     xField: "year",
-//     yField: "totalSales",
-//     label: { position: "top", style: { fill: "#FFFFFF", opacity: 0.6 } },
-//     xAxis: { title: { text: "Year" } },
-//     yAxis: { title: { text: "Sales" } },
-//   };
+    return (
+        <div>
+            <h1 className="text-center font-bold text-xl">Revenue Dashboard</h1>
 
-//   const totalRevenueConfig = {
-//     data: totalRevenue
-//       ? [
-//           {
-//             name: "Total Sales",
-//             value: totalRevenue.totalSales.toLocaleString(),
-//           },
-//         ]
-//       : [],
-//     xField: "name",
-//     yField: "value",
-//     label: { position: "top", style: { fill: "#FFFFFF", opacity: 0.6 } },
-//     xAxis: { title: { text: "Type" } },
-//     yAxis: { title: { text: "Amount" } },
-//   };
+            {/* Nút điều hướng */}
+            <div style={{ textAlign: 'center', margin: '20px' }}>
+                <Button type={chartType === 'daily' ? 'primary' : 'default'} onClick={() => setChartType('daily')}>
+                    Doanh thu theo ngày
+                </Button>
+                <Button type={chartType === '3days' ? 'primary' : 'default'} onClick={() => setChartType('3days')}>
+                    Doanh thu 3 ngày gần nhất
+                </Button>
+                <Button type={chartType === '7days' ? 'primary' : 'default'} onClick={() => setChartType('7days')}>
+                    Doanh thu 7 ngày trong tuần
+                </Button>
+                <Button type={chartType === 'product' ? 'primary' : 'default'} onClick={() => setChartType('product')}>
+                    Doanh thu theo sản phẩm
+                </Button>
+            </div>
 
-//   if (loading) {
-//     return <p>Loading revenue data...</p>;
-//   }
-
-//   return (
-//     <div>
-//       <h1 className="text-center font-bold text-xl">Revenue Dashboard</h1>
-
-//       {/* Nút điều hướng để chọn biểu đồ */}
-//       <div style={{ textAlign: "center", margin: "20px" }}>
-//         <Button
-//           type={chartType === "daily" ? "primary" : "default"}
-//           className="mx-2 z-auto"
-//           onClick={() => setChartType("daily")}
-//         >
-//           Doanh thu theo ngày
-//         </Button>
-//         <Button
-//           type={chartType === "weekly" ? "primary" : "default"}
-//           className="mx-2"
-//           onClick={() => setChartType("weekly")}
-//         >
-//           Doanh thu theo tuần
-//         </Button>
-//         <Button
-//           type={chartType === "yearly" ? "primary" : "default"}
-//           className="mx-2"
-//           onClick={() => setChartType("yearly")}
-//         >
-//           Doanh thu theo năm
-//         </Button>
-//         <Button
-//           type={chartType === "total" ? "primary" : "default"}
-//           className="mx-2"
-//           onClick={() => setChartType("total")}
-//         >
-//           Tổng doanh thu
-//         </Button>
-//       </div>
-
-//       <div className="chart-container">
-//         <div className="chart-header">
-//           {chartType === "daily" && "Doanh thu theo ngày"}
-//           {chartType === "weekly" && "Doanh thu theo tuần"}
-//           {chartType === "yearly" && "Doanh thu theo năm"}
-//           {chartType === "total" && "Tổng doanh thu"}
-//         </div>
-//         {chartType === "daily" && dailyRevenue.length ? (
-//           <Column {...dailyConfig} />
-//         ) : (
-//           chartType === "daily" && <p>Chưa có doanh thu ngày</p>
-//         )}
-//         {chartType === "weekly" && weeklyRevenue.length ? (
-//           <Column {...weeklyConfig} />
-//         ) : (
-//           chartType === "weekly" && <p>Chưa có doanh thu tuần</p>
-//         )}
-//         {chartType === "yearly" && yearlyRevenue.length ? (
-//           <Column {...yearlyConfig} />
-//         ) : (
-//           chartType === "yearly" && <p>Chưa có doanh thu năm</p>
-//         )}
-//         {chartType === "total" && totalRevenue ? (
-//           <Column {...totalRevenueConfig} />
-//         ) : (
-//           chartType === "total" && <p>Chưa có tổng doanh thu</p>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Revenue;
-
-const Dashboard = () => {
-  return <div>dashboard</div>;
+            <div className="chart-container">
+                {chartType === 'daily' && <Column {...dailyConfig} />}
+                {chartType === '3days' && <Column {...last3DaysConfig} />}
+                {chartType === '7days' && <Column {...last7DaysConfig} />}
+                {chartType === 'product' && <Pie {...productRevenueConfig} />}
+            </div>
+        </div>
+    );
 };
 
-export default Dashboard;
+export default Revenue;

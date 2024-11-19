@@ -18,7 +18,6 @@ const OrderList: React.FC = () => {
         const response = await getOrders();
         console.log(response.data);
         setOrders(response.data.orders);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         message.error(error);
       } finally {
@@ -98,19 +97,41 @@ const OrderList: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (record: { status: string; orderId: string }) => (
-        <Select
-          defaultValue={record.status}
-          style={{ width: 120 }}
-          onChange={(value) => handleUpdateStatus(record.orderId, value)}
-          dropdownStyle={{ zIndex: 1000 }}
-        >
-          <Select.Option value="pending">Pending</Select.Option>
-          <Select.Option value="processing">Processing</Select.Option>
-          <Select.Option value="delivered">Delivered</Select.Option>
-          <Select.Option value="cancel">Cancel</Select.Option>
-        </Select>
-      ),
+      render: (record: { status: string; orderId: string }) => {
+        // Kiểm tra trạng thái hiện tại của đơn hàng và giới hạn các lựa chọn trạng thái
+        let availableStatus: string[] = [];
+        switch (record.status) {
+          case "pending":
+            availableStatus = ["processing", "cancel"];
+            break;
+          case "processing":
+            availableStatus = ["delivered", "cancel"];
+            break;
+          case "delivered":
+          case "cancel":
+            availableStatus = []; // Không thể chuyển trạng thái nữa
+            break;
+          default:
+            availableStatus = [];
+            break;
+        }
+
+        return (
+          <Select
+            defaultValue={record.status}
+            style={{ width: 120 }}
+            onChange={(value) => handleUpdateStatus(record.orderId, value)}
+            dropdownStyle={{ zIndex: 1000 }}
+            disabled={availableStatus.length === 0} // Disable select if no available statuses
+          >
+            {availableStatus.map((status) => (
+              <Select.Option key={status} value={status}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Select.Option>
+            ))}
+          </Select>
+        );
+      },
     },
   ];
 
