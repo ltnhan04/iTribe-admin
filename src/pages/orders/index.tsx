@@ -1,30 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Select, message } from "antd";
+import { Carousel, Table, Image, Tag, Select, message, Modal, Descriptions, Button, Row, Col } from "antd";
 import { Product, Order, ErrorResponse } from "./types";
-import {
-  getOrders,
-  updateOrderStatus,
-} from "../../api/services/order/orderApi";
+import { getOrders, updateOrderStatus, getOrderDetail } from "../../api/services/order/orderApi";
 import { formatCurrency } from "../../utils/format-currency";
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
         const response = await getOrders();
-        console.log(response.data);
         setOrders(response.data.orders);
       } catch (error: any) {
-        message.error(error);
+        message.error(error.message || "Error fetching orders");
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchOrders();
   }, []);
 
@@ -42,9 +39,24 @@ const OrderList: React.FC = () => {
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
       const errorMsg =
-        typedError.response.data.message || "Đã xảy ra lỗi! Vui lòng thử lại.";
+        typedError.response?.data?.message || "An error occurred. Please try again.";
       message.error(errorMsg);
     }
+  };
+
+  const fetchOrderDetail = async (orderId: string) => {
+    try {
+      const response = await getOrderDetail(orderId);
+      setSelectedOrder(response.data.order);
+      setIsModalVisible(true);
+    } catch (error: any) {
+      message.error(error.response?.data?.message || "Error fetching order details");
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setSelectedOrder(null);
   };
 
   const columns = [
@@ -65,7 +77,7 @@ const OrderList: React.FC = () => {
       render: (productVariants: Product[]) => (
         <>
           {productVariants.map((product) => (
-            <Tag key={product.productVariantId}>
+            <Tag key={product.productVariantId} color="blue">
               {product.productName} (x{product.quantity})
             </Tag>
           ))}
@@ -98,7 +110,6 @@ const OrderList: React.FC = () => {
       title: "Actions",
       key: "actions",
       render: (record: { status: string; orderId: string }) => {
-        // Kiểm tra trạng thái hiện tại của đơn hàng và giới hạn các lựa chọn trạng thái
         let availableStatus: string[] = [];
         switch (record.status) {
           case "pending":
@@ -109,7 +120,7 @@ const OrderList: React.FC = () => {
             break;
           case "shipped":
           case "cancel":
-            availableStatus = []; // Không thể chuyển trạng thái nữa
+            availableStatus = [];
             break;
           default:
             availableStatus = [];
@@ -122,7 +133,7 @@ const OrderList: React.FC = () => {
             style={{ width: 120 }}
             onChange={(value) => handleUpdateStatus(record.orderId, value)}
             dropdownStyle={{ zIndex: 1000 }}
-            disabled={availableStatus.length === 0} // Disable select if no available statuses
+            disabled={availableStatus.length === 0}
           >
             {availableStatus.map((status) => (
               <Select.Option key={status} value={status}>
@@ -133,15 +144,118 @@ const OrderList: React.FC = () => {
         );
       },
     },
+    {
+      title: "Detail",
+      key: "detail",
+      render: (record: Order) => (
+        <Button type="primary" onClick={() => fetchOrderDetail(record.orderId)}>
+          Detail
+        </Button>
+      ),
+    },
   ];
 
   return (
-    <Table
-      dataSource={orders}
-      columns={columns}
-      loading={isLoading}
-      rowKey="orderId"
-    />
+    <>
+      <Table
+        loading={isLoading}
+        columns={columns}
+        dataSource={orders}
+        rowKey="orderId"
+        pagination={{ pageSize: 5 }}
+        bordered
+      />
+
+      <Modal
+        title="Order Details"
+        visible={isModalVisible}
+        onCancel={closeModal}
+        footer={[<Button key="close" onClick={closeModal}>Close</Button>]}
+        width={1110}
+        centered
+      >
+        {selectedOrder ? (
+          <div style={{ padding: '20px' }}>
+            <Row gutter={16}>
+              <Col span={24}>
+                <Descriptions title="Order Information" bordered>
+                  <Descriptions.Item label="Total Amount">
+                    {formatCurrency(selectedOrder.totalAmount)}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Status">
+                    <Tag color={selectedOrder.status === "shipped" ? "green" : "orange"}>
+                      {selectedOrder.status}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Shipping Address">
+                    {selectedOrder.shippingAddress}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Payment Method">
+                    {selectedOrder.paymentMethod}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Created At">
+                    {new Date(selectedOrder.createdAt).toLocaleString()}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Col>  
+            </Row>
+
+            <Row gutter={16} style={{ marginTop: '20px' }}>
+              <Col span={24}>
+                <Descriptions title="User Information" bordered>
+                  <Descriptions.Item label="User Name">
+                    {selectedOrder.user?.name || "N/A"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    {selectedOrder.user?.email || "N/A"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Phone Number">
+                    {selectedOrder.user?.phoneNumber || "N/A"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Address">
+                    {typeof selectedOrder.user?.address === 'string' ? selectedOrder.user.address : "N/A"}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Col>
+            </Row>
+
+            <div style={{ marginTop: '20px' }}>
+              <h3 className="font-bold">Products</h3>
+              {selectedOrder.productVariants?.map((item, index) => (
+                <div key={index} style={{ marginBottom: 16 }}>
+                  <strong>{item.productName}</strong> (x{item.quantity}) 
+                  {item.productColorName ? ` - ${item.productColorName} (${item.productStorage})` : ""}
+                  <Row gutter={16} style={{ marginTop: 8 }}>
+                    {item.productImages && item.productImages.length > 0 ? (
+                      <div style={{ width: '50%' , height : "50%" ,margin:'auto' }}>
+                        {item.productImages.length > 0 && (
+                          <Carousel autoplay>
+                            {item.productImages.slice(1).map((image:string, imgIndex:string) => (
+                              <div key={imgIndex}>
+                                <Image 
+                                  width="100%" 
+                                  src={image} 
+                                  alt={`Additional product image ${imgIndex + 1}`} 
+                                  preview={true}
+                                />
+                              </div>
+                            ))}
+                          </Carousel>
+                        )}
+                      </div>
+                    ) : (
+                      <p>No images available</p>
+                    )}
+                  </Row>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>No order details available</div>
+        )}
+      </Modal>
+    </>
   );
 };
 
