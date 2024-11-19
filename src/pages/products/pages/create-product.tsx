@@ -115,16 +115,20 @@ const AddProduct = () => {
             }}
           />
         </Form.Item>
+        <div className="flex space-x-4">
+          <Button type="primary" htmlType="submit" loading={isLoading} block>
+            Add New Product
+          </Button>
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={isLoading}
-          block
-          className="w-full font-semibold py-2 md:py-3 bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          Add New Product
-        </Button>
+          <Button
+            type="default"
+            loading={isLoading}
+            block
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </Button>
+        </div>
       </Form>
     </div>
   );

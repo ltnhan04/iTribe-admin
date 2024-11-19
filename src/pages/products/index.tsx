@@ -33,8 +33,8 @@ interface ErrorResponse {
 
 const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
   const navigate = useNavigate();
+
   const {
     data,
     error,
