@@ -52,7 +52,7 @@ export const productVariantApi = createApi({
 
     deleteProductVariant: builder.mutation<{ message: string }, string>({
       query: (variantId) => ({
-        url: `/api/admin/variant/${variantId}`,
+        url: `/api/admin/products/variant/${variantId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["ProductVariants"],

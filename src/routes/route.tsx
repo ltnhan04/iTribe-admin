@@ -14,6 +14,8 @@ import AddProduct from "../pages/products/pages/create-product";
 import EditProduct from "../pages/products/pages/edit-product";
 import ViewProduct from "../pages/products/pages/view-product";
 import CreateProductVariant from "../pages/products/pages/create-product-variant";
+import EditProductVariant from "../pages/products/pages/edit-product-variant";
+import ViewProductVariant from "../pages/products/pages/view-product-variant";
 
 const Promotions = lazy(() => import("../pages/promotions"));
 
@@ -59,8 +61,16 @@ const routes = createBrowserRouter([
         element: <EditProduct />,
       },
       {
+        path: "products/details/:id/edit",
+        element: <EditProductVariant />,
+      },
+      {
         path: "products/:productId",
         element: <ViewProduct />,
+      },
+      {
+        path: "products/details/:id",
+        element: <ViewProductVariant />,
       },
       { path: "users", element: <Users /> },
       { path: "users/:userId", element: <UserDetailPage /> },

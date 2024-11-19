@@ -84,7 +84,7 @@ const Products = () => {
       }) => (
         <div className="p-4">
           <Input
-            placeholder="Search name"
+            placeholder="Search Name"
             value={selectedKeys[0]}
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
