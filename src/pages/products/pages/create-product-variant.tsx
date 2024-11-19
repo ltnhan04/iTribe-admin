@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CurrencyInput from "react-currency-input-field";
 import {
   Form,
@@ -16,6 +17,7 @@ import { UploadFile } from "antd/es/upload/interface";
 import type { RcFile } from "antd/es/upload";
 import UploadButton from "../components/UploadButton";
 import { iphones, storages } from "../../../constants";
+import type { ProductList } from "../../../redux/types";
 import { useGetProductsQuery } from "../../../redux/api/productApi";
 import { useCreateProductVariantMutation } from "../../../redux/api/productVariantApi";
 
@@ -28,6 +30,7 @@ interface ErrorResponse {
 }
 
 const CreateProductVariant = () => {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [formState, setFormState] = useState({
     price: 0,
@@ -41,7 +44,7 @@ const CreateProductVariant = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string>("");
-  const { data: products } = useGetProductsQuery(undefined, {
+  const { data } = useGetProductsQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
   const [createProductVariant, { isLoading }] =
@@ -109,7 +112,7 @@ const CreateProductVariant = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFinish = async (values: any) => {
-    const selectedProduct = products?.data.find(
+    const selectedProduct = data?.data.find(
       (product) => product.name === formState.selectedName
     );
 
@@ -147,19 +150,14 @@ const CreateProductVariant = () => {
         colorName: "",
         selectedStorage: "",
       });
+
+      form.resetFields();
+
+      setFileList([]);
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
       const errorMsg = typedError?.data?.error;
       message.error(errorMsg);
-      setFormState({
-        price: 0,
-        selectedName: "",
-        selectedSlug: "",
-        selectedVariantName: "",
-        colorCode: "",
-        colorName: "",
-        selectedStorage: "",
-      });
     }
   };
 
@@ -249,9 +247,9 @@ const CreateProductVariant = () => {
                       value={formState.selectedName}
                       disabled={isLoading}
                       placeholder="Select a product"
-                      options={iphones.map((product) => ({
-                        label: product.label,
-                        value: product.label,
+                      options={data?.data?.map((product: ProductList) => ({
+                        label: product.name,
+                        value: product.name,
                       }))}
                       onChange={(value) =>
                         updateFormState("selectedName", value)
@@ -366,6 +364,9 @@ const CreateProductVariant = () => {
           <div className="flex gap-4 mt-8">
             <Button htmlType="submit" type="primary" loading={isLoading}>
               Create New Variant
+            </Button>
+            <Button type="default" onClick={() => navigate(-1)}>
+              Cancel
             </Button>
           </div>
         </Form>

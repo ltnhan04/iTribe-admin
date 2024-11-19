@@ -3,6 +3,9 @@ export interface Data {
   data: ProductList[];
 }
 
+export interface ProductDetails {
+  product: Product;
+}
 export interface Root {
   message?: string;
   product: Product;
