@@ -6,7 +6,7 @@ import { fetchDailyRevenue,fetchTotalRevenue } from '../../api/services/revenue/
 
 const Revenue: React.FC = () => {
     const [dailyRevenue, setDailyRevenue] = useState<any[]>([]);
-    const [totalRevenue, setTotalRevenue] = useState<any | null>(null);
+    const [, setTotalRevenue] = useState<any | null>(null);
     const [productRevenue, setProductRevenue] = useState<any[]>([]); // Thêm state cho doanh thu theo sản phẩm
     const [loading, setLoading] = useState(true);
     const [chartType, setChartType] = useState<string>('daily'); // Trạng thái biểu đồ
@@ -108,7 +108,6 @@ const Revenue: React.FC = () => {
       },
       statistic: {
           title: {
-              formatter: (value: any) => 'Total Sales',
               style: { fontSize: '16px' },
           },
           content: {
@@ -175,7 +174,7 @@ const Revenue: React.FC = () => {
                 {chartType === 'daily' && <Column {...dailyConfig} />}
                 {chartType === '3days' && <Column {...last3DaysConfig} />}
                 {chartType === '7days' && <Column {...last7DaysConfig} />}
-                {chartType === 'product' && <Pie  {...productRevenueConfig} />}
+                {chartType === 'product' && <Pie {...productRevenueConfig} />}
             </div>
         </div>
     );
