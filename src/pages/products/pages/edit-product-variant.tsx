@@ -165,7 +165,6 @@ const EditProductVariant = () => {
       }
       return file;
     });
-    console.log(updatedFileList);
 
     setFileList(updatedFileList);
   };
@@ -204,7 +203,7 @@ const EditProductVariant = () => {
 
       fileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append("newImages", file.originFileObj);
+          formData.append("images", file.originFileObj);
         }
       });
 

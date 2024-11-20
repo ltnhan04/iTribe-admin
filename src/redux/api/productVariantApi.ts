@@ -51,6 +51,14 @@ export const productVariantApi = createApi({
       }),
       invalidatesTags: ["ProductVariants"],
     }),
+    importVariantFromExcel: builder.mutation<VariantDetails, FormData>({
+      query: (formData) => ({
+        url: `/api/admin/products/variant/import`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["ProductVariants"],
+    }),
   }),
 });
 
@@ -59,4 +67,5 @@ export const {
   useCreateProductVariantMutation,
   useUpdateProductVariantMutation,
   useDeleteProductVariantMutation,
+  useImportVariantFromExcelMutation,
 } = productVariantApi;
