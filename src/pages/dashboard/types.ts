@@ -1,32 +1,38 @@
-export interface RevenueData {
-  revenue: {
-    totalSales: number;
-    totalOrders: number;
-    date?: string;  // Optional for daily revenue
-    week?: string;  // Optional for weekly revenue
-    year?: string;  // Optional for yearly revenue
-  }[];
-}
-export interface DailyRevenue {
-  date: Date;
-  totalSales: number;
-  totalOrders: number; // Trường này bắt buộc
-  id: string;
+export interface OneDayType {
+  message: string;
+  revenue: Revenue;
 }
 
-export interface WeeklyRevenue {
-  week: string;
+export interface Revenue {
+  date: string;
   totalSales: number;
   totalOrders: number;
+  productVariants: ProductVariant[];
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
-export interface YearlyRevenue {
-  year: string;
+export interface ProductVariant {
+  productVariant: string;
+  name: string;
   totalSales: number;
   totalOrders: number;
+  _id: string;
 }
 
-export interface TotalRevenue {
+//Multi days
+export interface MultiDaysType {
+  message: string;
+  totalSales: number;
+  totalOrders: number;
+  details: Detail[];
+}
+
+export interface Detail {
+  productVariant: string;
+  name: string;
   totalSales: number;
   totalOrders: number;
 }

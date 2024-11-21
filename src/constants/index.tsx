@@ -80,3 +80,5 @@ export const iphones = [
 ];
 
 export const storages = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB"];
+
+export const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
