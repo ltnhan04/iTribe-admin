@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Carousel, Table, Image, Tag, Select, message, Modal, Descriptions, Button, Row, Col } from "antd";
-import { Product, Order, ErrorResponse } from "./types";
-import { getOrders, updateOrderStatus, getOrderDetail } from "../../api/services/order/orderApi";
+import { Table, Tag,Select,Input, Button,message,Modal,Descriptions,Row,Col,Carousel, Image,} from "antd";
+import { Order, Product, ErrorResponse } from "./types";
+import {getOrders, updateOrderStatus,getOrderDetail} from "../../api/services/order/orderApi";
 import { formatCurrency } from "../../utils/format-currency";
+
+const { Search } = Input;
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -16,6 +19,7 @@ const OrderList: React.FC = () => {
       try {
         const response = await getOrders();
         setOrders(response.data.orders);
+        setFilteredOrders(response.data.orders);
       } catch (error: any) {
         message.error(error.message || "Error fetching orders");
       } finally {
@@ -28,19 +32,15 @@ const OrderList: React.FC = () => {
   const handleUpdateStatus = async (orderId: string, status: string) => {
     try {
       const response = await updateOrderStatus(orderId, status);
-      if (response.data.message) {
-        message.success(response.data.message);
-      }
-
+      message.success(response.data.message || "Status updated successfully");
       const updatedOrders = orders.map((order) =>
         order.orderId === orderId ? { ...order, status } : order
       );
       setOrders(updatedOrders);
+      setFilteredOrders(updatedOrders);
     } catch (error: unknown) {
       const typedError = error as ErrorResponse;
-      const errorMsg =
-        typedError.response?.data?.message || "An error occurred. Please try again.";
-      message.error(errorMsg);
+      message.error(typedError.response?.data?.message || "An error occurred.");
     }
   };
 
@@ -64,31 +64,32 @@ const OrderList: React.FC = () => {
       title: "Order ID",
       dataIndex: "orderId",
       key: "orderId",
+      sorter: (a: Order, b: Order) => a.orderId.localeCompare(b.orderId),
     },
     {
       title: "User Name",
       dataIndex: ["user", "name"],
       key: "userName",
+      sorter: (a: Order, b: Order) =>
+        a.user?.name.localeCompare(b.user?.name || ""),
     },
     {
       title: "Products",
       dataIndex: "productVariants",
       key: "products",
-      render: (productVariants: Product[]) => (
-        <>
-          {productVariants.map((product) => (
-            <Tag key={product.productVariantId} color="blue">
-              {product.productName} (x{product.quantity})
-            </Tag>
-          ))}
-        </>
-      ),
+      render: (productVariants: Product[]) =>
+        productVariants.map((product) => (
+          <Tag key={product.productVariantId} color="blue">
+            {product.productName} (x{product.quantity})
+          </Tag>
+        )),
     },
     {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amount: number) => formatCurrency(amount),
+      sorter: (a: Order, b: Order) => a.totalAmount - b.totalAmount,
     },
     {
       title: "Status",
@@ -105,11 +106,19 @@ const OrderList: React.FC = () => {
             : "volcano";
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
       },
+      filters: [
+        { text: "Pending", value: "pending" },
+        { text: "Processing", value: "processing" },
+        { text: "Shipped", value: "shipped" },
+        { text: "Cancel", value: "cancel" },
+      ],
+      onFilter: (value: string | number | boolean, record: Order) =>
+        record.status === value,
     },
     {
       title: "Actions",
       key: "actions",
-      render: (record: { status: string; orderId: string }) => {
+      render: (record: Order) => {
         let availableStatus: string[] = [];
         switch (record.status) {
           case "pending":
@@ -132,7 +141,6 @@ const OrderList: React.FC = () => {
             defaultValue={record.status}
             style={{ width: 120 }}
             onChange={(value) => handleUpdateStatus(record.orderId, value)}
-            dropdownStyle={{ zIndex: 1000 }}
             disabled={availableStatus.length === 0}
           >
             {availableStatus.map((status) => (
@@ -157,15 +165,28 @@ const OrderList: React.FC = () => {
 
   return (
     <>
+      <Search
+        placeholder="Search orders by ID or User Name"
+        allowClear
+        onSearch={(value) => {
+          const searchValue = value.toLowerCase();
+          const filtered = orders.filter(
+            (order) =>
+              order.orderId.toLowerCase().includes(searchValue) ||
+              order.user?.name?.toLowerCase().includes(searchValue)
+          );
+          setFilteredOrders(filtered);
+        }}
+        style={{ width: 300, marginBottom: 20 }}
+      />
       <Table
         loading={isLoading}
-        columns={columns}
-        dataSource={orders}
+        columns={columns as any} 
+        dataSource={filteredOrders}
         rowKey="orderId"
         pagination={{ pageSize: 5 }}
         bordered
       />
-
       <Modal
         title="Order Details"
         visible={isModalVisible}
