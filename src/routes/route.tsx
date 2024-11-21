@@ -19,8 +19,6 @@ import ViewProductVariant from "../pages/products/pages/view-product-variant";
 
 const Promotions = lazy(() => import("../pages/promotions"));
 
-const Stock = lazy(() => import("../pages/stock"));
-
 const Users = lazy(() => import("../pages/users"));
 
 import NotFound from "../pages/not-found";
@@ -75,7 +73,6 @@ const routes = createBrowserRouter([
       { path: "users", element: <Users /> },
       { path: "users/:userId", element: <UserDetailPage /> },
       { path: "promotions", element: <Promotions /> },
-      { path: "stock", element: <Stock /> },
       { path: "notification", element: <Notification /> },
       { path: "profile", element: <Profile /> },
     ],

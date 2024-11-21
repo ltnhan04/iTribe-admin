@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
-import type { ProductVariant, ProductVariantRoot, VariantRoot } from "../types";
+import type { ProductVariantRoot, VariantDetails } from "../types";
 
 export const productVariantApi = createApi({
   reducerPath: "productVariantApi",
@@ -18,15 +18,9 @@ export const productVariantApi = createApi({
   tagTypes: ["ProductVariants"],
 
   endpoints: (builder) => ({
-    getProductVariants: builder.query<VariantRoot, string>({
-      query: (productId) => `/api/admin/variant/${productId}`,
-      providesTags: (result, _error, productId) =>
-        result?.variants
-          ? result.variants.map((variant) => ({
-              type: "ProductVariants",
-              id: variant._id,
-            }))
-          : [{ type: "ProductVariants", id: productId }],
+    getProductVariants: builder.query<VariantDetails, string>({
+      query: (id) => `/api/admin/products/variant/${id}`,
+      providesTags: ["ProductVariants"],
     }),
 
     createProductVariant: builder.mutation<ProductVariantRoot, FormData>({
@@ -40,10 +34,10 @@ export const productVariantApi = createApi({
 
     updateProductVariant: builder.mutation<
       ProductVariantRoot,
-      { variantId: string; updatedVariant: Partial<ProductVariant> }
+      { variantId: string; updatedVariant: FormData }
     >({
       query: ({ variantId, updatedVariant }) => ({
-        url: `/api/admin/variant/${variantId}`,
+        url: `/api/admin/products/variant/${variantId}`,
         method: "PUT",
         body: updatedVariant,
       }),
@@ -57,6 +51,14 @@ export const productVariantApi = createApi({
       }),
       invalidatesTags: ["ProductVariants"],
     }),
+    importVariantFromExcel: builder.mutation<VariantDetails, FormData>({
+      query: (formData) => ({
+        url: `/api/admin/products/variant/import`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["ProductVariants"],
+    }),
   }),
 });
 
@@ -65,4 +67,5 @@ export const {
   useCreateProductVariantMutation,
   useUpdateProductVariantMutation,
   useDeleteProductVariantMutation,
+  useImportVariantFromExcelMutation,
 } = productVariantApi;

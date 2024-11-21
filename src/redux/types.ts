@@ -6,6 +6,10 @@ export interface Data {
 export interface ProductDetails {
   product: Product;
 }
+export interface VariantDetails {
+  message?: string;
+  variant: Variant;
+}
 export interface Root {
   message?: string;
   product: Product;
@@ -48,8 +52,10 @@ export interface Variant {
   stock: number;
   slug: string;
   images: string[];
-  createdAt: string;
-  updatedAt: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reviews: any[];
+  createdAt: Date;
+  updatedAt: Date;
   __v: number;
 }
 
@@ -63,6 +69,24 @@ export interface Color {
 //Get All Variants
 export interface VariantRoot {
   variants: Variant[];
+}
+
+export interface Review {
+  _id: string;
+  productId: string;
+  user: User;
+  rating: number;
+  comment: string;
+  isAnonymous: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
 }
 
 //Create Variant

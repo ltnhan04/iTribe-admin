@@ -13,6 +13,7 @@ import {
   Tooltip,
   Space,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { useGetProductQuery } from "../../../redux/api/productApi";
 import { useEffect, useState } from "react";
 import {
@@ -25,7 +26,10 @@ import type { TableColumnsType } from "antd";
 import { desc, pageSize } from "../constants";
 import { formatCurrency } from "../../../utils/format-currency";
 import type { Variant } from "../../../redux/types";
-import { useDeleteProductVariantMutation } from "../../../redux/api/productVariantApi";
+import {
+  useDeleteProductVariantMutation,
+  useImportVariantFromExcelMutation,
+} from "../../../redux/api/productVariantApi";
 
 interface ErrorType {
   data: {
@@ -38,9 +42,13 @@ const ViewProduct = () => {
   const location = useLocation();
   const id = location.pathname.split("/")[2];
 
-  const { data, error, isLoading, refetch } = useGetProductQuery(id);
+  const { data, error, isLoading, refetch } = useGetProductQuery(id, {
+    refetchOnMountOrArgChange: true,
+  });
   const [deleteProductVariant, { isLoading: isDeleting }] =
     useDeleteProductVariantMutation();
+  const [importVariantFromExcel, { isLoading: isImporting }] =
+    useImportVariantFromExcelMutation();
 
   useEffect(() => {
     if (error) {
@@ -270,7 +278,6 @@ const ViewProduct = () => {
   const handleDelete = async (id: string) => {
     try {
       const response = await deleteProductVariant(id).unwrap();
-      console.log(response);
       if (response) {
         message.success(response.message);
         refetch();
@@ -282,8 +289,48 @@ const ViewProduct = () => {
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    const id = location.pathname.split("/")[2];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("productId", id);
+
+    try {
+      const response = await importVariantFromExcel(formData).unwrap();
+      message.success(response.message);
+      refetch();
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg =
+        typedError?.data?.error || "The file does not comply with regulations";
+      message.error(errorMsg);
+    }
+  };
+
+  const handleImportClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".xlsx, .xls";
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    };
+    input.click();
+  };
+
   return (
     <Card title={`${data?.product.name}'s Variants`}>
+      <Button
+        type="default"
+        icon={<UploadOutlined />}
+        onClick={handleImportClick}
+        loading={isImporting}
+        style={{ marginBottom: 16 }}
+      >
+        Import variants from Excel
+      </Button>
       <Table
         dataSource={data?.product.variants || []}
         columns={columns}
