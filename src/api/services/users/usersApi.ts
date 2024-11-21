@@ -21,7 +21,6 @@ export const getUserOrders = async (userId: string) => {
 };
 
 export const getProductVariantDetail = async (productVariantId: string) => {
-  console.log("Product Variant ID:", productVariantId); // Check the value here
   return await axiosInstance.get(`/api/admin/users/productVariantDetail/${productVariantId}`);
 };
 
