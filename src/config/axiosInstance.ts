@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import { store } from "../redux/store";
-import {
-  updateAccessToken,
-  clearAccessToken,
-} from "../redux/features/authentication/authSlice";
+import { updateAccessToken } from "../redux/features/authentication/authSlice";
 import { refreshToken } from "../api/services/auth/authApi";
 
 let isRefreshing = false;
@@ -22,7 +19,7 @@ const processQueue = (error: any, token: string | null) => {
 };
 
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL  || "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
   timeout: 10000,
   withCredentials: true,
 });
@@ -46,7 +43,6 @@ axiosInstance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    console.log(error);
     if (
       error.response &&
       error.response.status === 403 &&
@@ -81,11 +77,6 @@ axiosInstance.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
-    } else if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 500)
-    ) {
-      store.dispatch(clearAccessToken());
     } else {
       return Promise.reject(error);
     }
