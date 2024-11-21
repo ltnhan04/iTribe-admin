@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { PlusOutlined } from "@ant-design/icons";
 import {
-  fetchPromotions,
-  createPromotion,
-  updatePromotion,
-  deletePromotion,
-} from "../../api/services/promotion/promotionApi";
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import type { TableColumnsType } from "antd";
 import {
   Table,
   Modal,
@@ -17,22 +17,51 @@ import {
   Badge,
   Space,
   FloatButton,
+  Popconfirm,
 } from "antd";
-import { DataType, FormValues } from "./types";
-import { promotionNameRules, startDateRules, endDateRules, discountRules, maxUsageRules } from "../../schemaValidation/promotion.schema";
 import dayjs from "dayjs";
 
+import { DataType, FormValues } from "./types";
+import {
+  promotionNameRules,
+  startDateRules,
+  endDateRules,
+  discountRules,
+  maxUsageRules,
+  minOrderAmountRules,
+} from "../../schemaValidation/promotion.schema";
+import { pageSize } from "../products/constants";
+import {
+  fetchPromotions,
+  createPromotion,
+  updatePromotion,
+  deletePromotion,
+} from "../../api/services/promotion/promotionApi";
+import { formatCurrency } from "../../utils/format-currency";
+
+interface ErrorType {
+  response: {
+    data: {
+      error: string;
+    };
+  };
+}
+
 const Promotions = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentPromotionId, setCurrentPromotionId] = useState<string | null>(null);
-  const [form] = Form.useForm(); // Khởi tạo form từ Form.useForm()
+  const [currentPromotionId, setCurrentPromotionId] = useState<string | null>(
+    null
+  );
+  const [form] = Form.useForm();
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const response = await fetchPromotions();
-      if (response && response.promotions && Array.isArray(response.promotions)) {
+      if (response?.promotions && Array.isArray(response.promotions)) {
         const data: DataType[] = response.promotions.map((item: DataType) => ({
           ...item,
           key: item._id,
@@ -40,12 +69,13 @@ const Promotions = () => {
           maxUsage: item.maxUsage,
         }));
         setPromotions(data);
-      } else {
-        throw new Error("Dữ liệu trả về không đúng định dạng");
       }
-    } catch (error) {
-      console.error("Error fetching promotions:", error);
-      message.error("Không thể tải danh sách khuyến mãi");
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,80 +83,128 @@ const Promotions = () => {
     fetchData();
   }, []);
 
-  const showModal = () => setIsModalVisible(true);
   const handleOk = () => {
     setIsModalVisible(false);
     fetchData();
   };
-  const handleCancel = () => setIsModalVisible(false);
 
   const onFinish = async (values: FormValues) => {
     setLoading(true);
     try {
       const startDate = values.startDate;
-      const endDate = values.endDate;  
-      if (currentPromotionId) {
-        await updatePromotion(currentPromotionId, {
-          code: values.code,
-          discountPercentage: values.discount,
-          validFrom: startDate,
-          validTo: endDate,
-          maxUsage: values.maxUsage, 
-          isActive: true,
+      const endDate = values.endDate;
+      const promotionData = {
+        code: values.code,
+        discountPercentage: values.discount,
+        validFrom: startDate,
+        validTo: endDate,
+        maxUsage: values.maxUsage,
+        minOrderAmount: values.minOrderAmount,
+        isActive: true,
+      };
 
-        });
-        message.success("Khuyến mãi đã được cập nhật thành công!");
+      if (currentPromotionId) {
+        const response = await updatePromotion(
+          currentPromotionId,
+          promotionData
+        );
+        message.success(response.data.message);
       } else {
-        await createPromotion({
-          code: values.code,
-          discountPercentage: values.discount,
-          validFrom: startDate,
-          validTo: endDate,
-          maxUsage: values.maxUsage,
-          isActive: true,
-        });
-        message.success("Khuyến mãi đã được tạo thành công!");
+        const response = await createPromotion(promotionData);
+        message.success(response.data.message);
       }
       handleOk();
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại!");
+    } catch (error: unknown) {
+      console.log(error);
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  const columns = [
-    // { title: "STT",
-    //   render: (text: string, record: DataType, index: number) => index + 1,
-    // },
-    { title: "Mã Khuyến Mãi", 
-      dataIndex: "code", 
-      key: "code" },
+  const handleUpdate = (record: DataType) => {
+    form.setFieldsValue({
+      code: record.code,
+      discount: record.discountPercentage,
+      startDate: dayjs(record.validFrom),
+      endDate: dayjs(record.validTo),
+      maxUsage: record.maxUsage,
+      minOrderAmount: record.minOrderAmount,
+    });
+    setCurrentPromotionId(record._id);
+    setIsModalVisible(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await deletePromotion(id);
+      message.success(response.data.message);
+      fetchData();
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
+    }
+  };
+
+  const columns: TableColumnsType<DataType> = [
     {
-      title: "Giảm Giá (%)",
+      title: "ID",
+      dataIndex: "_id",
+      key: "_id",
+      render: (_, _record, index) => (currentPage - 1) * pageSize + index + 1,
+    },
+    {
+      title: "Promotion Code",
+      dataIndex: "code",
+      key: "code",
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+        <Input
+          placeholder="Search by code"
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => confirm()}
+          onBlur={() => confirm()}
+        />
+      ),
+      filterIcon: () => <SearchOutlined />,
+      onFilter: (value, record) =>
+        record.code.toLowerCase().includes((value as string).toLowerCase()),
+    },
+    {
+      title: "Discount (%)",
       dataIndex: "discountPercentage",
       key: "discountPercentage",
     },
     {
-      title: "Số lượng sử dụng",
+      title: "Usage",
       key: "maxUsage",
       render: (record: DataType) => `${record.usedCount}/${record.maxUsage}`,
     },
     {
-      title: "Ngày Bắt Đầu",
+      title: "Min Order Amount",
+      dataIndex: "minOrderAmount",
+      key: "minOrderAmount",
+      render: (text: number) => formatCurrency(text),
+    },
+    {
+      title: "Start Date",
       dataIndex: "validFrom",
       key: "validFrom",
-      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
+      render: (text: string) => new Date(text).toLocaleDateString(),
     },
     {
-      title: "Ngày Kết Thúc",
+      title: "End Date",
       dataIndex: "validTo",
       key: "validTo",
-      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
+      render: (text: string) => new Date(text).toLocaleDateString(),
     },
     {
-      title: "Trạng Thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (text: string, record: DataType) => (
@@ -138,35 +216,23 @@ const Promotions = () => {
       key: "action",
       render: (record: DataType) => (
         <Space size="middle">
-          <a onClick={() => handleUpdate(record)}>Sửa</a>
-          <a onClick={() => handleDelete(record._id)}>Xóa</a>
+          <Button icon={<EditOutlined />} onClick={() => handleUpdate(record)}>
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this promotion?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button icon={<DeleteOutlined />} danger>
+              Delete
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
-
-  const handleUpdate = (record: DataType) => {
-    form.setFieldsValue({
-      code: record.code,
-      discount: record.discountPercentage,
-      startDate: dayjs(record.validFrom),
-      endDate: dayjs(record.validTo),
-      maxUsage: record.maxUsage,
-    });
-    setCurrentPromotionId(record._id);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deletePromotion(id);
-      message.success("Khuyến mãi đã được xóa");
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting promotion:", error);
-      message.error("Có lỗi xảy ra khi xóa");
-    }
-  };
 
   return (
     <>
@@ -174,45 +240,77 @@ const Promotions = () => {
         icon={<PlusOutlined />}
         type="default"
         style={{ insetInlineEnd: 94 }}
-        onClick={showModal}
+        onClick={() => setIsModalVisible(true)}
       />
       <Table
         columns={columns}
         dataSource={promotions}
+        loading={loading}
         rowKey="_id"
-        pagination={false}
+        pagination={{
+          pageSize,
+          onChange: (page) => setCurrentPage(page),
+        }}
+        className="text-sm"
       />
       <Modal
-        title={currentPromotionId ? "Sửa Khuyến Mãi" : "Thêm Khuyến Mãi"}
-        visible={isModalVisible}
-        onCancel={handleCancel}
+        title={currentPromotionId ? "Edit Promotion" : "Add Promotion"}
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
         <Form layout="vertical" onFinish={onFinish} form={form}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Mã Khuyến Mãi" name="code" rules={promotionNameRules}>
-              <Input placeholder="Nhập mã khuyến mãi" />
+            <Form.Item
+              label="Promotion Code"
+              name="code"
+              rules={promotionNameRules}
+            >
+              <Input placeholder="Enter promotion code" />
             </Form.Item>
-            <Form.Item label="Giảm giá (%)" name="discount" rules={discountRules}>
-              <Input placeholder="Nhập % giảm giá" />
+            <Form.Item
+              label="Discount (%)"
+              name="discount"
+              rules={discountRules}
+            >
+              <Input disabled={loading} placeholder="Enter discount" />
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Ngày Bắt Đầu" name="startDate" rules={startDateRules}>
-              <DatePicker className="w-full" format="DD-MM-YYYY" />
+            <Form.Item
+              label="Start Date"
+              name="startDate"
+              rules={startDateRules}
+            >
+              <DatePicker
+                disabled={loading}
+                className="w-full"
+                format="DD-MM-YYYY"
+              />
             </Form.Item>
-            <Form.Item label="Ngày Kết Thúc" name="endDate" rules={endDateRules}>
-              <DatePicker className="w-full" format="DD-MM-YYYY" />
+            <Form.Item label="End Date" name="endDate" rules={endDateRules}>
+              <DatePicker
+                disabled={loading}
+                className="w-full"
+                format="DD-MM-YYYY"
+              />
             </Form.Item>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Số lượng tối đa" name="maxUsage" rules={maxUsageRules}>
-              <Input placeholder="Nhập vào số lượng" />
+            <Form.Item label="Max Usage" name="maxUsage" rules={maxUsageRules}>
+              <Input disabled={loading} placeholder="Enter max usage" />
+            </Form.Item>
+            <Form.Item
+              label="Min Order Amount"
+              name="minOrderAmount"
+              rules={minOrderAmountRules}
+            >
+              <Input disabled={loading} placeholder="Enter min order amount" />
             </Form.Item>
           </div>
           <Form.Item>
             <Button type="primary" htmlType="submit" block loading={loading}>
-              {currentPromotionId ? "Lưu thay đổi" : "Lưu"}
+              {currentPromotionId ? "Save Changes" : "Save"}
             </Button>
           </Form.Item>
         </Form>
