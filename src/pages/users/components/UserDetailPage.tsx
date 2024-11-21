@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { User, Order, ProductVariant } from "../types";
-import { Spin, Pagination, Button, message, Badge, Card, Table, Input, Select, Modal, Carousel, Space, Tag } from "antd";
+import { Spin, Pagination, Button, message, Badge, Card, Table, Select, Modal,  Space, Tag,Input } from "antd";
 import { UserOutlined, PhoneOutlined, MailOutlined, DollarOutlined, HomeOutlined, EyeOutlined, InfoCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import {
   getUserDetails,
@@ -15,6 +15,7 @@ import {
 import { formatCurrency } from "../../../utils/format-currency";
 import moment from "moment";
 import "moment/locale/vi";
+const { Search } = Input;
 const { Option } = Select;
 
 const UserDetailPage: React.FC = () => {
@@ -32,18 +33,16 @@ const UserDetailPage: React.FC = () => {
   
 
   const handleViewAllProductDetails = (order: Order) => {
-
-  const variants: ProductVariant[] = order.productVariants.map((productItem) => {
-    if (typeof productItem.productVariant === "object") {
-      return productItem.productVariant as ProductVariant;
+    const variants: ProductVariant[] = orderDetails[order._id] || [];
+  
+    if (variants.length === 0) {
+      // Handle case where there are no variants available in the `orderDetails`
+      message.warning("No product details available.");
     }
-    throw new Error("Invalid productVariant type");
-  });
-  setSelectedOrderVariants(variants);
-  console.log(variants)
-  setIsModalVisible(true);
-};
-
+  
+    setSelectedOrderVariants(variants);
+    setIsModalVisible(true);
+  };
   const handleModalClose = () => {
     setIsModalVisible(false);
     setSelectedOrderVariants([]);
@@ -263,7 +262,13 @@ const UserDetailPage: React.FC = () => {
       {/* Order History */}
       <Card title={<><DollarOutlined className="mr-2 text-green-500" /> Order History</>} bordered={false} className="w-full">
         <div className="flex justify-between mb-4">
-          
+          <Search
+                placeholder="Search by order status or product name"
+                value={searchText}
+                onChange={(e) => handleSearch(e.target.value)}
+                enterButton="Search"
+                style={{ width: 300 }}
+          />
           <Select
             value={statusFilter}
             onChange={handleStatusFilterChange}
