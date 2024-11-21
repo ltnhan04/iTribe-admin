@@ -19,7 +19,7 @@ const processQueue = (error: any, token: string | null) => {
 };
 
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000,
   withCredentials: true,
 });

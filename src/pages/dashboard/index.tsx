@@ -1,213 +1,260 @@
-import React, { useEffect, useState } from 'react';
-import { Column, Pie } from '@ant-design/charts';
-import { Button } from 'antd';
-import '../../index.css';
-import { fetchDailyRevenue, fetchTotalRevenue } from '../../api/services/revenue/revenueApi';
-import { formatCurrency } from '../../utils/format-currency';
+import { useEffect, useState } from "react";
+import { Card, message, Tabs } from "antd";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
-const Revenue: React.FC = () => {
-    const [dailyRevenue, setDailyRevenue] = useState<any[]>([]);
-    const [, setTotalRevenue] = useState<any | null>(null);
-    const [productRevenue, setProductRevenue] = useState<any[]>([]); // Thêm state cho doanh thu theo sản phẩm
-    const [loading, setLoading] = useState(true);
-    const [chartType, setChartType] = useState<string>('daily'); // Trạng thái biểu đồ
+import {
+  fetchDailyRevenue,
+  fetchTotalProduct,
+  fetchTotalRevenue,
+  revenueLastDays,
+} from "../../api/services/revenue/revenueApi";
+import { COLORS } from "../../constants";
+import { formatCurrency } from "../../utils/format-currency";
+import type { ProductVariant, Detail } from "./types";
 
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // Fetch doanh thu theo ngày
-                const dailyData = await fetchDailyRevenue();
-                if (dailyData.data && dailyData.data.revenue) {
-                    const revenue = dailyData.data.revenue;
-                    const formattedDailyData = [
-                        {
-                            date: new Date(revenue.date),
-                            totalSales: revenue.totalSales,
-                        },
-                    ];
-                    setDailyRevenue(formattedDailyData);
-                }
-                const totalData = await fetchTotalRevenue();
-                if (totalData.data && Array.isArray(totalData.data.result) && totalData.data.result.length > 0) {
-                    setTotalRevenue(totalData.data.result[0]);
-                }
-                // Fetch doanh thu theo sản phẩm
-                const productData = await fetch('http://localhost:8000/api/admin/revenue/product');
-                const productRevenueData = await productData.json();
-                if (productRevenueData.result && Array.isArray(productRevenueData.result)) {
-                    setProductRevenue(productRevenueData.result);
-                }
-
-            } catch (error) {
-                console.error('Failed to fetch revenue data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, []);
-
-    // Xử lý dữ liệu cho 3 ngày gần nhất (cách 1 ngày)
-    const getLast3DaysData = () => {
-        const today = new Date();
-        const filteredData = [];
-        for (let i = 2; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(today.getDate() - i);
-            const formattedDate = date.toISOString().split('T')[0];
-            const dataForDate = dailyRevenue.find(
-                (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
-            );
-            filteredData.push({
-                date: formattedDate,
-                totalSales: dataForDate ? dataForDate.totalSales : 0,
-            });
-        }
-        return filteredData;
+interface ErrorType {
+  response: {
+    data: {
+      error: string;
     };
-
-    // Xử lý dữ liệu cho 7 ngày trong tuần bắt đầu từ thứ Hai
-    const getLast7DaysData = () => {
-        const today = new Date();
-        const currentDayOfWeek = today.getDay();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - currentDayOfWeek + 1);
-        const filteredData = [];
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
-            const formattedDate = date.toISOString().split('T')[0];
-            const dataForDate = dailyRevenue.find(
-                (item) => new Date(item.date).toISOString().split('T')[0] === formattedDate
-            );
-            filteredData.push({
-                date: formattedDate,
-                totalSales: dataForDate ? dataForDate.totalSales : 0,
-            });
-        }
-        return filteredData;
-    };
-
-    const getColorBySales = (totalSales: number) => {
-        if (totalSales < 100000) return '#f39c12';
-        if (totalSales < 500000) return '#e67e22';
-        return '#2ecc71';
-    };
-
-    const productRevenueConfig = {
-        data: productRevenue,
-        angleField: 'totalSales',  // Trường tổng doanh thu
-        colorField: 'name',  // Trường tên sản phẩm
-        radius: 0.8,  // Kích thước của vòng tròn
-        color: (datum: any) => getColorBySales(datum.totalSales),
-        label: {
-            type: 'inner',
-            content: '{name} {percentage}',  // Hiển thị tên và tỷ lệ phần trăm
-            style: { fill: '#fff', fontSize: 14 },
-        },
-        legend: {
-            position: 'top',
-        },
-        statistic: {
-            title: {
-                style: { fontSize: '16px' },
-            },
-            content: {
-                formatter: (value: any) => formatCurrency(value), // Định dạng tổng doanh thu
-            },
-        },
-    };
-
-    const dailyConfig = {
-        data: dailyRevenue,
-        xField: 'date',
-        yField: 'totalSales',
-        color: (datum: any) => getColorBySales(datum.totalSales),
-        label: {
-            position: 'top',
-            style: { fill: '#FFFFFF', opacity: 0.6 },
-            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
-        },
-        xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { 
-          title: { text: 'Sales' },  // Tiêu đề cho trục Y
-          label: {
-              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
-          },
-      },
   };
+}
 
-    const last3DaysConfig = {
-        data: getLast3DaysData(),
-        xField: 'date',
-        yField: 'totalSales',
-        color: (datum: any) => getColorBySales(datum.totalSales),
-        label: {
-            position: 'top',
-            style: { fill: '#FFFFFF', opacity: 0.6 },
-            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
-        },
-        xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { 
-          title: { text: 'Sales' },  // Tiêu đề cho trục Y
-          label: {
-              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
-          },
-      },
-  };
-    const last7DaysConfig = {
-        data: getLast7DaysData(),
-        xField: 'date',
-        yField: 'totalSales',
-        color: (datum: any) => getColorBySales(datum.totalSales),
-        label: {
-            position: 'top',
-            style: { fill: '#FFFFFF', opacity: 0.6 },
-            formatter: (datum: any) => formatCurrency(datum.totalSales), // Hiển thị giá trị dưới dạng VND
-        },
-        xAxis: { title: { text: 'Date' }, type: 'time' },
-        yAxis: { 
-          title: { text: 'Sales' },  // Tiêu đề cho trục Y
-          label: {
-              formatter: (value: any) => formatCurrency(value),  // Định dạng giá trị trục Y
-          },
-      },
-  };
+export default function RevenueDashboard() {
+  const [oneDayData, setOneDayData] = useState<ProductVariant[]>([]);
+  const [multiDayData, setMultiDayData] = useState<Detail[]>([]);
+  const [totalRevenueData, setTotalRevenueData] = useState<Detail[]>([]);
+  const [totalProductData, setTotalProductData] = useState<Detail[]>([]);
+  const [days, setDays] = useState<number>(3);
 
-    if (loading) {
-        return <p>Loading revenue data...</p>;
+  const getOneDayData = async () => {
+    try {
+      const response = await fetchDailyRevenue();
+      if (response.status === 200) {
+        setOneDayData(response.data.revenue.productVariants);
+      }
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
     }
+  };
 
-    return (
-        <div>
-            <h1 className="text-center font-bold text-xl">Revenue Dashboard</h1>
+  const getLastDaysData = async (days: number) => {
+    try {
+      const response = await revenueLastDays(days);
+      if (response.status === 200) {
+        setMultiDayData(response.data.details);
+      }
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
+    }
+  };
 
-            {/* Nút điều hướng */}
-            <div style={{ textAlign: 'center', margin: '20px' }}>
-                <Button type={chartType === 'daily' ? 'primary' : 'default'} onClick={() => setChartType('daily')}>
-                    Doanh thu theo ngày
-                </Button>
-                <Button type={chartType === '3days' ? 'primary' : 'default'} onClick={() => setChartType('3days')}>
-                    Doanh thu 3 ngày gần nhất
-                </Button>
-                <Button type={chartType === '7days' ? 'primary' : 'default'} onClick={() => setChartType('7days')}>
-                    Doanh thu 7 ngày trong tuần
-                </Button>
-                <Button type={chartType === 'product' ? 'primary' : 'default'} onClick={() => setChartType('product')}>
-                    Doanh thu theo sản phẩm
-                </Button>
-            </div>
+  const getTotalRevenue = async () => {
+    try {
+      const response = await fetchTotalRevenue();
+      if (response.status === 200) {
+        setTotalRevenueData(response.data.details);
+      }
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
+    }
+  };
 
-            <div className="chart-container">
-                {chartType === 'daily' && <Column {...dailyConfig} />}
-                {chartType === '3days' && <Column {...last3DaysConfig} />}
-                {chartType === '7days' && <Column {...last7DaysConfig} />}
-                {chartType === 'product' && <Pie {...productRevenueConfig} />}
-            </div>
-        </div>
-    );
-};
+  const getTotalProduct = async () => {
+    try {
+      const response = await fetchTotalProduct();
+      if (response.status === 200) {
+        setTotalProductData(response.data.result);
+      }
+    } catch (error: unknown) {
+      const typedError = error as ErrorType;
+      const errorMsg = typedError?.response?.data?.error;
+      message.error(errorMsg);
+    }
+  };
 
-export default Revenue;
+  const handleTabChange = (key: string) => {
+    const selectedDays = key === "3days" ? 3 : 7;
+    setDays(selectedDays);
+    getLastDaysData(selectedDays);
+  };
+
+  useEffect(() => {
+    getOneDayData();
+    getLastDaysData(days);
+    getTotalProduct();
+    getTotalRevenue();
+  }, [days]);
+
+  return (
+    <div className="container mx-auto">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="1-Day Revenue" bordered={true}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={oneDayData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis
+                width={100}
+                tickFormatter={(value) => `${formatCurrency(value)}`}
+              />
+              <Tooltip
+                formatter={(value) => `${formatCurrency(Number(value))}`}
+              />
+              <Legend />
+              <Bar dataKey="totalSales" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card title="3-Day and 7-Day Revenue" bordered={true}>
+          <Tabs
+            defaultActiveKey="3days"
+            onChange={handleTabChange}
+            items={[
+              {
+                key: "3days",
+                label: "3 Days",
+                children: (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={multiDayData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis
+                        width={100}
+                        tickFormatter={(value) => `${formatCurrency(value)}`}
+                      />
+                      <Tooltip
+                        formatter={(value) =>
+                          `${formatCurrency(Number(value))}`
+                        }
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="totalSales"
+                        stroke="#8884d8"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ),
+              },
+              {
+                key: "7days",
+                label: "7 Days",
+                children: (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={multiDayData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis
+                        width={100}
+                        tickFormatter={(value) => `${formatCurrency(value)}`}
+                      />
+                      <Tooltip
+                        formatter={(value) =>
+                          `${formatCurrency(Number(value))}`
+                        }
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="totalSales"
+                        stroke="#8884d8"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ),
+              },
+            ]}
+          />
+        </Card>
+
+        <Card title="Total Revenue by Product" bordered={true}>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={totalProductData}
+                cx="50%"
+                cy="50%"
+                labelLine={true}
+                width={220}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="totalSales"
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
+              >
+                {totalRevenueData.map((_entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value) => `${formatCurrency(Number(value))}`}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card title="Revenue by Product" bordered={true}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={totalRevenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis
+                width={100}
+                yAxisId="left"
+                tickFormatter={(value) => `${formatCurrency(value)}`}
+              />
+              <YAxis yAxisId="right" orientation="right" />
+              <Tooltip
+                formatter={(value, name) =>
+                  name === "totalSales"
+                    ? `${formatCurrency(Number(value))}`
+                    : value
+                }
+              />
+              <Legend />
+              <Bar
+                yAxisId="left"
+                dataKey="totalSales"
+                fill="#8884d8"
+                name="Total Sales"
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="totalOrders"
+                fill="#82ca9d"
+                name="Total Orders"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+    </div>
+  );
+}

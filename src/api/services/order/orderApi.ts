@@ -9,4 +9,3 @@ export const getOrderDetail = async (orderId: string) => {
 export const updateOrderStatus = async (orderId: string, status: string) => {
   return await axiosInstance.put(`/api/admin/orders/${orderId}`, { status });
 };
-export const paginatedOrders = async () => {};
