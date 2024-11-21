@@ -12,7 +12,7 @@ import {
   Divider,
   message,
 } from "antd";
-import { UserOutlined, PhoneOutlined, HomeOutlined } from "@ant-design/icons";
+import { UserOutlined, PhoneOutlined, HomeOutlined,UserSwitchOutlined } from "@ant-design/icons";
 import {
   fetchAdminProfileApi,
   updateAdminProfileApi,
@@ -118,6 +118,14 @@ const AdminProfile: React.FC = () => {
             </Col>
             <Col span={16}>
               <Text>{adminData?.address}</Text>
+            </Col>
+            <Col span={8}>
+              <Text strong>
+              <UserSwitchOutlined /> Role:
+              </Text>
+            </Col>
+            <Col span={16}>
+              <Text>{adminData?.role}</Text>
             </Col>
           </Row>
         </div>
