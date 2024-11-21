@@ -30,3 +30,11 @@ export const paginatedUsers = async (page: number, limit: number) => {
     `/api/admin/paginate?page=${page}&limit=${limit}`
   );
 };
+export const fetchAdminProfileApi = async () => {
+  return axiosInstance.get("/api/auth/profile");
+};
+
+// Cập nhật thông tin admin
+export const updateAdminProfileApi = async (values: any) => {
+  return axiosInstance.put("/api/auth/update-profile", values);
+};
