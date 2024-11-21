@@ -48,7 +48,7 @@ interface ErrorType {
 }
 
 const Promotions = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [, setCurrentPage] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promotions, setPromotions] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -148,60 +148,166 @@ const Promotions = () => {
       message.error(errorMsg);
     }
   };
-
   const columns: TableColumnsType<DataType> = [
-    {
-      title: "ID",
-      dataIndex: "_id",
-      key: "_id",
-      render: (_, _record, index) => (currentPage - 1) * pageSize + index + 1,
-    },
     {
       title: "Promotion Code",
       dataIndex: "code",
       key: "code",
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-        <Input
-          placeholder="Search by code"
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => confirm()}
-          onBlur={() => confirm()}
-        />
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search by code"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            onBlur={() => confirm()}
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters?.();
+                confirm(); // Apply reset
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
       ),
       filterIcon: () => <SearchOutlined />,
       onFilter: (value, record) =>
         record.code.toLowerCase().includes((value as string).toLowerCase()),
+      sorter: (a, b) => a.code.localeCompare(b.code),
     },
     {
       title: "Discount (%)",
       dataIndex: "discountPercentage",
       key: "discountPercentage",
-    },
-    {
-      title: "Usage",
-      key: "maxUsage",
-      render: (record: DataType) => `${record.usedCount}/${record.maxUsage}`,
+      sorter: (a, b) => a.discountPercentage - b.discountPercentage,
+      render: (discount) => `${discount}%`,
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Filter by Discount"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            onBlur={() => confirm()}
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters?.();
+                confirm(); // Apply reset
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+      onFilter: (value, record) =>
+        record.discountPercentage
+          .toString()
+          .includes((value as string).toLowerCase()),
     },
     {
       title: "Min Order Amount",
       dataIndex: "minOrderAmount",
       key: "minOrderAmount",
+      sorter: (a, b) => a.minOrderAmount - b.minOrderAmount,
       render: (text: number) => formatCurrency(text),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Filter by Min Order Amount"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            onBlur={() => confirm()}
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters?.();
+                confirm(); // Apply reset
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+      onFilter: (value, record) =>
+        record.minOrderAmount
+          .toString()
+          .includes((value as string).toLowerCase()),
     },
     {
       title: "Start Date",
       dataIndex: "validFrom",
       key: "validFrom",
       render: (text: string) => new Date(text).toLocaleDateString(),
+      sorter: (a, b) => {
+        const dateA = new Date(a.validFrom).getTime();
+        const dateB = new Date(b.validFrom).getTime();
+        return dateA - dateB; // Sort ascending
+      },
+      sortDirections: ["ascend", "descend"], // Optional: specifies sorting directions
     },
     {
       title: "End Date",
       dataIndex: "validTo",
       key: "validTo",
       render: (text: string) => new Date(text).toLocaleDateString(),
+      sorter: (a, b) => {
+        const dateA = new Date(a.validTo).getTime();
+        const dateB = new Date(b.validTo).getTime();
+        return dateA - dateB;
+      },
+      sortDirections: ["ascend", "descend"],
     },
     {
       title: "Status",
@@ -210,7 +316,47 @@ const Promotions = () => {
       render: (text: string, record: DataType) => (
         <Badge status={record.isActive ? "success" : "default"} text={text} />
       ),
-    },
+      filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Button
+            type="link"
+            onClick={() => {
+              setSelectedKeys(["active"]);
+              confirm?.();  // Optional chaining to ensure confirm is called safely
+            }}
+          >
+            Active
+          </Button>
+          <Button
+            type="link"
+            onClick={() => {
+              setSelectedKeys(["inactive"]);
+              confirm?.();  // Optional chaining to ensure confirm is called safely
+            }}
+          >
+            Inactive
+          </Button>
+          <Button
+            type="link"
+            onClick={() => {
+              clearFilters?.();  // Optional chaining to ensure clearFilters is called safely
+              confirm?.();
+            }}
+          >
+            Reset
+          </Button>
+        </div>
+      ),
+      onFilter: (value, record) => {
+        if (value === "active") {
+          return record.isActive === true;
+        } else if (value === "inactive") {
+          return record.isActive === false;
+        }
+        return true;
+      },
+      sortDirections: ["ascend", "descend"],
+    },    
     {
       title: "Action",
       key: "action",
@@ -233,7 +379,7 @@ const Promotions = () => {
       ),
     },
   ];
-
+  
   return (
     <>
       <FloatButton

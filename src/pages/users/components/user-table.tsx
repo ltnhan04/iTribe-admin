@@ -24,6 +24,43 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
       title: "Member Name",
       dataIndex: "name",
       key: "name",
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }: any) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Name"
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            style={{ marginBottom: 8, display: "block" }}
+          />
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90, marginRight: 8 }}
+          >
+            Search
+          </Button>
+          <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+            Reset
+          </Button>
+        </div>
+      ),
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+      onFilter: (value, record) => {
+        const searchValue = String(value).toLowerCase();
+        return record.name.toLowerCase().includes(searchValue);
+      },
       render: (text: string) => <Link to={`/users/${text}`}>{text}</Link>,
     },
     {
@@ -90,8 +127,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
         { text: "Inactive", value: false },
       ],
       onFilter: (value, record) => record.active === value,
-    }
-    ,
+    },
     {
       title: "Action",
       key: "action",
