@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Layout, List, Card, Button, Input, Typography, message } from "antd";
 import { sendMessage, onNewMessage, offNewMessage } from "../../utils/socket";
 import { Message } from "./types";
