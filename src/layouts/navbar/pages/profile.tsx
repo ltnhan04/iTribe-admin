@@ -29,6 +29,7 @@ const AdminProfile: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false); // Trạng thái khi submit form
   const [fetching, setFetching] = useState<boolean>(true); // Trạng thái khi lấy dữ liệu
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [adminData, setAdminData] = useState<any>(null); // Dữ liệu admin
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false); // Trạng thái hiển thị modal
 
@@ -82,7 +83,7 @@ const AdminProfile: React.FC = () => {
   if (fetching) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Spin size="large" />
+        <Spin size="small" />
       </div>
     );
   }

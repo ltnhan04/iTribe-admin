@@ -90,6 +90,7 @@ import { User } from "./types";
 import { Layout } from "antd";
 import { getAllUsers } from "../../api/services/users/usersApi";
 const { Content } = Layout;
+import Loading from "../../loading";
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -113,7 +114,7 @@ const UsersList: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading users...</p>; // You can use a spinner here
+    return <Loading />;
   }
 
   if (error) {
@@ -122,7 +123,7 @@ const UsersList: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Content >
+      <Content>
         <UsersTable users={users} />
       </Content>
     </Layout>

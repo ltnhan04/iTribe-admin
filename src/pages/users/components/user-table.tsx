@@ -17,6 +17,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
     {
       title: "ID",
       key: "id",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, __: User, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
     },
@@ -29,7 +30,8 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
         selectedKeys,
         confirm,
         clearFilters,
-      }: any) => (
+      }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Search Name"
@@ -72,7 +74,8 @@ const UsersTable: React.FC<UsersTableProps> = ({ users }) => {
         selectedKeys,
         confirm,
         clearFilters,
-      }: any) => (
+      }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Search Phone"

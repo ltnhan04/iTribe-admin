@@ -141,6 +141,7 @@ import { NavbarProps } from "./types";
 import { getAllNotification } from "../../api/services/notification/notificationApi";
 
 const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
