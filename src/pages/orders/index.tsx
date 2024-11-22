@@ -20,6 +20,7 @@ const OrderList: React.FC = () => {
         const response = await getOrders();
         setOrders(response.data.orders);
         setFilteredOrders(response.data.orders);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         message.error(error.message || "Error fetching orders");
       } finally {
@@ -49,6 +50,7 @@ const OrderList: React.FC = () => {
       const response = await getOrderDetail(orderId);
       setSelectedOrder(response.data.order);
       setIsModalVisible(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       message.error(error.response?.data?.message || "Error fetching order details");
     }
@@ -181,6 +183,7 @@ const OrderList: React.FC = () => {
       />
       <Table
         loading={isLoading}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         columns={columns as any} 
         dataSource={filteredOrders}
         rowKey="orderId"
