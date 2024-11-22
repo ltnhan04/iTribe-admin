@@ -25,6 +25,7 @@ import {
 import { COLORS } from "../../constants";
 import { formatCurrency } from "../../utils/format-currency";
 import type { ProductVariant, Detail } from "./types";
+import Loading from "../../loading";
 
 interface ErrorType {
   response: {
@@ -40,8 +41,10 @@ export default function RevenueDashboard() {
   const [totalRevenueData, setTotalRevenueData] = useState<Detail[]>([]);
   const [totalProductData, setTotalProductData] = useState<Detail[]>([]);
   const [days, setDays] = useState<number>(3);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getOneDayData = async () => {
+    setIsLoading(true);
     try {
       const response = await fetchDailyRevenue();
       if (response.status === 200) {
@@ -51,6 +54,8 @@ export default function RevenueDashboard() {
       const typedError = error as ErrorType;
       const errorMsg = typedError?.response?.data?.error;
       message.error(errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,6 +110,10 @@ export default function RevenueDashboard() {
     getTotalProduct();
     getTotalRevenue();
   }, [days]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="container mx-auto">

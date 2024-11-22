@@ -12,7 +12,12 @@ import {
   Divider,
   message,
 } from "antd";
-import { UserOutlined, PhoneOutlined, HomeOutlined,UserSwitchOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  PhoneOutlined,
+  HomeOutlined,
+  UserSwitchOutlined,
+} from "@ant-design/icons";
 import {
   fetchAdminProfileApi,
   updateAdminProfileApi,
@@ -38,6 +43,7 @@ const AdminProfile: React.FC = () => {
         phoneNumber: response.data.phoneNumber,
         address: response.data.address,
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Error fetching admin profile:", error);
       message.error(
@@ -49,6 +55,7 @@ const AdminProfile: React.FC = () => {
   };
 
   // Hàm cập nhật thông tin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpdateProfile = async (values: any) => {
     try {
       setLoading(true);
@@ -56,6 +63,7 @@ const AdminProfile: React.FC = () => {
       message.success("Profile updated successfully!");
       setIsModalVisible(false);
       fetchAdminProfile(); // Reload dữ liệu
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Error updating admin profile:", error);
       message.error(
@@ -121,7 +129,7 @@ const AdminProfile: React.FC = () => {
             </Col>
             <Col span={8}>
               <Text strong>
-              <UserSwitchOutlined /> Role:
+                <UserSwitchOutlined /> Role:
               </Text>
             </Col>
             <Col span={16}>
@@ -179,16 +187,18 @@ const AdminProfile: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-  label={<span className="text-gray-700">Phone Number</span>}
-  name="phoneNumber"
-  rules={[
-    { required: true, message: "Please enter your phone number" },
-    { pattern: /^0\d{9}$/, message: "Phone number must start with 0 and contain 10 digits" }, // Kiểm tra bắt đầu bằng số 0 và có 10 chữ số
-  ]}
->
-  <Input placeholder="Enter your phone number" />
-</Form.Item>
-
+            label={<span className="text-gray-700">Phone Number</span>}
+            name="phoneNumber"
+            rules={[
+              { required: true, message: "Please enter your phone number" },
+              {
+                pattern: /^0\d{9}$/,
+                message: "Phone number must start with 0 and contain 10 digits",
+              }, // Kiểm tra bắt đầu bằng số 0 và có 10 chữ số
+            ]}
+          >
+            <Input placeholder="Enter your phone number" />
+          </Form.Item>
 
           <Form.Item
             label={<span className="text-gray-700">Address</span>}
