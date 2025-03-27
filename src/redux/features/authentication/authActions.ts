@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { LoginType } from "./authTypes";
+import type { LoginType } from "../../../types/auth";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
@@ -11,7 +11,7 @@ export const loginThunk = createAsyncThunk(
     try {
       const role = "admin";
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/api/v1/auth/login`,
         {
           email: user.email,
           password: user.password,

@@ -1,269 +1,181 @@
-import { useEffect, useState } from "react";
-import { Card, message, Tabs } from "antd";
+import { Card, DatePicker, Row, Col, Statistic, Tabs } from "antd";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
+  BarChart,
+  Bar,
 } from "recharts";
+import { useState } from "react";
+import dayjs from "dayjs";
 
-import {
-  fetchDailyRevenue,
-  fetchTotalProduct,
-  fetchTotalRevenue,
-  revenueLastDays,
-} from "../../api/services/revenue/revenueApi";
-import { COLORS } from "../../constants";
-import { formatCurrency } from "../../utils/format-currency";
-import type { ProductVariant, Detail } from "./types";
-import Loading from "../../loading";
+const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
 
-interface ErrorType {
-  response: {
-    data: {
-      error: string;
-    };
-  };
-}
-
-export default function RevenueDashboard() {
-  const [oneDayData, setOneDayData] = useState<ProductVariant[]>([]);
-  const [multiDayData, setMultiDayData] = useState<Detail[]>([]);
-  const [totalRevenueData, setTotalRevenueData] = useState<Detail[]>([]);
-  const [totalProductData, setTotalProductData] = useState<Detail[]>([]);
-  const [days, setDays] = useState<number>(3);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const getOneDayData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchDailyRevenue();
-      if (response.status === 200) {
-        setOneDayData(response.data.revenue.productVariants);
-      }
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getLastDaysData = async (days: number) => {
-    try {
-      const response = await revenueLastDays(days);
-      if (response.status === 200) {
-        setMultiDayData(response.data.details);
-      }
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    }
-  };
-
-  const getTotalRevenue = async () => {
-    try {
-      const response = await fetchTotalRevenue();
-      if (response.status === 200) {
-        setTotalRevenueData(response.data.details);
-      }
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    }
-  };
-
-  const getTotalProduct = async () => {
-    try {
-      const response = await fetchTotalProduct();
-      if (response.status === 200) {
-        setTotalProductData(response.data.result);
-      }
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    }
-  };
-
-  const handleTabChange = (key: string) => {
-    const selectedDays = key === "3days" ? 3 : 7;
-    setDays(selectedDays);
-    getLastDaysData(selectedDays);
-  };
-
-  useEffect(() => {
-    getOneDayData();
-    getLastDaysData(days);
-    getTotalProduct();
-    getTotalRevenue();
-  }, [days]);
-
-  if (isLoading) {
-    return <Loading />;
+// Generate fake data for different time periods
+const generateFakeData = (days: number) => {
+  const data = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    data.push({
+      date: dayjs(date).format("DD/MM/YYYY"),
+      revenue: Math.floor(Math.random() * 10000000) + 5000000,
+    });
   }
+  return data;
+};
+
+const generateMonthlyData = (months: number) => {
+  const data = [];
+  const today = new Date();
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setMonth(date.getMonth() - i);
+    data.push({
+      date: dayjs(date).format("MM/YYYY"),
+      revenue: Math.floor(Math.random() * 300000000) + 150000000,
+    });
+  }
+  return data;
+};
+
+const generateYearlyData = (years: number) => {
+  const data = [];
+  const today = new Date();
+  for (let i = years - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setFullYear(date.getFullYear() - i);
+    data.push({
+      date: dayjs(date).format("YYYY"),
+      revenue: Math.floor(Math.random() * 3000000000) + 1500000000,
+    });
+  }
+  return data;
+};
+
+function DashboardPage() {
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
+    null
+  );
+  const [dailyData] = useState(generateFakeData(30));
+  const [monthlyData] = useState(generateMonthlyData(12));
+  const [yearlyData] = useState(generateYearlyData(5));
+
+  const totalRevenue = dailyData.reduce((sum, item) => sum + item.revenue, 0);
+  const averageRevenue = Math.floor(totalRevenue / dailyData.length);
 
   return (
-    <div className="container mx-auto">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card title="1-Day Revenue" bordered={true}>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={oneDayData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                width={100}
-                tickFormatter={(value) => `${formatCurrency(value)}`}
-              />
-              <Tooltip
-                formatter={(value) => `${formatCurrency(Number(value))}`}
-              />
-              <Legend />
-              <Bar dataKey="totalSales" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card title="3-Day and 7-Day Revenue" bordered={true}>
-          <Tabs
-            defaultActiveKey="3days"
-            onChange={handleTabChange}
-            items={[
-              {
-                key: "3days",
-                label: "3 Days",
-                children: (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={multiDayData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis
-                        width={100}
-                        tickFormatter={(value) => `${formatCurrency(value)}`}
-                      />
-                      <Tooltip
-                        formatter={(value) =>
-                          `${formatCurrency(Number(value))}`
-                        }
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="totalSales"
-                        stroke="#8884d8"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ),
-              },
-              {
-                key: "7days",
-                label: "7 Days",
-                children: (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={multiDayData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis
-                        width={100}
-                        tickFormatter={(value) => `${formatCurrency(value)}`}
-                      />
-                      <Tooltip
-                        formatter={(value) =>
-                          `${formatCurrency(Number(value))}`
-                        }
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="totalSales"
-                        stroke="#8884d8"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ),
-              },
-            ]}
-          />
-        </Card>
-
-        <Card title="Total Revenue by Product" bordered={true}>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={totalProductData}
-                cx="50%"
-                cy="50%"
-                labelLine={true}
-                width={220}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="totalSales"
-                label={({ name, percent }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {totalRevenueData.map((_entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+    <div>
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Statistic
+                  title="Total Revenue"
+                  value={totalRevenue}
+                  formatter={(value) => `$${value.toLocaleString()}`}
+                />
+              </Col>
+              <Col span={8}>
+                <Statistic
+                  title="Average Revenue"
+                  value={averageRevenue}
+                  formatter={(value) => `$${value.toLocaleString()}`}
+                />
+              </Col>
+              <Col span={8}>
+                <RangePicker
+                  onChange={(dates) =>
+                    setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])
+                  }
+                  style={{ width: "100%" }}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        <Col span={24}>
+          <Card>
+            <Tabs defaultActiveKey="daily">
+              <TabPane tab="Daily" key="daily">
+                <LineChart
+                  width={1200}
+                  height={400}
+                  data={dailyData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) => [
+                      `$${value.toLocaleString()}`,
+                      "Revenue",
+                    ]}
                   />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value) => `${formatCurrency(Number(value))}`}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card title="Revenue by Product" bordered={true}>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={totalRevenueData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                width={100}
-                yAxisId="left"
-                tickFormatter={(value) => `${formatCurrency(value)}`}
-              />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip
-                formatter={(value, name) =>
-                  name === "totalSales"
-                    ? `${formatCurrency(Number(value))}`
-                    : value
-                }
-              />
-              <Legend />
-              <Bar
-                yAxisId="left"
-                dataKey="totalSales"
-                fill="#8884d8"
-                name="Total Sales"
-              />
-              <Bar
-                yAxisId="right"
-                dataKey="totalOrders"
-                fill="#82ca9d"
-                name="Total Orders"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#8884d8"
+                    name="Revenue"
+                    dot={false}
+                  />
+                </LineChart>
+              </TabPane>
+              <TabPane tab="Monthly" key="monthly">
+                <BarChart
+                  width={1200}
+                  height={400}
+                  data={monthlyData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) => [
+                      `$${value.toLocaleString()}`,
+                      "Revenue",
+                    ]}
+                  />
+                  <Legend />
+                  <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+                </BarChart>
+              </TabPane>
+              <TabPane tab="Yearly" key="yearly">
+                <BarChart
+                  width={1200}
+                  height={400}
+                  data={yearlyData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) => [
+                      `$${value.toLocaleString()}`,
+                      "Revenue",
+                    ]}
+                  />
+                  <Legend />
+                  <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+                </BarChart>
+              </TabPane>
+            </Tabs>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }
+
+export default DashboardPage;

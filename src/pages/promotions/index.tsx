@@ -1,468 +1,233 @@
-import { useState, useEffect } from "react";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import type { TableColumnsType } from "antd";
-import {
-  Table,
-  Modal,
-  Input,
-  Button,
-  Form,
-  DatePicker,
-  message,
-  Badge,
-  Space,
-  FloatButton,
-  Popconfirm,
-} from "antd";
+import React, { useState } from "react";
+import { Button, Modal, Form, message, Drawer } from "antd";
+import { PlusCircleOutlined } from "@ant-design/icons";
+import PromotionTable from "./components/PromotionTable";
+import PromotionForm from "./components/PromotionForm";
+import PromotionDetails from "./components/PromotionDetails";
+import { Promotion, Category, PromotionUserUsage, PromotionFormValues, ProductVariant } from "./types";
 import dayjs from "dayjs";
 
-import { DataType, FormValues } from "./types";
-import {
-  promotionNameRules,
-  startDateRules,
-  endDateRules,
-  discountRules,
-  maxUsageRules,
-  minOrderAmountRules,
-} from "../../schemaValidation/promotion.schema";
-import { pageSize } from "../products/constants";
-import {
-  fetchPromotions,
-  createPromotion,
-  updatePromotion,
-  deletePromotion,
-} from "../../api/services/promotion/promotionApi";
-import { formatCurrency } from "../../utils/format-currency";
+const PromotionPage: React.FC = () => {
+  const [promotions, setPromotions] = useState<Promotion[]>([
+    {
+      id: 1,
+      code: "SUMMER2024",
+      discount_type: "percentage",
+      valid_from: "2024-06-01",
+      valid_to: "2024-08-31",
+      is_active: true,
+      maxUsage: 1000,
+      maxUsagePerUser: 3,
+      minOrderAmount: 500000,
+      usedCount: 450,
+      applicable_category_id: 1,
+      applicable_variant_ids: [1, 2],
+      points: 100,
+    },
+    {
+      id: 2,
+      code: "FLASH50K",
+      discount_type: "amount",
+      valid_from: "2024-05-01",
+      valid_to: "2024-05-31",
+      is_active: true,
+      maxUsage: 500,
+      maxUsagePerUser: 2,
+      minOrderAmount: 1000000,
+      usedCount: 300,
+      applicable_category_id: 2,
+      applicable_variant_ids: [3],
+      points: 50,
+    },
+    {
+      id: 3,
+      code: "WELCOME10",
+      discount_type: "percentage",
+      valid_from: "2024-01-01",
+      valid_to: "2024-12-31",
+      is_active: true,
+      maxUsage: 2000,
+      maxUsagePerUser: 1,
+      minOrderAmount: 200000,
+      usedCount: 1500,
+      applicable_category_id: 1,
+      applicable_variant_ids: [1, 2],
+      points: 200,
+    },
+  ]);
 
-interface ErrorType {
-  response: {
-    data: {
-      error: string;
-    };
-  };
-}
+  const [categories] = useState<Category[]>([
+    { id: 1, name: "Smartphones" },
+    { id: 2, name: "Laptops" },
+    { id: 3, name: "Accessories" },
+  ]);
 
-const Promotions = () => {
-  const [, setCurrentPage] = useState(1);
+  const [productVariants] = useState<ProductVariant[]>([
+    {
+      id: 1,
+      product_id: 1,
+      storage: "128GB",
+      price: 999,
+      stock_quantity: 100,
+      slug: "iphone-15-pro-128gb",
+      rating: 4.8,
+      color: ["Black", "White"],
+      status: "in_stock",
+      images: ["image1.jpg", "image2.jpg"],
+    },
+    {
+      id: 2,
+      product_id: 1,
+      storage: "256GB",
+      price: 1199,
+      stock_quantity: 50,
+      slug: "iphone-15-pro-256gb",
+      rating: 4.9,
+      color: ["Black", "White"],
+      status: "in_stock",
+      images: ["image3.jpg", "image4.jpg"],
+    },
+    {
+      id: 3,
+      product_id: 2,
+      storage: "512GB",
+      price: 1499,
+      stock_quantity: 30,
+      slug: "macbook-pro-512gb",
+      rating: 4.7,
+      color: ["Space Gray"],
+      status: "in_stock",
+      images: ["image5.jpg", "image6.jpg"],
+    },
+  ]);
+
+  const [userUsages] = useState<PromotionUserUsage[]>([
+    { id: 1, promotion_id: 1, user_id: 1, usage_count: 2 },
+    { id: 2, promotion_id: 1, user_id: 2, usage_count: 3 },
+    { id: 3, promotion_id: 2, user_id: 1, usage_count: 1 },
+    { id: 4, promotion_id: 2, user_id: 3, usage_count: 2 },
+    { id: 5, promotion_id: 3, user_id: 1, usage_count: 1 },
+  ]);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [promotions, setPromotions] = useState<DataType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [currentPromotionId, setCurrentPromotionId] = useState<string | null>(
-    null
-  );
-  const [form] = Form.useForm();
+  const [isDetailsDrawerVisible, setIsDetailsDrawerVisible] = useState(false);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+  const [form] = Form.useForm<PromotionFormValues>();
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetchPromotions();
-      if (response?.promotions && Array.isArray(response.promotions)) {
-        const data: DataType[] = response.promotions.map((item: DataType) => ({
-          ...item,
-          key: item._id,
-          status: item.isActive ? "Active" : "Inactive",
-          maxUsage: item.maxUsage,
-        }));
-        setPromotions(data);
-      }
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    } finally {
-      setLoading(false);
-    }
+  const handleViewDetails = (promotion: Promotion) => {
+    setSelectedPromotion(promotion);
+    setIsDetailsDrawerVisible(true);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleOk = () => {
-    setIsModalVisible(false);
-    fetchData();
-  };
-
-  const onFinish = async (values: FormValues) => {
-    setLoading(true);
-    try {
-      const startDate = values.startDate;
-      const endDate = values.endDate;
-      const promotionData = {
-        code: values.code,
-        discountPercentage: values.discount,
-        validFrom: startDate,
-        validTo: endDate,
-        maxUsage: values.maxUsage,
-        minOrderAmount: values.minOrderAmount,
-        isActive: true,
-      };
-
-      if (currentPromotionId) {
-        const response = await updatePromotion(
-          currentPromotionId,
-          promotionData
-        );
-        message.success(response.data.message);
-      } else {
-        const response = await createPromotion(promotionData);
-        message.success(response.data.message);
-      }
-      handleOk();
-    } catch (error: unknown) {
-      console.log(error);
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdate = (record: DataType) => {
-    form.setFieldsValue({
-      code: record.code,
-      discount: record.discountPercentage,
-      startDate: dayjs(record.validFrom),
-      endDate: dayjs(record.validTo),
-      maxUsage: record.maxUsage,
-      minOrderAmount: record.minOrderAmount,
-    });
-    setCurrentPromotionId(record._id);
+  const handleAddPromotion = () => {
+    setEditingId(null);
+    form.resetFields();
     setIsModalVisible(true);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await deletePromotion(id);
-      message.success(response.data.message);
-      fetchData();
-    } catch (error: unknown) {
-      const typedError = error as ErrorType;
-      const errorMsg = typedError?.response?.data?.error;
-      message.error(errorMsg);
-    }
+  const handleEditPromotion = (promotion: Promotion) => {
+    setEditingId(promotion.id);
+    form.setFieldsValue({
+      ...promotion,
+      valid_from: dayjs(promotion.valid_from),
+      valid_to: dayjs(promotion.valid_to),
+    });
+    setIsModalVisible(true);
   };
-  const columns: TableColumnsType<DataType> = [
-    {
-      title: "Promotion Code",
-      dataIndex: "code",
-      key: "code",
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search by code"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            onBlur={() => confirm()}
-            style={{ marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button
-              onClick={() => {
-                clearFilters?.();
-                confirm(); // Apply reset
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: () => <SearchOutlined />,
-      onFilter: (value, record) =>
-        record.code.toLowerCase().includes((value as string).toLowerCase()),
-      sorter: (a, b) => a.code.localeCompare(b.code),
-    },
-    {
-      title: "Discount (%)",
-      dataIndex: "discountPercentage",
-      key: "discountPercentage",
-      sorter: (a, b) => a.discountPercentage - b.discountPercentage,
-      render: (discount) => `${discount}%`,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Filter by Discount"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            onBlur={() => confirm()}
-            style={{ marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button
-              onClick={() => {
-                clearFilters?.();
-                confirm(); // Apply reset
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      onFilter: (value, record) =>
-        record.discountPercentage
-          .toString()
-          .includes((value as string).toLowerCase()),
-    },
-    {
-      title: "Min Order Amount",
-      dataIndex: "minOrderAmount",
-      key: "minOrderAmount",
-      sorter: (a, b) => a.minOrderAmount - b.minOrderAmount,
-      render: (text: number) => formatCurrency(text),
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Filter by Min Order Amount"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            onBlur={() => confirm()}
-            style={{ marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => confirm()}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            <Button
-              onClick={() => {
-                clearFilters?.();
-                confirm(); // Apply reset
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      onFilter: (value, record) =>
-        record.minOrderAmount
-          .toString()
-          .includes((value as string).toLowerCase()),
-    },
-    {
-      title: "Start Date",
-      dataIndex: "validFrom",
-      key: "validFrom",
-      render: (text: string) => new Date(text).toLocaleDateString(),
-      sorter: (a, b) => {
-        const dateA = new Date(a.validFrom).getTime();
-        const dateB = new Date(b.validFrom).getTime();
-        return dateA - dateB; // Sort ascending
+
+  const handleDeletePromotion = (id: number) => {
+    Modal.confirm({
+      title: "Confirm Delete",
+      content: "Are you sure you want to delete this promotion?",
+      onOk: () => {
+        setPromotions(promotions.filter((p) => p.id !== id));
+        message.success("Promotion deleted successfully");
       },
-      sortDirections: ["ascend", "descend"], // Optional: specifies sorting directions
-    },
-    {
-      title: "End Date",
-      dataIndex: "validTo",
-      key: "validTo",
-      render: (text: string) => new Date(text).toLocaleDateString(),
-      sorter: (a, b) => {
-        const dateA = new Date(a.validTo).getTime();
-        const dateB = new Date(b.validTo).getTime();
-        return dateA - dateB;
-      },
-      sortDirections: ["ascend", "descend"],
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text: string, record: DataType) => (
-        <Badge status={record.isActive ? "success" : "default"} text={text} />
-      ),
-      filterDropdown: ({ setSelectedKeys, confirm, clearFilters }) => (
-        <div style={{ padding: 8 }}>
-          <Button
-            type="link"
-            onClick={() => {
-              setSelectedKeys(["active"]);
-              confirm?.();  // Optional chaining to ensure confirm is called safely
-            }}
-          >
-            Active
-          </Button>
-          <Button
-            type="link"
-            onClick={() => {
-              setSelectedKeys(["inactive"]);
-              confirm?.();  // Optional chaining to ensure confirm is called safely
-            }}
-          >
-            Inactive
-          </Button>
-          <Button
-            type="link"
-            onClick={() => {
-              clearFilters?.();  // Optional chaining to ensure clearFilters is called safely
-              confirm?.();
-            }}
-          >
-            Reset
-          </Button>
-        </div>
-      ),
-      onFilter: (value, record) => {
-        if (value === "active") {
-          return record.isActive === true;
-        } else if (value === "inactive") {
-          return record.isActive === false;
-        }
-        return true;
-      },
-      sortDirections: ["ascend", "descend"],
-    },    
-    {
-      title: "Action",
-      key: "action",
-      render: (record: DataType) => (
-        <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => handleUpdate(record)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this promotion?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button icon={<DeleteOutlined />} danger>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-  
+    });
+  };
+
+  const handleModalOk = () => {
+    form.validateFields().then((values) => {
+      const promotionData = {
+        ...values,
+        id: editingId || Math.max(...promotions.map((p) => p.id)) + 1,
+        valid_from: values.valid_from.format("YYYY-MM-DD"),
+        valid_to: values.valid_to.format("YYYY-MM-DD"),
+        usedCount: editingId
+          ? promotions.find((p) => p.id === editingId)?.usedCount || 0
+          : 0,
+      };
+
+      if (editingId) {
+        setPromotions(
+          promotions.map((p) =>
+            p.id === editingId ? promotionData : p
+          )
+        );
+        message.success("Promotion updated successfully");
+      } else {
+        setPromotions([...promotions, promotionData]);
+        message.success("Promotion added successfully");
+      }
+      setIsModalVisible(false);
+      form.resetFields();
+    });
+  };
+
   return (
-    <>
-      <FloatButton
-        icon={<PlusOutlined />}
-        type="default"
-        style={{ insetInlineEnd: 94 }}
-        onClick={() => setIsModalVisible(true)}
+    <div className="p-6">
+      <div className="mb-6">
+        <Button
+          type="primary"
+          icon={<PlusCircleOutlined />}
+          onClick={handleAddPromotion}
+        >
+          Add Promotion
+        </Button>
+      </div>
+
+      <PromotionTable
+        data={promotions}
+        categories={categories}
+        onViewDetails={handleViewDetails}
+        onEdit={handleEditPromotion}
+        onDelete={handleDeletePromotion}
       />
-      <Table
-        columns={columns}
-        dataSource={promotions}
-        loading={loading}
-        rowKey="_id"
-        pagination={{
-          pageSize,
-          onChange: (page) => setCurrentPage(page),
-        }}
-        className="text-sm"
-      />
-      <Modal
-        title={currentPromotionId ? "Edit Promotion" : "Add Promotion"}
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
+
+      <Drawer
+        title={`Promotion Details: ${selectedPromotion?.code}`}
+        placement="right"
+        onClose={() => setIsDetailsDrawerVisible(false)}
+        open={isDetailsDrawerVisible}
+        width={800}
       >
-        <Form layout="vertical" onFinish={onFinish} form={form}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="Promotion Code"
-              name="code"
-              rules={promotionNameRules}
-            >
-              <Input placeholder="Enter promotion code" />
-            </Form.Item>
-            <Form.Item
-              label="Discount (%)"
-              name="discount"
-              rules={discountRules}
-            >
-              <Input disabled={loading} placeholder="Enter discount" />
-            </Form.Item>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item
-              label="Start Date"
-              name="startDate"
-              rules={startDateRules}
-            >
-              <DatePicker
-                disabled={loading}
-                className="w-full"
-                format="DD-MM-YYYY"
-              />
-            </Form.Item>
-            <Form.Item label="End Date" name="endDate" rules={endDateRules}>
-              <DatePicker
-                disabled={loading}
-                className="w-full"
-                format="DD-MM-YYYY"
-              />
-            </Form.Item>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Form.Item label="Max Usage" name="maxUsage" rules={maxUsageRules}>
-              <Input disabled={loading} placeholder="Enter max usage" />
-            </Form.Item>
-            <Form.Item
-              label="Min Order Amount"
-              name="minOrderAmount"
-              rules={minOrderAmountRules}
-            >
-              <Input disabled={loading} placeholder="Enter min order amount" />
-            </Form.Item>
-          </div>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              {currentPromotionId ? "Save Changes" : "Save"}
-            </Button>
-          </Form.Item>
-        </Form>
+        {selectedPromotion && (
+          <PromotionDetails
+            promotion={selectedPromotion}
+            categories={categories}
+            userUsages={userUsages.filter(
+              (usage) => usage.promotion_id === selectedPromotion.id
+            )}
+            productVariants={productVariants}
+          />
+        )}
+      </Drawer>
+
+      <Modal
+        title={editingId ? "Edit Promotion" : "Add Promotion"}
+        open={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={() => {
+          setIsModalVisible(false);
+          form.resetFields();
+        }}
+        width={800}
+      >
+        <PromotionForm form={form} categories={categories} productVariants={productVariants} />
       </Modal>
-    </>
+    </div>
   );
 };
 
-export default Promotions;
+export default PromotionPage;

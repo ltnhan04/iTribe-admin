@@ -4,9 +4,8 @@ import { createBrowserRouter } from "react-router-dom";
 import PrivateRoutes from "./PrivateRoutes";
 
 const Dashboard = lazy(() => import("../pages/dashboard"));
-
+const Category = lazy(() => import("../pages/category"));
 const Inbox = lazy(() => import("../pages/inbox"));
-
 const Orders = lazy(() => import("../pages/orders"));
 //Product Page
 const Products = lazy(() => import("../pages/products"));
@@ -45,6 +44,7 @@ const routes = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> },
       { path: "inbox", element: <Inbox /> },
       { path: "orders", element: <Orders /> },
+      { path: "categories", element: <Category /> },
       {
         path: "products",
         element: <Products />,

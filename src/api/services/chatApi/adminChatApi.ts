@@ -20,19 +20,19 @@ export const getMessages = async () => {
     return Array.isArray(response.data.messages) ? response.data.messages : [];
   } catch (error) {
     handleApiError(error);
-    return []; 
+    return [];
   }
 };
 
 // Gửi phản hồi từ admin và lưu tin nhắn vào DB
 export const sendAdminReply = async (userId: string, message: string) => {
-    try {
-      const response = await axiosInstance.post(
-        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/chat/admin/reply`,
-        { userId, message,sender: 'admin' }
-      );
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
+  try {
+    const response = await axiosInstance.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/chat/admin/reply`,
+      { userId, message, sender: "admin" }
+    );
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};

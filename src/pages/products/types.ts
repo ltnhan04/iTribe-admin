@@ -1,22 +1,44 @@
-import type { GetProp, UploadProps } from "antd";
+export interface Review {
+  id: number;
+  user_id: number;
+  product_variant_id: number;
+  rating: number;
+  comment: string;
+}
 
-export type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
-export interface ErrorResponse {
-  error: string;
+export interface ProductVariant {
+  id: number;
+  product_id: number;
+  storage: string;
+  price: number;
+  stock_quantity: number;
+  slug: string;
+  rating: number;
+  color: string[];
+  status: "in_stock" | "out_of_stock";
+  images: string[];
 }
 
 export interface Product {
   id: number;
-  name: string;
-  image: string;
-  price: number;
-  rating: number;
-  status: string;
-}
-
-export interface newProduct {
+  category_id: number;
   name: string;
   description: string;
-  slug: string;
 }
+
+export interface ColorOption {
+  name: string;
+  hex: string;
+}
+
+export interface VariantFilters {
+  storage: string;
+  price: number | null;
+  stock: number | null;
+  status: "in_stock" | "out_of_stock" | null;
+}
+
+export interface User {
+  id: number;
+  name: string;
+} 
