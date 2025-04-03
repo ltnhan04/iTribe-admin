@@ -8,7 +8,7 @@ import {
   clearError,
   clearMessage,
 } from "../../../redux/features/authentication/authSlice";
-import type { LoginType } from "./type";
+import type { LoginType } from "../../../types/auth";
 import {
   emailRules,
   passwordRules,

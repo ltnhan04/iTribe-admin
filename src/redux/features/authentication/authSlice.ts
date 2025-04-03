@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { loginThunk } from "./authActions";
-import type { LoginStateFulfilled } from "./authTypes";
+import type { LoginStateFulfilled } from "../../../types/auth";
 
 export interface AuthState {
   login: {

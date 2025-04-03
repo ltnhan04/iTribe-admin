@@ -1,7 +1,7 @@
 import { axiosInstance } from "../../../config/axiosInstance";
 
 export const fetchPromotions = async () => {
-  const response = await axiosInstance.get(`/api/admin/promotions`);
+  const response = await axiosInstance.get(`/api/v1/admin/promotions`);
   return response.data;
 };
 

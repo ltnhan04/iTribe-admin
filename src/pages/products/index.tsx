@@ -1,250 +1,241 @@
-import {
-  Badge,
-  Image,
-  Input,
-  Button,
-  Table,
-  message,
-  Popconfirm,
-  Tag,
-} from "antd";
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  EditOutlined,
-  DeleteOutlined,
-  SearchOutlined,
-  PlusCircleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import type { TableColumnsType } from "antd";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { pageSize } from "./constants";
-import { formatCurrency } from "../../utils/format-currency";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from "react";
+import { Button, Modal, Form, message, Drawer } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import type { UploadFile } from "antd/es/upload/interface";
+import { useNavigate } from "react-router-dom";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
-} from "../../redux/api/productApi";
-import { ProductList } from "../../redux/types";
+  useGetProductQuery,
+} from "../../redux/features/product/productApi";
+import { useGetCategoriesQuery } from "../../redux/features/category/categoryApi";
+import ProductTable from "./components/ProductTable";
+import ProductForm from "./components/ProductForm";
+import ProductFilters from "./components/ProductFilters";
+import ProductDetails from "./components/ProductDetails";
+import VariantForm from "./components/VariantForm";
+import VariantDetails from "./components/VariantDetails";
+import { IProduct, Variant } from "../../types/product";
+import { Review, User } from "./types";
 
-interface ErrorResponse {
-  message: string;
-}
-
-const Products = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+const ProductsPage: React.FC = () => {
   const navigate = useNavigate();
+  const [filters, setFilters] = useState<{
+    search?: string;
+    category?: string;
+  }>({});
 
-  const {
-    data,
-    error,
-    isLoading: isProductLoading,
-  } = useGetProductsQuery(undefined, { refetchOnMountOrArgChange: true });
+  const { data: productsData, isLoading } = useGetProductsQuery();
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const [deleteProduct] = useDeleteProductMutation();
 
-  const [deleteProduct, { isLoading: isDeleteLoading }] =
-    useDeleteProductMutation();
+  const categories = categoriesData?.categories || [];
 
-  useEffect(() => {
-    if (error && "data" in error) {
-      const errorData = (error as FetchBaseQueryError).data as ErrorResponse;
-      const errorMsg = errorData.message;
-      message.error(errorMsg);
+  const filteredProducts = productsData?.data.filter((product: IProduct) => {
+    if (
+      filters.search &&
+      !product.name.toLowerCase().includes(filters.search.toLowerCase())
+    ) {
+      return false;
     }
-  }, [error]);
-
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await deleteProduct(id).unwrap();
-      if (response?.message) {
-        message.success(response.message);
-      }
-    } catch (error) {
-      console.log(error);
-      message.error("Failed to delete product.");
+    if (filters.category && product.category?.name !== filters.category) {
+      return false;
     }
+    return true;
+  });
+
+  const handleFilter = (values: { search?: string; category?: string }) => {
+    setFilters(values);
   };
 
-  const columns: TableColumnsType<ProductList> = [
-    {
-      title: "ID",
-      dataIndex: "_id",
-      key: "_id",
-      render: (_, _record, index) => (currentPage - 1) * pageSize + index + 1,
-    },
-    {
-      title: "Product Name",
-      dataIndex: "name",
-      key: "name",
-      className: "font-semibold text-gray-700",
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div className="p-4">
-          <Input
-            placeholder="Search Name"
-            value={selectedKeys[0]}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            className="mb-2"
-          />
-          <Button
-            type="primary"
-            onClick={() => confirm()}
-            icon={<SearchOutlined />}
-            size="small"
-            className="mr-2"
-          >
-            Search
-          </Button>
-          <Button onClick={clearFilters} size="small">
-            Reset
-          </Button>
-        </div>
-      ),
-      filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
-      onFilter: (value, record) => {
-        return (
-          typeof record.name === "string" &&
-          record.name.toLowerCase().includes((value as string).toLowerCase())
-        );
+  const handleReset = () => {
+    setFilters({});
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    Modal.confirm({
+      title: "Confirm Delete",
+      content: "Are you sure you want to delete this product?",
+      onOk: async () => {
+        try {
+          await deleteProduct(id).unwrap();
+          message.success("Product deleted successfully");
+        } catch (error) {
+          message.error("Failed to delete product");
+        }
       },
-      render: (name: string) => (
-        <Tag className="text-xs font-semibold px-3 py-1 rounded-lg ">
-          {name}
-        </Tag>
-      ),
-    },
-    {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (imageUrl: string) => (
-        <Image
-          src={imageUrl}
-          alt="Product"
-          width={80}
-          height={80}
-          className="object-cover rounded-md border border-white shadow-sm"
-          style={{ borderRadius: 4 }}
-          preview={{
-            maskClassName: "bg-gray-900/50",
-            mask: <span className="text-white text-center text-xs">View</span>,
-          }}
-        />
-      ),
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (price: number) => (
-        <Tag
-          color="gold"
-          className="text-xs font-semibold px-3 py-1 rounded-lg "
-        >
-          {formatCurrency(price)}
-        </Tag>
-      ),
-      filters: [
-        { text: "Below 10M", value: 10000000 },
-        { text: "10M - 20M", value: 20000000 },
-        { text: "Above 20M", value: 20000001 },
-      ],
-      onFilter: (value, record) => {
-        if (value === 10000000) return record.price < value;
-        if (value === 20000000)
-          return record.price >= 10000000 && record.price <= value;
-        return record.price > 20000000;
-      },
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      className: "font-medium",
-      render: (status: string) => (
-        <Badge
-          color={status === "active" ? "green" : "red"}
-          text={status === "active" ? "Active" : "Inactive"}
-          className="font-medium"
-        />
-      ),
-      filters: [
-        { text: "Active", value: "active" },
-        { text: "Inactive", value: "inactive" },
-      ],
-      onFilter: (value, record) => record.status === value,
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (record) => (
-        <div className="flex items-center space-x-4">
-          <Link
-            to={`/products/${record._id}`}
-            className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"
-          >
-            <EyeOutlined />
-            <span>View</span>
-          </Link>
-          <Link
-            to={`/products/${record._id}/edit`}
-            className="transition-colors duration-300 ease-in hover:underline flex items-center space-x-1"
-          >
-            <EditOutlined />
-            <span>Edit</span>
-          </Link>
-          <Popconfirm
-            title="Are you sure to delete this product?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <span className="text-red-500 cursor-pointer transition-colors duration-300 ease-in hover:text-red-700 flex items-center space-x-1">
-              <DeleteOutlined />
-              <span>Delete</span>
-            </span>
-          </Popconfirm>
-        </div>
-      ),
-    },
-  ];
+    });
+  };
+
+  const [isProductModalVisible, setIsProductModalVisible] = useState(false);
+  const [isVariantModalVisible, setIsVariantModalVisible] = useState(false);
+  const [isDetailsDrawerVisible, setIsDetailsDrawerVisible] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null
+  );
+  const [productForm] = Form.useForm();
+  const [variantForm] = Form.useForm();
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [colorOptions, setColorOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [isVariantDetailsDrawerVisible, setIsVariantDetailsDrawerVisible] =
+    useState(false);
+  const [reviews] = useState<Review[]>([]);
+  const [users] = useState<User[]>([]);
+
+  const { data: productDetail } = useGetProductQuery(selectedProductId || "", {
+    skip: !selectedProductId,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const handleEditProduct = (record: IProduct) => {
+    setEditingId(record._id);
+    productForm.setFieldsValue({
+      ...record,
+      category: record.category?._id,
+    });
+    setIsProductModalVisible(true);
+  };
+
+  const handleStorageChange = (value: string) => {
+    if (!selectedProductId) return;
+    const slug = `${productDetail?.data.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}-${value.toLowerCase()}`;
+    variantForm.setFieldsValue({ slug });
+  };
+
+  const handleViewProductDetails = (product: IProduct) => {
+    setSelectedProductId(product._id);
+    setIsDetailsDrawerVisible(true);
+  };
+
+  const handleViewVariantDetails = (variant: Variant) => {
+    setSelectedVariant(variant);
+    setIsVariantDetailsDrawerVisible(true);
+  };
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg">
-      <div className="flex items-center space-x-3">
-        <Button className="mb-4" onClick={() => navigate("/products/create")}>
-          <PlusCircleOutlined />
+    <div className="p-6">
+      <div style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/products/create")}
+        >
           Add New Product
         </Button>
-        <Button
-          className="mb-4"
-          onClick={() => navigate("/products/create/variant")}
-        >
-          <PlusCircleOutlined />
-          Add New Product Variant
-        </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={data?.data || []}
-        loading={isProductLoading || isDeleteLoading}
-        pagination={{
-          pageSize,
-          onChange: (page) => setCurrentPage(page),
-        }}
-        className="text-sm"
-        rowKey={(record) => `${record._id}-${record.name}`}
+
+      <ProductFilters
+        onFilter={handleFilter}
+        onReset={handleReset}
+        categories={categories}
       />
+
+      <ProductTable
+        products={filteredProducts || []}
+        loading={isLoading}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
+        onViewDetails={handleViewProductDetails}
+      />
+
+      <Drawer
+        title={`Product Details: ${productDetail?.data.name}`}
+        placement="right"
+        onClose={() => {
+          setIsDetailsDrawerVisible(false);
+          setSelectedProductId(null);
+        }}
+        open={isDetailsDrawerVisible}
+        width={1000}
+      >
+        {productDetail?.data && (
+          <ProductDetails
+            product={productDetail.data}
+            onViewVariantDetails={handleViewVariantDetails}
+          />
+        )}
+      </Drawer>
+
+      <Drawer
+        title={`Variant Details: ${selectedVariant?.storage}`}
+        placement="right"
+        onClose={() => setIsVariantDetailsDrawerVisible(false)}
+        open={isVariantDetailsDrawerVisible}
+        width={800}
+      >
+        {selectedVariant && (
+          <VariantDetails
+            variant={{
+              ...selectedVariant,
+              product: selectedVariant.product,
+              status: "in_stock",
+            }}
+            reviews={reviews}
+            users={users}
+          />
+        )}
+      </Drawer>
+
+      <Modal
+        title={editingId ? "Edit Product" : "Add Product"}
+        open={isProductModalVisible}
+        onOk={() => productForm.submit()}
+        onCancel={() => {
+          setIsProductModalVisible(false);
+          productForm.resetFields();
+        }}
+        width={800}
+        footer={null}
+      >
+        <ProductForm
+          form={productForm}
+          categories={categories}
+          productId={editingId}
+          onSuccess={() => {
+            setIsProductModalVisible(false);
+            productForm.resetFields();
+          }}
+        />
+      </Modal>
+
+      <Modal
+        title={editingId ? "Edit Variant" : "Add Variant"}
+        open={isVariantModalVisible}
+        onOk={() => {
+          variantForm.validateFields().then((_values) => {
+            setIsVariantModalVisible(false);
+            variantForm.resetFields();
+            setFileList([]);
+            setColorOptions([]);
+          });
+        }}
+        onCancel={() => {
+          setIsVariantModalVisible(false);
+          variantForm.resetFields();
+          setFileList([]);
+          setColorOptions([]);
+        }}
+        width={800}
+      >
+        <VariantForm
+          form={variantForm}
+          fileList={fileList}
+          setFileList={setFileList}
+          colorOptions={colorOptions}
+          setColorOptions={setColorOptions}
+          onStorageChange={handleStorageChange}
+        />
+      </Modal>
     </div>
   );
 };
 
-export default Products;
+export default ProductsPage;

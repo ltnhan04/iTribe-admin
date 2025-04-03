@@ -5,6 +5,5 @@ export const refreshToken = async () => {
 };
 
 export const logout = async () => {
-  console.log("gg")
   return await axiosInstance.post(`/api/auth/logout`);
 };

@@ -1,41 +1,56 @@
-export interface Product {
-  productImages: any;
-  productVariantId: string;
-  productName: string;
-  productColorName: string;
-  productStorage: string;
-  quantity: number;
-}
+export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancel";
+export type PaymentMethod = "stripe" | "momo" | "ship-cod";
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
-  phoneNumber: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
+  phone: string;
+}
+
+export interface ProductVariant {
+  _id: string;
+  name: string;
+  storage: string;
+  color: {
+    colorName: string;
   };
+  price: number;
+  images: string[];
+}
+
+export interface OrderDetails {
+  _id: string;
+  order_id: string;
+  product_variant_id: string;
+  quantity: number;
+  price: number;
+  product_variant: ProductVariant;
 }
 
 export interface Order {
-  orderId: string;
-  user: User;
-  productVariants: Product[];
+  _id: string;
+  user_id: string;
   totalAmount: number;
-  status: string;
+  order_status: OrderStatus;
   shippingAddress: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
+  stripeSessionId?: string;
   createdAt: string;
-  updatedAt: string;
+  user: User;
+  order_details: OrderDetails[];
 }
 
-export interface ErrorResponse {
-  response: {
-    data: {
-      message: string;
-    };
-  };
-}
+export interface OrderList {
+  _id: string;
+  user: User;
+  variants: {
+    _id: string;
+    variant: ProductVariant;
+    quantity: number;
+  }[];
+  totalAmount: number;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  createdAt: string;
+} 

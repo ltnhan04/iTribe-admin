@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Layout, Menu } from "antd";
 import { Link, useLocation } from "react-router-dom";
-import { MenuProps as MenuItemProps } from "./types";
+import { MenuProps as MenuItemProps } from "../../types/sidebar";
 import { menu as menuItems } from "../../constants";
 
 interface SidebarProps {

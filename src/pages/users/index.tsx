@@ -1,133 +1,119 @@
-// // export default UsersList;
-// import React, { useState } from "react";
-// import UsersTable from "./userTable";
-// import { User } from "./types";
-// import { Layout } from "antd";
-// import { Outlet } from "react-router-dom";
-
-// const { Content } = Layout;
-
-// const UsersList: React.FC = () => {
-//   const [users] = useState<User[]>([
-//     {
-//       id: 1,
-//       name: "George Lindelof",
-//       mobile: "+4 315 23 62",
-//       role: "user",
-//       email: "carlsen@armand.no",
-//       status: "Active",
-//       address: {
-//         street: "123 Elm St",
-//         city: "Somewhere",
-//         state: "CA",
-//         zip: "90210",
-//       },
-//     },
-//     {
-//       id: 2,
-//       name: "Emma Watson",
-//       mobile: "+4 315 23 63",
-//       role: "admin",
-//       email: "emma@watson.com",
-//       status: "Inactive",
-//       address: {
-//         street: "456 Maple Ave",
-//         city: "Anywhere",
-//         state: "NY",
-//         zip: "10001",
-//       },
-//     },
-//     {
-//       id: 3,
-//       name: "Emma Watson",
-//       mobile: "+4 315 23 63",
-//       role: "admin",
-//       email: "emma@watson.com",
-//       status: "Inactive",
-//       address: {
-//         street: "456 Maple Ave",
-//         city: "Anywhere",
-//         state: "NY",
-//         zip: "10001",
-//       },
-//     },
-//     {
-//       id: 4,
-//       name: "Emma Watson",
-//       mobile: "+4 315 23 63",
-//       role: "admin",
-//       email: "emma@watson.com",
-//       status: "Inactive",
-//       address: {
-//         street: "456 Maple Ave",
-//         city: "Anywhere",
-//         state: "NY",
-//         zip: "10001",
-//       },
-//     },
-//   ]);
-
-//   return (
-//     // <Layout style={{ minHeight: "100vh" }}>
-//     //   <Content style={{ padding: "1rem" }}>
-//     //     <UsersTable users={users} /> {/* Remove onUserClick prop here */}
-//     //   </Content>
-//     // </Layout>
-//     <Layout style={{ minHeight: "100vh" }}>
-//     <Content style={{ padding: "1rem" }}>
-//       <UsersTable users={users} />
-//       <Outlet /> {/* This allows nested route rendering */}
-//     </Content>
-//   </Layout>
-//   );
-// };
-
-// export default UsersList;
-// UsersList.tsx
-import React, { useEffect, useState } from "react";
-import UsersTable from "./components/user-table";
-import { User } from "./types";
-import { Layout } from "antd";
-import { getAllUsers } from "../../api/services/users/usersApi";
-const { Content } = Layout;
+import React, { useState } from "react";
+import { message, Drawer, Card, Table, Tag, Typography, Space } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { useGetUsersQuery, useGetDetailsUserQuery } from "../../redux/features/users/userApi";
+import { Customer } from "../../types/user";
 import Loading from "../../loading";
+import UserDetails from "./components/UserDetails";
 
-const UsersList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // For error handling
+const { Title, Text } = Typography;
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await getAllUsers();
-        setUsers(response.data); // Adjust if response structure is different
-      } catch (error) {
-        console.log(error);
-        setError("Failed to fetch users."); // Handle error if fetching fails
-      } finally {
-        setLoading(false);
-      }
-    };
+const UserPage: React.FC = () => {
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isDetailsDrawerVisible, setIsDetailsDrawerVisible] = useState(false);
 
-    loadUsers();
-  }, []);
+  const { data: usersData, isLoading } = useGetUsersQuery();
+  const { data: userDetails, isLoading: isLoadingDetails } = useGetDetailsUserQuery(
+    { id: selectedUserId || "" },
+    { skip: !selectedUserId }
+  );
 
-  if (loading) {
+  const handleViewDetails = (userId: string) => {
+    console.log("Viewing details for user:", userId);
+    setSelectedUserId(userId);
+    setIsDetailsDrawerVisible(true);
+  };
+
+  const columns: ColumnsType<Customer> = [
+    {
+      title: "User ID",
+      dataIndex: "_id",
+      key: "_id",
+      render: (text: string) => <Text copyable>{text}</Text>,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      render: (role: string) => (
+        <Tag color={role === "admin" ? "red" : "blue"}>
+          {role.toUpperCase()}
+        </Tag>
+      ),
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleString(),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => handleViewDetails(record._id)}>View Details</a>
+        </Space>
+      ),
+    },
+  ];
+
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (error) {
-    return <p>{error}</p>; // Display the error message
-  }
+  console.log("User Details Data:", userDetails);
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Content>
-        <UsersTable users={users} />
-      </Content>
-    </Layout>
+    <div className="p-4">
+      <Card
+        title={<Title level={3}>User Management</Title>}
+        className="bg-white rounded-lg shadow"
+        variant="outlined"
+      >
+        <Table
+          columns={columns}
+          dataSource={usersData?.data}
+          rowKey="_id"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Total ${total} users`,
+          }}
+        />
+      </Card>
+
+      <Drawer
+        title="User Details"
+        placement="right"
+        onClose={() => {
+          setIsDetailsDrawerVisible(false);
+          setSelectedUserId(null);
+        }}
+        open={isDetailsDrawerVisible}
+        width={800}
+      >
+        {isLoadingDetails ? (
+          <Loading />
+        ) : userDetails?.customer ? (
+          <UserDetails user={userDetails.customer} />
+        ) : (
+          <Text>No user details available</Text>
+        )}
+      </Drawer>
+    </div>
   );
 };
 
-export default UsersList;
+export default UserPage;
