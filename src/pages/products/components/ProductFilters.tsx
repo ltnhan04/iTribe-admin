@@ -1,65 +1,66 @@
-import React from 'react';
-import { Card, Row, Col, Form, Select, Input, Button } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
+import { Form, Input, Select, Space, Button } from "antd";
+import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Category } from "../../../redux/features/category/types";
 
 interface ProductFiltersProps {
-  categories: { id: number; name: string }[];
-  filters: {
-    category_id: number | undefined;
-    name: string;
-  };
-  onFilterChange: (filters: { category_id: number | undefined; name: string }) => void;
-  onClearFilters: () => void;
+  onFilter: (values: any) => void;
+  onReset: () => void;
+  categories: Category[];
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({
+  onFilter,
+  onReset,
   categories,
-  filters,
-  onFilterChange,
-  onClearFilters,
 }) => {
+  const [form] = Form.useForm();
+
+  const handleReset = () => {
+    form.resetFields();
+    onReset();
+  };
+
   return (
-    <Card className="mb-6">
-      <Row gutter={[16, 16]}>
-        <Col span={8}>
-          <Form.Item label="Category">
-            <Select
-              allowClear
-              placeholder="Select category"
-              value={filters.category_id}
-              onChange={(value) =>
-                onFilterChange({ ...filters, category_id: value })
-              }
-              options={categories.map((cat) => ({
-                value: cat.id,
-                label: cat.name,
-              }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item label="Product Name">
-            <Input
-              placeholder="Search by product name"
-              prefix={<SearchOutlined />}
-              value={filters.name}
-              onChange={(e) =>
-                onFilterChange({ ...filters, name: e.target.value })
-              }
-            />
-          </Form.Item>
-        </Col>
-        <Col span={8} className="flex">
-          <Button
-            type="primary"
-            onClick={onClearFilters}
-          >
-            Clear Filters
+    <Form
+      form={form}
+      layout="inline"
+      onFinish={onFilter}
+      style={{ marginBottom: 24 }}
+    >
+      <Form.Item name="search">
+        <Input
+          placeholder="Search by name"
+          prefix={<SearchOutlined />}
+          allowClear
+        />
+      </Form.Item>
+
+      <Form.Item name="category">
+        <Select
+          placeholder="Select category"
+          allowClear
+          style={{ width: 200 }}
+          options={categories.map((cat) => ({
+            label: cat.name,
+            value: cat.name,
+          }))}
+        />
+      </Form.Item>
+
+      <Form.Item>
+        <Space>
+          <Button type="primary" htmlType="submit">
+            Search
           </Button>
-        </Col>
-      </Row>
-    </Card>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>
+            Reset
+          </Button>
+        </Space>
+      </Form.Item>
+    </Form>
   );
 };
 
-export default ProductFilters; 
+export default ProductFilters;

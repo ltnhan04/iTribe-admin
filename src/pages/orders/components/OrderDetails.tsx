@@ -1,11 +1,21 @@
 import React from "react";
-import { Card, Descriptions, Table, Tag, Image, Carousel } from "antd";
+import {
+  Card,
+  Descriptions,
+  Table,
+  Tag,
+  Image,
+  Carousel,
+  Typography,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Order, OrderDetails as OrderDetailsType } from "../types";
+import { OrderList, Variant1 } from "../../../types/order";
 import { formatCurrency } from "../../../utils/format-currency";
 
+const { Title, Text } = Typography;
+
 interface OrderDetailsProps {
-  order: Order;
+  order: OrderList;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
@@ -26,37 +36,24 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
     }
   };
 
-  const columns: ColumnsType<OrderDetailsType> = [
-    {
-      title: "Product",
-      dataIndex: ["product_variant", "name"],
-      key: "product",
-    },
+  const columns: ColumnsType<Variant1> = [
     {
       title: "Storage",
-      dataIndex: ["product_variant", "storage"],
+      dataIndex: ["variant", "storage"],
       key: "storage",
+      render: (text: string) => <Text>{text}</Text>,
     },
     {
       title: "Color",
-      dataIndex: ["product_variant", "color"],
+      dataIndex: ["variant", "color", "colorName"],
       key: "color",
+      render: (color: string) => <Tag color="blue">{color}</Tag>,
     },
     {
       title: "Quantity",
       dataIndex: "quantity",
       key: "quantity",
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (price: number) => formatCurrency(price),
-    },
-    {
-      title: "Total",
-      key: "total",
-      render: (_, record) => formatCurrency(record.price * record.quantity),
+      render: (quantity: number) => <Text>{quantity}</Text>,
     },
     {
       title: "Images",
@@ -64,7 +61,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
       render: (_, record) => (
         <div style={{ width: 100 }}>
           <Carousel autoplay>
-            {record.product_variant.images.map((image, index) => (
+            {record.variant?.images.map((image: string, index: number) => (
               <div key={index}>
                 <Image
                   src={image}
@@ -72,6 +69,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
                   width={80}
                   height={80}
                   preview={true}
+                  style={{ borderRadius: 4 }}
                 />
               </div>
             ))}
@@ -82,49 +80,72 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
   ];
 
   return (
-    <div className="space-y-6">
-      <Card title="Order Information" className="bg-white rounded-lg shadow">
-        <Descriptions bordered column={2}>
-          <Descriptions.Item label="Order ID">{order.id}</Descriptions.Item>
-          <Descriptions.Item label="Status">
-            <Tag color={getStatusColor(order.order_status)}>
-              {order.order_status.toUpperCase()}
+    <div className="space-y-6 p-4">
+      <Card
+        title={<Title level={3}>Order Information</Title>}
+        className="bg-white rounded-lg shadow"
+        bordered={false}
+      >
+        <Descriptions bordered column={2} size="middle">
+          <Descriptions.Item label={<Text strong>Order ID</Text>}>
+            <Text copyable>{order._id}</Text>
+          </Descriptions.Item>
+          <Descriptions.Item label={<Text strong>Status</Text>}>
+            <Tag color={getStatusColor(order.status)}>
+              {order.status.toUpperCase()}
             </Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Total Amount">
-            {formatCurrency(order.totalAmount)}
+          <Descriptions.Item label={<Text strong>Total Amount</Text>}>
+            <Text strong type="success">
+              {formatCurrency(order.totalAmount)}
+            </Text>
           </Descriptions.Item>
-          <Descriptions.Item label="Payment Method">
+          <Descriptions.Item label={<Text strong>Payment Method</Text>}>
             <Tag color="blue">{order.paymentMethod.toUpperCase()}</Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Shipping Address">
+          <Descriptions.Item label={<Text strong>Shipping Address</Text>}>
             {order.shippingAddress}
           </Descriptions.Item>
-          <Descriptions.Item label="Created At">
-            {new Date(order.created_at).toLocaleString()}
+          <Descriptions.Item label={<Text strong>Created At</Text>}>
+            {new Date(order.createdAt).toLocaleString()}
+          </Descriptions.Item>
+          <Descriptions.Item label={<Text strong>Updated At</Text>}>
+            {new Date(order.updatedAt).toLocaleString()}
           </Descriptions.Item>
         </Descriptions>
       </Card>
 
-      <Card title="Customer Information" className="bg-white rounded-lg shadow">
-        <Descriptions bordered column={2}>
-          <Descriptions.Item label="Name">{order.user.name}</Descriptions.Item>
-          <Descriptions.Item label="Email">{order.user.email}</Descriptions.Item>
-          <Descriptions.Item label="Phone">{order.user.phone}</Descriptions.Item>
+      <Card
+        title={<Title level={3}>Customer Information</Title>}
+        className="bg-white rounded-lg shadow"
+        bordered={false}
+      >
+        <Descriptions bordered column={2} size="middle">
+          <Descriptions.Item label={<Text strong>Name</Text>}>
+            {order.user.name}
+          </Descriptions.Item>
+          <Descriptions.Item label={<Text strong>Email</Text>}>
+            {order.user.email}
+          </Descriptions.Item>
         </Descriptions>
       </Card>
 
-      <Card title="Order Items" className="bg-white rounded-lg shadow">
+      <Card
+        title={<Title level={3}>Order Items</Title>}
+        className="bg-white rounded-lg shadow"
+        bordered={false}
+      >
         <Table
           columns={columns}
-          dataSource={order.order_details}
-          rowKey="id"
+          dataSource={order.variants}
+          rowKey="_id"
           pagination={false}
           bordered
+          size="middle"
         />
       </Card>
     </div>
   );
 };
 
-export default OrderDetails; 
+export default OrderDetails;

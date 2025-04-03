@@ -14,7 +14,6 @@ import { useState } from "react";
 import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
-const { TabPane } = Tabs;
 
 // Generate fake data for different time periods
 const generateFakeData = (days: number) => {
@@ -31,6 +30,7 @@ const generateFakeData = (days: number) => {
   return data;
 };
 
+// Generate monthly data
 const generateMonthlyData = (months: number) => {
   const data = [];
   const today = new Date();
@@ -39,12 +39,13 @@ const generateMonthlyData = (months: number) => {
     date.setMonth(date.getMonth() - i);
     data.push({
       date: dayjs(date).format("MM/YYYY"),
-      revenue: Math.floor(Math.random() * 300000000) + 150000000,
+      revenue: Math.floor(Math.random() * 100000000) + 50000000,
     });
   }
   return data;
 };
 
+// Generate yearly data
 const generateYearlyData = (years: number) => {
   const data = [];
   const today = new Date();
@@ -53,7 +54,7 @@ const generateYearlyData = (years: number) => {
     date.setFullYear(date.getFullYear() - i);
     data.push({
       date: dayjs(date).format("YYYY"),
-      revenue: Math.floor(Math.random() * 3000000000) + 1500000000,
+      revenue: Math.floor(Math.random() * 1000000000) + 500000000,
     });
   }
   return data;
@@ -69,6 +70,87 @@ function DashboardPage() {
 
   const totalRevenue = dailyData.reduce((sum, item) => sum + item.revenue, 0);
   const averageRevenue = Math.floor(totalRevenue / dailyData.length);
+
+  const items = [
+    {
+      key: "daily",
+      label: "Daily",
+      children: (
+        <LineChart
+          width={1200}
+          height={400}
+          data={dailyData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Tooltip
+            formatter={(value: number) => [
+              `$${value.toLocaleString()}`,
+              "Revenue",
+            ]}
+          />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="revenue"
+            stroke="#8884d8"
+            name="Revenue"
+            dot={false}
+          />
+        </LineChart>
+      ),
+    },
+    {
+      key: "monthly",
+      label: "Monthly",
+      children: (
+        <BarChart
+          width={1200}
+          height={400}
+          data={monthlyData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Tooltip
+            formatter={(value: number) => [
+              `$${value.toLocaleString()}`,
+              "Revenue",
+            ]}
+          />
+          <Legend />
+          <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+        </BarChart>
+      ),
+    },
+    {
+      key: "yearly",
+      label: "Yearly",
+      children: (
+        <BarChart
+          width={1200}
+          height={400}
+          data={yearlyData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Tooltip
+            formatter={(value: number) => [
+              `$${value.toLocaleString()}`,
+              "Revenue",
+            ]}
+          />
+          <Legend />
+          <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+        </BarChart>
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -103,74 +185,7 @@ function DashboardPage() {
         </Col>
         <Col span={24}>
           <Card>
-            <Tabs defaultActiveKey="daily">
-              <TabPane tab="Daily" key="daily">
-                <LineChart
-                  width={1200}
-                  height={400}
-                  data={dailyData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      `$${value.toLocaleString()}`,
-                      "Revenue",
-                    ]}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8884d8"
-                    name="Revenue"
-                    dot={false}
-                  />
-                </LineChart>
-              </TabPane>
-              <TabPane tab="Monthly" key="monthly">
-                <BarChart
-                  width={1200}
-                  height={400}
-                  data={monthlyData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      `$${value.toLocaleString()}`,
-                      "Revenue",
-                    ]}
-                  />
-                  <Legend />
-                  <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
-                </BarChart>
-              </TabPane>
-              <TabPane tab="Yearly" key="yearly">
-                <BarChart
-                  width={1200}
-                  height={400}
-                  data={yearlyData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      `$${value.toLocaleString()}`,
-                      "Revenue",
-                    ]}
-                  />
-                  <Legend />
-                  <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
-                </BarChart>
-              </TabPane>
-            </Tabs>
+            <Tabs defaultActiveKey="daily" items={items} />
           </Card>
         </Col>
       </Row>

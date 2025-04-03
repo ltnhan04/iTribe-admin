@@ -1,9 +1,23 @@
-import React from 'react';
-import { Card, Row, Col, Image, Descriptions, Badge, Rate, List, Avatar, Tag, Space } from 'antd';
-import { ProductVariant, Review, User } from '../types';
+import React from "react";
+import {
+  Card,
+  Row,
+  Col,
+  Image,
+  Descriptions,
+  Badge,
+  Rate,
+  List,
+  Avatar,
+  Tag,
+  Space,
+} from "antd";
+import { Review, User } from "../types";
+import { IProductVariant } from "../../../types/product";
+import { formatCurrency } from "../../../utils/format-currency";
 
 interface VariantDetailsProps {
-  variant: ProductVariant;
+  variant: IProductVariant;
   reviews: Review[];
   users: User[];
 }
@@ -34,11 +48,9 @@ const VariantDetails: React.FC<VariantDetailsProps> = ({
       </Card>
 
       <Descriptions bordered column={1} className="mb-6">
-        <Descriptions.Item label="ID">{variant.id}</Descriptions.Item>
-        <Descriptions.Item label="Product ID">{variant.product_id}</Descriptions.Item>
         <Descriptions.Item label="Storage">{variant.storage}</Descriptions.Item>
         <Descriptions.Item label="Price">
-          ${variant.price.toLocaleString()}
+          {formatCurrency(Number(variant.price))}
         </Descriptions.Item>
         <Descriptions.Item label="Stock Quantity">
           {variant.stock_quantity}
@@ -49,11 +61,9 @@ const VariantDetails: React.FC<VariantDetailsProps> = ({
         </Descriptions.Item>
         <Descriptions.Item label="Colors">
           <Space>
-            {variant.color.map((color, index) => (
-              <Tag key={index} color="blue">
-                {color}
-              </Tag>
-            ))}
+            <Tag color="gold">
+              {variant.color.colorCode} - {variant.color.colorName}
+            </Tag>
           </Space>
         </Descriptions.Item>
         <Descriptions.Item label="Status">
@@ -67,7 +77,7 @@ const VariantDetails: React.FC<VariantDetailsProps> = ({
       <Card title="Reviews" className="mt-4">
         <List
           dataSource={reviews.filter(
-            (review) => review.product_variant_id === variant.id
+            (review) => review.product_variant_id.toString() === variant._id
           )}
           renderItem={(review) => {
             const user = users.find((u) => u.id === review.user_id);
@@ -92,4 +102,4 @@ const VariantDetails: React.FC<VariantDetailsProps> = ({
   );
 };
 
-export default VariantDetails; 
+export default VariantDetails;

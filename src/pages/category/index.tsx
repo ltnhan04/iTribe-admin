@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
 import {
   Table,
   Button,
@@ -14,54 +16,55 @@ import {
   DeleteOutlined,
   PlusCircleOutlined,
 } from "@ant-design/icons";
+import {
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useEditCategoryMutation,
+  useDeleteCategoryMutation,
+} from "../../redux/features/category/categoryApi";
+import { Category } from "../../redux/features/category/types";
 
-interface Category {
-  id: number;
-  category_name: string;
-  parent_category_id: number | null;
-}
-
-const CategoryPage: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, category_name: "Điện thoại", parent_category_id: null },
-    { id: 2, category_name: "Laptop", parent_category_id: null },
-    { id: 3, category_name: "iPhone", parent_category_id: 1 },
-    { id: 4, category_name: "Samsung", parent_category_id: 1 },
-    { id: 5, category_name: "Dell", parent_category_id: 2 },
-    { id: 6, category_name: "HP", parent_category_id: 2 },
-  ]);
-
+const CategoryPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const { data, isLoading } = useGetCategoriesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const [createCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useEditCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
 
   const columns = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
-      sorter: (a: Category, b: Category) => a.id - b.id,
+      dataIndex: "index",
+      key: "index",
+      render: (_: any, __: Category, index: number) => index + 1,
     },
     {
       title: "Category Name",
-      dataIndex: "category_name",
-      key: "category_name",
-      filterable: true,
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => text,
     },
     {
       title: "Parent Category",
-      dataIndex: "parent_category_id",
-      key: "parent_category_id",
-      render: (parentId: number | null) => {
-        if (!parentId) return "null";
-        const parent = categories.find((cat) => cat.id === parentId);
-        return parent ? parent.category_name : "Not Found";
+      dataIndex: "parent_category",
+      key: "parent_category",
+      render: (parent: { name: string; _id: string }) => {
+        if (!parent) return "null";
+        const parentCategory = data?.categories.find(
+          (cat) => cat._id === parent._id
+        );
+        return parentCategory ? parentCategory.name : "null";
       },
     },
     {
       title: "Actions",
       key: "action",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: Category) => (
         <Space size="middle">
           <Button
@@ -74,7 +77,7 @@ const CategoryPage: React.FC = () => {
           <Button
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
+            onClick={() => handleDelete(record._id)}
           >
             Delete
           </Button>
@@ -90,60 +93,78 @@ const CategoryPage: React.FC = () => {
   };
 
   const handleEdit = (record: Category) => {
-    setEditingId(record.id);
-    form.setFieldsValue(record);
+    setEditingId(record._id as string);
+    form.setFieldsValue({
+      name: record.name,
+      parent_category: record.parent_category?._id || null,
+    });
     setIsModalVisible(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id?: string) => {
+    if (!id) {
+      message.error("Invalid category ID");
+      return;
+    }
+
     Modal.confirm({
       title: "Confirm Delete",
-      content: "Are you sure to delete this category?",
-      onOk: () => {
-        setCategories(categories.filter((cat) => cat.id !== id));
-        message.success("Delete category successfully");
+      content: "Are you sure you want to delete this category?",
+      onOk: async () => {
+        try {
+          await deleteCategory({ id }).unwrap();
+          message.success("Category deleted successfully");
+        } catch (error) {
+          message.error("Failed to delete category");
+        }
       },
     });
   };
 
-  const handleModalOk = () => {
-    form.validateFields().then((values) => {
+  const handleModalOk = async () => {
+    try {
+      const values = await form.validateFields();
+      const payload: Category = {
+        name: values.name,
+        parent_category: values.parent_category || null,
+      };
+
       if (editingId) {
-        // Cập nhật danh mục
-        setCategories(
-          categories.map((cat) =>
-            cat.id === editingId ? { ...values, id: editingId } : cat
-          )
-        );
-        message.success("Updated category successfully");
+        await updateCategory({
+          id: editingId,
+          updateCategory: payload,
+        }).unwrap();
+        message.success("Category updated successfully");
       } else {
-        // Thêm danh mục mới
-        const newId = Math.max(...categories.map((cat) => cat.id)) + 1;
-        setCategories([...categories, { ...values, id: newId }]);
-        message.success("Create category successfully");
+        await createCategory(payload).unwrap();
+        message.success("Category created successfully");
       }
+
       setIsModalVisible(false);
       form.resetFields();
-    });
+    } catch (error: any) {
+      message.error("Failed to save category");
+    }
   };
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
         <Button icon={<PlusCircleOutlined />} onClick={handleAdd}>
-          New Category
+          Add New Category
         </Button>
       </div>
 
       <Table
         columns={columns}
-        dataSource={categories}
-        rowKey="id"
+        dataSource={data?.categories}
+        rowKey="_id"
         pagination={{ pageSize: 10 }}
+        loading={isLoading}
       />
 
       <Modal
-        title={editingId ? "Edit category" : "Add category"}
+        title={editingId ? "Edit Category" : "Add New Category"}
         open={isModalVisible}
         onOk={handleModalOk}
         onCancel={() => {
@@ -153,20 +174,20 @@ const CategoryPage: React.FC = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            name="category_name"
+            name="name"
             label="Category Name"
             rules={[{ required: true, message: "Please input category name" }]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item name="parent_category_id" label="Parent Category">
+          <Form.Item name="parent_category" label="Parent Category">
             <Select
               allowClear
-              placeholder="Please input parent category"
-              options={categories.map((cat) => ({
-                value: cat.id,
-                label: cat.category_name,
+              placeholder="Select parent category (optional)"
+              options={data?.categories.map((cat) => ({
+                value: cat._id,
+                label: cat.name,
               }))}
             />
           </Form.Item>

@@ -1,71 +1,95 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { Table, Tag, Select, Button, Space } from "antd";
-import type { ColumnsType } from "antd/es/table";
-import { Order, OrderStatus } from "../types";
+import { Table, Select, Space, Tag } from "antd";
+import { OrderList } from "../../../types/order";
 import { formatCurrency } from "../../../utils/format-currency";
 
+const { Option } = Select;
+
 interface OrderTableProps {
-  data: Order[];
-  onViewDetails: (order: Order) => void;
-  onUpdateStatus: (orderId: number, status: OrderStatus) => void;
+  orders: OrderList[];
+  onStatusChange: (orderId: string, newStatus: string) => void;
+  onViewDetails: (orderId: string) => void;
 }
 
 const OrderTable: React.FC<OrderTableProps> = ({
-  data,
+  orders,
+  onStatusChange,
   onViewDetails,
-  onUpdateStatus,
 }) => {
-  const getStatusColor = (status: OrderStatus) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "orange";
+        return "warning";
       case "processing":
-        return "blue";
+        return "processing";
       case "shipped":
-        return "cyan";
+        return "info";
       case "delivered":
-        return "green";
+        return "success";
       case "cancel":
-        return "red";
+        return "error";
       default:
         return "default";
     }
   };
 
-  const columns: ColumnsType<Order> = [
+  const columns = [
     {
       title: "Order ID",
-      dataIndex: "id",
-      key: "id",
-      sorter: (a, b) => a.id - b.id,
+      dataIndex: "_id",
+      key: "_id",
     },
     {
       title: "Customer",
-      dataIndex: ["user", "name"],
-      key: "customer",
+      key: "user",
+      render: (record: OrderList) => (
+        <div>
+          <div>{record.user.name}</div>
+          <div>{record.user.email}</div>
+        </div>
+      ),
+    },
+    {
+      title: "Products",
+      key: "variants",
+      render: (record: OrderList) => (
+        <div>
+          {record.variants.map((item) => (
+            <div key={item._id}>
+              {item.variant?.storage} - {item.variant?.color.colorName} x{" "}
+              {item.quantity}
+            </div>
+          ))}
+        </div>
+      ),
     },
     {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amount: number) => formatCurrency(amount),
-      sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
       title: "Status",
-      dataIndex: "order_status",
-      key: "order_status",
-      render: (status: OrderStatus) => (
-        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
+      dataIndex: "status",
+      key: "status",
+      render: (status: string, record: OrderList) => (
+        <Space>
+          <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
+          <Select
+            value={status}
+            style={{ width: 120 }}
+            onChange={(value) => onStatusChange(record._id, value)}
+          >
+            <Option value="pending">PENDING</Option>
+            <Option value="processing">PROCESSING</Option>
+            <Option value="shipped">SHIPPED</Option>
+            <Option value="delivered">DELIVERED</Option>
+            <Option value="cancel">CANCEL</Option>
+          </Select>
+        </Space>
       ),
-      filters: [
-        { text: "Pending", value: "pending" },
-        { text: "Processing", value: "processing" },
-        { text: "Shipped", value: "shipped" },
-        { text: "Delivered", value: "delivered" },
-        { text: "Cancel", value: "cancel" },
-      ],
-      onFilter: (value, record) => record.order_status === value,
     },
     {
       title: "Payment Method",
@@ -77,64 +101,33 @@ const OrderTable: React.FC<OrderTableProps> = ({
     },
     {
       title: "Created At",
-      dataIndex: "created_at",
-      key: "created_at",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date: string) => new Date(date).toLocaleString(),
-      sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_, record) => {
-        let availableStatuses: OrderStatus[] = [];
-        switch (record.order_status) {
-          case "pending":
-            availableStatuses = ["processing", "cancel"];
-            break;
-          case "processing":
-            availableStatuses = ["shipped", "cancel"];
-            break;
-          case "shipped":
-            availableStatuses = ["delivered"];
-            break;
-          case "delivered":
-          case "cancel":
-            availableStatuses = [];
-            break;
-        }
-
-        return (
-          <Space>
-            <Select
-              defaultValue={record.order_status}
-              style={{ width: 120 }}
-              onChange={(value) => onUpdateStatus(record.id, value)}
-              disabled={availableStatuses.length === 0}
-            >
-              {availableStatuses.map((status) => (
-                <Select.Option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </Select.Option>
-              ))}
-            </Select>
-            <Button type="primary" onClick={() => onViewDetails(record)}>
-              Details
-            </Button>
-          </Space>
-        );
-      },
+      render: (_: any, record: OrderList) => (
+        <Space>
+          <a onClick={() => onViewDetails(record._id)}>View Details</a>
+        </Space>
+      ),
     },
   ];
 
   return (
     <Table
       columns={columns}
-      dataSource={data}
-      rowKey="id"
-      pagination={{ pageSize: 10 }}
-      bordered
+      dataSource={orders}
+      rowKey="_id"
+      pagination={{
+        pageSize: 10,
+        showSizeChanger: true,
+        showTotal: (total) => `Total ${total} orders`,
+      }}
     />
   );
 };
 
-export default OrderTable; 
+export default OrderTable;

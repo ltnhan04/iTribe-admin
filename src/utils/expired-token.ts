@@ -1,6 +1,8 @@
 import { useAppSelector } from "../redux/hooks";
 import { jwtDecode } from "jwt-decode";
-import { JwtPayload } from "../type";
+export interface JwtPayload {
+  exp: number;
+}
 
 export const useTokenExpired = (): boolean => {
   const accessToken = useAppSelector((state) => state.auth.accessToken);

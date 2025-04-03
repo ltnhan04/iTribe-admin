@@ -1,61 +1,70 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { Table, Button, Space } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Product } from "../types";
+import { Table, Button, Space, Tag } from "antd";
+import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { IProduct } from "../../../types/product";
+import type { ColumnsType } from "antd/es/table";
 
 interface ProductTableProps {
-  data: Product[];
-  categories: { id: number; name: string }[];
-  onViewDetails: (product: Product) => void;
-  onEdit: (product: Product) => void;
-  onDelete: (id: number) => void;
+  products: IProduct[];
+  loading: boolean;
+  onEdit: (record: IProduct) => void;
+  onDelete: (id: string) => Promise<void>;
+  onViewDetails: (record: IProduct) => void;
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({
-  data,
-  categories,
-  onViewDetails,
+  products,
+  loading,
   onEdit,
   onDelete,
+  onViewDetails,
 }) => {
-  const columns = [
+  const columns: ColumnsType<IProduct> = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      sorter: (a: Product, b: Product) => a.id - b.id,
-    },
-    {
-      title: "Category",
-      dataIndex: "category_id",
-      key: "category_id",
-      render: (categoryId: number) => {
-        const category = categories.find((cat) => cat.id === categoryId);
-        return category ? category.name : "Not Found";
-      },
-    },
-    {
-      title: "Product Name",
+      title: "Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
+      ellipsis: true,
+      render: (text: string) => (
+        <div 
+          style={{ 
+            maxHeight: '50px', 
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+          dangerouslySetInnerHTML={{ __html: text || '' }}
+        />
+      ),
+    },
+    {
+      title: "Category",
+      dataIndex: ["category", "name"],
+      key: "category",
+      render: (text: string) => (text ? <Tag color="blue">{text}</Tag> : "-"),
+      filters: [
+        ...new Set(products.map((p) => p.category?.name || "").filter(Boolean)),
+      ].map((catName) => ({
+        text: catName,
+        value: catName,
+      })),
+      onFilter: (value, record) => record.category?.name === value,
     },
     {
       title: "Actions",
-      key: "action",
-      render: (_: any, record: Product) => (
+      key: "actions",
+      render: (_, record) => (
         <Space size="middle">
-          <Button
-            type="primary"
-            icon={<EyeOutlined />}
-            onClick={() => onViewDetails(record)}
-          >
-            View Details
+          <Button icon={<EyeOutlined />} onClick={() => onViewDetails(record)}>
+            View
           </Button>
           <Button
             type="primary"
@@ -67,7 +76,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
           <Button
             danger
             icon={<DeleteOutlined />}
-            onClick={() => onDelete(record.id)}
+            onClick={() => onDelete(record._id)}
           >
             Delete
           </Button>
@@ -79,9 +88,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
   return (
     <Table
       columns={columns}
-      dataSource={data}
-      rowKey="id"
-      pagination={{ pageSize: 10 }}
+      dataSource={products}
+      rowKey="_id"
+      loading={loading}
+      pagination={{
+        pageSize: 10,
+        showSizeChanger: true,
+        showTotal: (total) => `Total ${total} items`,
+      }}
     />
   );
 };

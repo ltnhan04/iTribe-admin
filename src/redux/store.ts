@@ -1,6 +1,5 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import { productApi } from "./api/productApi";
-import { productVariantApi } from "./api/productVariantApi";
+import { baseApi } from "./api/baseApi";
 import {
   persistStore,
   persistReducer,
@@ -12,7 +11,6 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-
 import authSlice from "./features/authentication/authSlice";
 
 const persistConfig = {
@@ -22,8 +20,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  [productApi.reducerPath]: productApi.reducer,
-  [productVariantApi.reducerPath]: productVariantApi.reducer,
+  api: baseApi.reducer,
   auth: authSlice,
 });
 
@@ -36,7 +33,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(productApi.middleware, productVariantApi.middleware),
+    }).concat(baseApi.middleware),
 });
 
 export const persistor = persistStore(store);

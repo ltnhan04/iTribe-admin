@@ -1,6 +1,5 @@
 import { io, Socket } from "socket.io-client";
 
-// Lấy URL của API từ biến môi trường
 const socket: Socket = io(import.meta.env.VITE_API_URL, {
   transports: ["websocket"],
 });

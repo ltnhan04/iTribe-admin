@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import {
   Button,
@@ -34,6 +34,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
 
   const dispatch = useAppDispatch();
   const { name } = useAppSelector((state) => state.auth);
+
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   // Fetch notifications on popover visibility change
   const handlePopoverVisibilityChange = async (visible: boolean) => {
@@ -97,7 +100,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
                 {notification.productVariantId && (
                   <Link
                     to={{
-                      pathname: `/products/details/${notification.productVariantId}`, // The route for the product page
+                      pathname: `/products/details/${notification.productVariantId}`,
                     }}
                     className="text-blue-500 ml-2"
                   >
@@ -167,12 +170,14 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           content={notificationContent}
           title="Notifications"
           trigger="click"
-          visible={isPopoverVisible}
-          onVisibleChange={handlePopoverVisibilityChange}
+          open={isPopoverVisible}
+          onOpenChange={handlePopoverVisibilityChange}
         >
-          <IoMdNotificationsOutline
-            style={{ fontSize: "24px", color: "#1890ff", cursor: "pointer" }}
-          />
+          <div ref={notificationRef}>
+            <IoMdNotificationsOutline
+              style={{ fontSize: "24px", color: "#1890ff", cursor: "pointer" }}
+            />
+          </div>
         </Popover>
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-start justify-center">
@@ -180,9 +185,11 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             <div className="text-sm text-gray-500">Admin</div>
           </div>
           <Popover content={popoverContent} title="Options" trigger="hover">
-            <DownCircleOutlined
-              style={{ fontSize: "18px", color: "gray", cursor: "pointer" }}
-            />
+            <div ref={profileRef}>
+              <DownCircleOutlined
+                style={{ fontSize: "18px", color: "gray", cursor: "pointer" }}
+              />
+            </div>
           </Popover>
         </div>
       </div>

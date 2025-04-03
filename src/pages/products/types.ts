@@ -7,14 +7,17 @@ export interface Review {
 }
 
 export interface ProductVariant {
-  id: number;
-  product_id: number;
+  _id: string;
+  product_id: string;
   storage: string;
   price: number;
   stock_quantity: number;
   slug: string;
   rating: number;
-  color: string[];
+  color: {
+    colorName: string;
+    colorCode: string;
+  };
   status: "in_stock" | "out_of_stock";
   images: string[];
 }

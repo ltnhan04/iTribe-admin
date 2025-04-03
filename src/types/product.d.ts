@@ -1,4 +1,4 @@
-//Product types
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { GetProp, UploadProps } from "antd";
 
@@ -7,129 +7,70 @@ export type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 export interface ErrorResponse {
   error: string;
 }
-
-export interface Product {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  rating: number;
-  status: string;
+export interface IResponseProductList {
+  message: string;
+  data: IProduct[];
+}
+export interface IResponseProduct {
+  message: string;
+  data: IProduct;
 }
 
-export interface newProduct {
-  name: string;
-  description: string;
-  slug: string;
-}
-
-export interface Data {
-  data: ProductList[];
-}
-
-export interface ProductDetails {
-  product: Product;
-}
-export interface VariantDetails {
-  message?: string;
-  variant: Variant;
-}
-export interface Root {
-  message?: string;
-  product: Product;
-}
-export type newProduct = Pick<Product, "name" | "description" | "slug">;
-
-export interface ProductList {
-  _id: string;
-  name: string;
-  image: string;
-  price: number;
-  rating: number;
-  status: string;
-}
-
-export interface Product {
-  _id: string;
+export interface IProduct {
+  category: { _id: string; name: string };
   name: string;
   description: string;
-  image: string[];
-  rating: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  reviews: any[];
-  status: string;
   variants: Variant[];
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+export interface Variant {
+  color: Color;
+  _id: string;
+  product: string;
+  rating: number;
+  storage: string;
+  price: number;
+  stock_quantity: number;
   slug: string;
+  images: string[];
+  reviews: any[];
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
 
-export interface Variant {
+export interface INewProduct {
+  category: { _id: string; name: string };
+  name: string;
+  description: string;
+}
+
+export interface IResponseProductVariant {
+  message: string;
+  data: IProductVariant;
+}
+
+export interface IProductVariant {
   color: Color;
   _id: string;
-  productId: string;
-  name: string;
+  product: string;
+  rating: number;
   storage: string;
   price: number;
-  rating?: number;
-  stock: number;
+  stock_quantity: number;
   slug: string;
+  status: "in_stock" | "out_of_stock";
   images: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reviews: any[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   __v: number;
 }
 
 export interface Color {
   colorName: string;
   colorCode: string;
-}
-
-//Product Variant types
-
-//Get All Variants
-export interface VariantRoot {
-  variants: Variant[];
-}
-
-export interface Review {
-  _id: string;
-  productId: string;
-  user: User;
-  rating: number;
-  comment: string;
-  isAnonymous: boolean;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
-
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-}
-
-//Create Variant
-
-export interface ProductVariantRoot {
-  message: string;
-  productVariant: ProductVariant;
-}
-export interface ProductVariant {
-  productId: string;
-  name: string;
-  color: Color;
-  storage: string;
-  price: number;
-  stock: number;
-  slug: string;
-  images: string[];
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
 }
