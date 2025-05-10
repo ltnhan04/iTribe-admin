@@ -1,58 +1,61 @@
-# 🤖Product Backlog
+# 👨‍💼 iTribe Admin Dashboard
 
-- [Product-Backlog](https://docs.google.com/document/d/194XJIP2Z_f8oKZGqJvUpDEpyfCw1sugB/edit)
+<div align="center">
 
-# ✨SRS
+<img src="https://skillicons.dev/icons?i=react,typescript,redux,tailwind,vite" alt="tech stack" />
 
-- [SRS](https://docs.google.com/spreadsheets/d/1iU2RbMFzlYnbVm2pl21k2XE3wK_UhA3t/edit?gid=1896635376#gid=1896635376)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-# React + TypeScript + Vite
+</div>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📝 Overview
+iTribe Admin Dashboard is a comprehensive management interface built with React and Vite, providing powerful tools for administrators to manage products, orders, users, and analytics for the iTribe e-commerce platform.
 
-Currently, two official plugins are available:
+## 🛠️ Tech Stack
+- ⚡ **Framework**: React 18 with Vite
+- 🎯 **Language**: TypeScript
+- 💅 **Styling**: Tailwind CSS
+- 🔄 **State Management**: Redux Toolkit with Redux Persist
+- 📡 **Data Fetching**: RTK Query
+- 📱 **UI Components**: Ant Design (antd)
+- 📊 **Charts**: Recharts 
+- 📝 **Form Handling**: React Hook Form with Zod validation
+- 📝 **Rich Text Editor**: CKEditor 5 
+- 🎨 **Icons**: Ant Design Icons & React Icons
+- 🔄 **Real-time**: Socket.io Client
+- 📅 **Date Handling**: Day.js 
+- 🔒 **Authentication**: JWT
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+### 📊 Dashboard
+- 📈 Sales & revenue analytics
+- 📦 Order & inventory overview
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 📦 Product Management
+- 📝 CRUD operations for products, variants
+- 📑 Category & inventory management
+- 📸 Media & content management
 
-- Configure the top-level `parserOptions` property like this:
+### 👥 User Management
+- 👤 User profile & role management
+- 📝 Activity tracking & permissions
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+### 📦 Order Management
+- 📋 Order processing & tracking
+- 💰 Payment & notification handling
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 🔒 Security
+- 🔐 Role-based access control
+- 🔒 JWT authentication
+- 📝 Activity logging & monitoring
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
+## 📄 License
+This project is licensed under the MIT License
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
-```
+---
+
+<div align="center">
+Made with ❤️ by the iTribe Team
+</div>
+
