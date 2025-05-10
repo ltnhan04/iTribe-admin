@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Table, Button, Space, Tag } from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
@@ -34,14 +32,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
       key: "description",
       ellipsis: true,
       render: (text: string) => (
-        <div 
-          style={{ 
-            maxHeight: '50px', 
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+        <div
+          style={{
+            maxHeight: "50px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
-          dangerouslySetInnerHTML={{ __html: text || '' }}
+          dangerouslySetInnerHTML={{ __html: text || "" }}
         />
       ),
     },

@@ -1,10 +1,10 @@
 import { baseApi } from "../../api/baseApi";
 import {
   IResponseCategory,
-  Category,
   IResponseCategories,
+  Category,
   IResponseDeletedCategory,
-} from "./types";
+} from "../../../types/category";
 
 export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

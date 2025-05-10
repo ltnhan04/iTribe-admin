@@ -12,7 +12,7 @@ import {
   Tag,
   Space,
 } from "antd";
-import { Review, User } from "../types";
+import { Review, User } from "../../../types/product";
 import { IProductVariant } from "../../../types/product";
 import { formatCurrency } from "../../../utils/format-currency";
 

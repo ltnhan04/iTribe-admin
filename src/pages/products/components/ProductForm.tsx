@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Form, Input, Select, Button, message } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +10,7 @@ import {
 } from "../../../redux/features/product/productApi";
 import { INewProduct } from "../../../types/product";
 import type { FormInstance } from "antd/es/form";
-import { Category } from "../../../redux/features/category/types";
+import { Category } from "../../../types/category";
 
 interface ProductFormProps {
   form: FormInstance;

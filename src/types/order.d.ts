@@ -1,3 +1,30 @@
+export type OrderStatus =
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancel";
+export type PaymentMethod = "stripe" | "momo" | "ship-cod";
+
+export interface ProductVariant {
+  _id: string;
+  name: string;
+  storage: string;
+  color: {
+    colorName: string;
+  };
+  price: number;
+  images: string[];
+}
+
+export interface OrderDetails {
+  _id: string;
+  order_id: string;
+  product_variant_id: string;
+  quantity: number;
+  price: number;
+  product_variant: ProductVariant;
+}
 export interface IResponseDetailOrder {
   message: string;
   data: OrderList;
@@ -56,14 +83,15 @@ export interface IResponseOrder {
 }
 
 export interface Order {
-  user: string;
+  user: User;
   variants: Variant[];
   totalAmount: number;
-  status: string;
+  status: OrderStatus;
   shippingAddress: string;
   paymentMethod: string;
   stripeSessionId: string | null;
   _id: string;
+  order_details: OrderDetails[];
   createdAt: string;
   updatedAt: string;
   __v: number;

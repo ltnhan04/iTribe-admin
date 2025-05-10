@@ -32,7 +32,7 @@ const PrivateRoutes = () => {
         <div
           className={` flex-1 ${
             collapsed ? "ml-20" : "ml-[200px]"
-          }  mt-[72px] px-5 py-3 rounded-lg`}
+          }  mt-[5%] px-5 py-3 rounded-lg`}
         >
           <Outlet />
         </div>

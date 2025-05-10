@@ -17,4 +17,4 @@ export interface Conversation {
     name: string;
     email: string;
   };
-} 
+}

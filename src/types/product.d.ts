@@ -62,6 +62,7 @@ export interface IProductVariant {
   price: number;
   stock_quantity: number;
   slug: string;
+  color: Color;
   status: "in_stock" | "out_of_stock";
   images: string[];
   reviews: any[];
@@ -73,4 +74,28 @@ export interface IProductVariant {
 export interface Color {
   colorName: string;
   colorCode: string;
+}
+
+export interface Review {
+  id: number;
+  user_id: number;
+  product_variant_id: number;
+  rating: number;
+  comment: string;
+}
+
+export interface ColorOption {
+  name: string;
+  hex: string;
+}
+export interface VariantFilters {
+  storage: string;
+  price: number | null;
+  stock: number | null;
+  status: "in_stock" | "out_of_stock" | null;
+}
+
+export interface User {
+  id: number;
+  name: string;
 }

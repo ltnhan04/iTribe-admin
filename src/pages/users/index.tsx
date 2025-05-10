@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { message, Drawer, Card, Table, Tag, Typography, Space } from "antd";
+import { Drawer, Card, Table, Tag, Typography, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useGetUsersQuery, useGetDetailsUserQuery } from "../../redux/features/users/userApi";
+import {
+  useGetUsersQuery,
+  useGetDetailsUserQuery,
+} from "../../redux/features/users/userApi";
 import { Customer } from "../../types/user";
 import Loading from "../../loading";
 import UserDetails from "./components/UserDetails";
@@ -13,10 +16,11 @@ const UserPage: React.FC = () => {
   const [isDetailsDrawerVisible, setIsDetailsDrawerVisible] = useState(false);
 
   const { data: usersData, isLoading } = useGetUsersQuery();
-  const { data: userDetails, isLoading: isLoadingDetails } = useGetDetailsUserQuery(
-    { id: selectedUserId || "" },
-    { skip: !selectedUserId }
-  );
+  const { data: userDetails, isLoading: isLoadingDetails } =
+    useGetDetailsUserQuery(
+      { id: selectedUserId || "" },
+      { skip: !selectedUserId }
+    );
 
   const handleViewDetails = (userId: string) => {
     console.log("Viewing details for user:", userId);
@@ -73,10 +77,8 @@ const UserPage: React.FC = () => {
     return <Loading />;
   }
 
-  console.log("User Details Data:", userDetails);
-
   return (
-    <div className="p-4">
+    <div>
       <Card
         title={<Title level={3}>User Management</Title>}
         className="bg-white rounded-lg shadow"

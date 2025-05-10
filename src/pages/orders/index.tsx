@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { message, Drawer } from "antd";
 import {
@@ -20,10 +19,11 @@ const OrderPage: React.FC = () => {
   const [isDetailsDrawerVisible, setIsDetailsDrawerVisible] = useState(false);
 
   const { data: ordersData, isLoading } = useGetOrdersQuery();
-  const { data: orderDetails, isLoading: isLoadingDetails } = useGetOrderDetailsQuery(
-    { id: selectedOrderId || "" },
-    { skip: !selectedOrderId }
-  );
+  const { data: orderDetails, isLoading: isLoadingDetails } =
+    useGetOrderDetailsQuery(
+      { id: selectedOrderId || "" },
+      { skip: !selectedOrderId }
+    );
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
 
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
@@ -41,13 +41,13 @@ const OrderPage: React.FC = () => {
   };
 
   const filteredOrders = ordersData?.data?.filter((order: OrderList) => {
-    const matchesSearch = 
+    const matchesSearch =
       order._id.toLowerCase().includes(searchText.toLowerCase()) ||
       order.user.name.toLowerCase().includes(searchText.toLowerCase()) ||
       order.user.email.toLowerCase().includes(searchText.toLowerCase());
-    
+
     const matchesStatus = !statusFilter || order.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -83,9 +83,7 @@ const OrderPage: React.FC = () => {
         {isLoadingDetails ? (
           <Loading />
         ) : (
-          orderDetails?.data && (
-            <OrderDetails order={orderDetails.data} />
-          )
+          orderDetails?.data && <OrderDetails order={orderDetails.data} />
         )}
       </Drawer>
     </div>

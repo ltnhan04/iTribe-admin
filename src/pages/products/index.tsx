@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Button, Modal, Form, message, Drawer } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
@@ -18,7 +17,7 @@ import ProductDetails from "./components/ProductDetails";
 import VariantForm from "./components/VariantForm";
 import VariantDetails from "./components/VariantDetails";
 import { IProduct, Variant } from "../../types/product";
-import { Review, User } from "./types";
+import { Review, User } from "../../types/product";
 
 const ProductsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -121,7 +120,7 @@ const ProductsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div>
       <div style={{ marginBottom: 16 }}>
         <Button
           type="primary"

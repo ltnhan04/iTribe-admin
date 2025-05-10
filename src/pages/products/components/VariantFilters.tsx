@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, Row, Col, Form, Select, InputNumber, Input } from 'antd';
-import { VariantFilters as VariantFiltersType } from '../types';
+import React from "react";
+import { Card, Row, Col, Form, Select, InputNumber, Input } from "antd";
+import { VariantFilters as VariantFiltersType } from "../../../types/product";
 
 interface VariantFiltersProps {
   filters: VariantFiltersType;
@@ -33,9 +33,7 @@ const VariantFilters: React.FC<VariantFiltersProps> = ({
             <InputNumber
               placeholder="Max price"
               value={filters.price}
-              onChange={(value) =>
-                onFilterChange({ ...filters, price: value })
-              }
+              onChange={(value) => onFilterChange({ ...filters, price: value })}
               style={{ width: "100%" }}
             />
           </Form.Item>
@@ -45,9 +43,7 @@ const VariantFilters: React.FC<VariantFiltersProps> = ({
             <InputNumber
               placeholder="Max stock"
               value={filters.stock}
-              onChange={(value) =>
-                onFilterChange({ ...filters, stock: value })
-              }
+              onChange={(value) => onFilterChange({ ...filters, stock: value })}
               style={{ width: "100%" }}
             />
           </Form.Item>
@@ -75,4 +71,4 @@ const VariantFilters: React.FC<VariantFiltersProps> = ({
   );
 };
 
-export default VariantFilters; 
+export default VariantFilters;

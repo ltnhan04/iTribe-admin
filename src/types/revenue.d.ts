@@ -1,38 +1,22 @@
-export interface OneDayType {
-  message: string;
-  revenue: Revenue;
+export interface IResponseRevenue {
+  status: string;
+  data: Data;
 }
 
-export interface Revenue {
+export interface Data {
+  report: Report[];
+  summary: Summary;
+}
+
+export interface Report {
   date: string;
+  label: string;
   totalSales: number;
   totalOrders: number;
-  productVariants: ProductVariant[];
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
 }
 
-export interface ProductVariant {
-  productVariant: string;
-  name: string;
-  totalSales: number;
+export interface Summary {
+  totalSales: string;
   totalOrders: number;
-  _id: string;
-}
-
-//Multi days
-export interface MultiDaysType {
-  message: string;
-  totalSales: number;
-  totalOrders: number;
-  details: Detail[];
-}
-
-export interface Detail {
-  productVariant: string;
-  name: string;
-  totalSales: number;
-  totalOrders: number;
+  averageOrderValue: string;
 }

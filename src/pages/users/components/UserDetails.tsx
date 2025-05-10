@@ -9,16 +9,11 @@ interface UserDetailsProps {
 }
 
 const UserDetails: React.FC<UserDetailsProps> = ({ user }) => {
-  const getRoleColor = (role: string) => {
-    return role === "admin" ? "red" : "blue";
-  };
-
   return (
     <div className="space-y-6 p-4">
       <Card
         title={<Title level={3}>User Information</Title>}
         className="bg-white rounded-lg shadow"
-        bordered={false}
       >
         <Descriptions bordered column={2} size="middle">
           <Descriptions.Item label={<Text strong>User ID</Text>}>
@@ -45,4 +40,4 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user }) => {
   );
 };
 
-export default UserDetails; 
+export default UserDetails;

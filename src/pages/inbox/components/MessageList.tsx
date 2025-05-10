@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { List, Avatar, Typography, Space, Image } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { Message } from "../types";
+import { Message } from "../../../types/inbox";
 
 const { Text } = Typography;
 
@@ -34,7 +34,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
           >
             <div className="flex items-start space-x-2 max-w-[70%]">
               {!message.is_reply && (
-                <Avatar 
+                <Avatar
                   size={36}
                   icon={<UserOutlined />}
                   style={{ backgroundColor: "#52525b" }}
@@ -73,7 +73,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
                 </Space>
               </div>
               {message.is_reply && (
-                <Avatar 
+                <Avatar
                   size={36}
                   icon={<UserOutlined />}
                   style={{ backgroundColor: "#52525b" }}
@@ -88,4 +88,4 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   );
 };
 
-export default MessageList; 
+export default MessageList;

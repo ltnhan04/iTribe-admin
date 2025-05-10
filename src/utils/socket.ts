@@ -7,13 +7,11 @@ export const sendMessage = (message: { user: string; message: string }) => {
   socket.emit("sendMessage", message);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const onNewMessage = (callback: (message: any) => void) => {
+export const onNewMessage = (callback: (message: string) => void) => {
   socket.on("newMessage", callback);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const offNewMessage = (callback: (message: any) => void) => {
+export const offNewMessage = (callback: (message: string) => void) => {
   socket.off("newMessage", callback);
 };
 export default socket;

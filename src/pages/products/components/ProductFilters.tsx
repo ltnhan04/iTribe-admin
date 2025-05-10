@@ -2,7 +2,7 @@
 import React from "react";
 import { Form, Input, Select, Space, Button } from "antd";
 import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Category } from "../../../redux/features/category/types";
+import { Category } from "../../../types/category";
 
 interface ProductFiltersProps {
   onFilter: (values: any) => void;

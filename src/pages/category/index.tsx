@@ -22,7 +22,7 @@ import {
   useEditCategoryMutation,
   useDeleteCategoryMutation,
 } from "../../redux/features/category/categoryApi";
-import { Category } from "../../redux/features/category/types";
+import { Category } from "../../types/category";
 
 const CategoryPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);

@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import { store } from "../redux/store";
 import { updateAccessToken } from "../redux/features/authentication/authSlice";
-import { refreshToken } from "../api/services/auth/authApi";
+import { refreshToken } from "../redux/features/authentication/authApi";
 
 let isRefreshing = false;
 let failedQueue: any[] = [];

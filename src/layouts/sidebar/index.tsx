@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   return (
     <Layout.Sider
-      className="h-screen fixed top-[72px] left-0 bottom-0 shadow-md"
+      className="h-screen fixed top-[11%] left-0 bottom-0 shadow-md"
       breakpoint="lg"
       theme="light"
       collapsible

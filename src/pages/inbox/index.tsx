@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Input, Button, Upload, message } from "antd";
 import { SendOutlined, PaperClipOutlined } from "@ant-design/icons";
 import ConversationList from "./components/ConversationList";
 import MessageList from "./components/MessageList";
-import { Conversation, Message } from "./types";
+import { Conversation, Message } from "../../types/inbox";
 import { Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
@@ -58,7 +59,8 @@ const InboxPage: React.FC = () => {
     },
   ]);
 
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [fileList, setFileList] = useState<any[]>([]);
 
@@ -111,7 +113,7 @@ const InboxPage: React.FC = () => {
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200 bg-white">
               <div className="flex items-center space-x-3">
-                <Avatar 
+                <Avatar
                   size={40}
                   icon={<UserOutlined />}
                   style={{ backgroundColor: "#52525b" }}
@@ -138,7 +140,7 @@ const InboxPage: React.FC = () => {
                   onChange={handleFileUpload}
                   maxCount={1}
                 >
-                  <Button 
+                  <Button
                     icon={<PaperClipOutlined />}
                     className="text-gray-600 border-gray-300 hover:text-gray-800 hover:border-gray-400"
                   >

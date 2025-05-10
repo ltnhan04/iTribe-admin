@@ -19,8 +19,6 @@ import NotFound from "../pages/not-found";
 import Loading from "../loading";
 
 import Login from "../pages/auth/login";
-import Notification from "../layouts/navbar/pages/notification";
-import Profile from "../layouts/navbar/pages/profile";
 
 const routes = createBrowserRouter([
   {
@@ -57,8 +55,6 @@ const routes = createBrowserRouter([
       },
 
       { path: "users", element: <Users /> },
-      { path: "notification", element: <Notification /> },
-      { path: "profile", element: <Profile /> },
     ],
   },
   {

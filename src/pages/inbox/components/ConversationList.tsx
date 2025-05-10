@@ -1,7 +1,7 @@
 import React from "react";
 import { List, Avatar, Typography, Space, Badge } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { Conversation } from "../types";
+import { Conversation } from "../../../types/inbox";
 const { Text } = Typography;
 
 interface ConversationListProps {
